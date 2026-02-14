@@ -129,8 +129,22 @@ export default function Investors() {
         const updatedHistory = inv.history.map((h) => (h.id === entryId ? { ...h, status } : h));
         // Recalculate invested from approved deposits
         const approvedDeposits = updatedHistory.filter((h) => h.type === "deposit" && h.status === "approved").reduce((s, h) => s + h.amount, 0);
-        return { ...inv, history: updatedHistory, invested: approvedDeposits };
+        const approvedWithdrawals = updatedHistory.filter((h) => h.type === "withdrawal" && h.status === "approved").reduce((s, h) => s + h.amount, 0);
+        return { ...inv, history: updatedHistory, invested: approvedDeposits - approvedWithdrawals };
       })
+    );
+  };
+
+  const handleWithdraw = (investorId: number, amount: number) => {
+    const withdrawalEntry = {
+      id: Date.now(),
+      date: TODAY.toISOString().split("T")[0],
+      amount,
+      type: "withdrawal" as const,
+      status: "pending" as const,
+    };
+    setInvestors((prev) =>
+      prev.map((i) => (i.id === investorId ? { ...i, history: [...i.history, withdrawalEntry] } : i))
     );
   };
 
@@ -297,6 +311,7 @@ export default function Investors() {
         profit={profit}
         onClose={() => setDetailInvestor(null)}
         onUpdateInvestment={handleUpdateInvestment}
+        onWithdraw={handleWithdraw}
       />
     </div>
   );
