@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { UserPlus, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { UserPlus, Eye, CheckCircle, XCircle, Clock, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -22,9 +22,9 @@ import {
   quarterDaysElapsed,
   calcDaysActive,
   calculateProRata,
-  getPeriodBadge,
   fmt,
   initialInvestors,
+  TODAY,
 } from "@/lib/investor-utils";
 
 const statusConfig: Record<InvestorStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" }> = {
@@ -47,16 +47,35 @@ export default function Investors() {
       investors.map((inv) => {
         const daysActive = inv.status === "approved" ? calcDaysActive(inv.investmentDate) : 0;
         const share = inv.status === "approved" ? calculateProRata(inv.invested, inv.investmentDate, QUARTER_TOTAL_DAYS, profit, investors) : 0;
-        const badge = getPeriodBadge(inv.investmentDate);
-        return { ...inv, daysActive, share, badge };
+        return { ...inv, daysActive, share };
       }),
     [profit, investors]
   );
 
   const totalInvested = approvedInvestors.reduce((s, i) => s + i.invested, 0);
 
-  // Keep detailInvestor in sync with investors state
   const currentDetailInvestor = detailInvestor ? investors.find((i) => i.id === detailInvestor.id) || null : null;
+
+  const handleRelease = (id: number) => {
+    const inv = investors.find((i) => i.id === id);
+    if (!inv || inv.status !== "approved") return;
+    const share = calculateProRata(inv.invested, inv.investmentDate, QUARTER_TOTAL_DAYS, profit, investors);
+    if (share <= 0) {
+      toast.error("No profit to release for this investor.");
+      return;
+    }
+    const payoutEntry = {
+      id: Date.now(),
+      date: TODAY.toISOString().split("T")[0],
+      amount: Math.round(share),
+      type: "payout" as const,
+      status: "approved" as const,
+    };
+    setInvestors((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, history: [...i.history, payoutEntry] } : i))
+    );
+    toast.success(`Released ${fmt(Math.round(share))} to ${inv.name}.`);
+  };
 
   const handleRegister = () => {
     if (!form.name || !form.email || !form.invested || !form.investmentDate) {
@@ -169,7 +188,6 @@ export default function Investors() {
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Total Principal</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Investment Date</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Days Active</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Period</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Projected Share</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Actions</th>
@@ -186,11 +204,6 @@ export default function Investors() {
                   <td className="px-4 py-3 text-muted-foreground">{inv.investmentDate}</td>
                   <td className="px-4 py-3 text-right text-foreground">{inv.daysActive}</td>
                   <td className="px-4 py-3 text-center">
-                    <Badge variant={inv.badge === "Early-Period" ? "default" : "secondary"} className="text-[11px]">
-                      {inv.badge}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-center">
                     <Badge variant={sc.variant} className="text-[11px] gap-1">
                       <StatusIcon className="h-3 w-3" /> {sc.label}
                     </Badge>
@@ -202,6 +215,11 @@ export default function Investors() {
                     <Button variant="ghost" size="sm" onClick={() => setDetailInvestor(inv)}>
                       <Eye className="h-4 w-4" />
                     </Button>
+                    {inv.status === "approved" && (
+                      <Button variant="ghost" size="sm" className="text-profit hover:text-profit" title="Release profit" onClick={() => handleRelease(inv.id)}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    )}
                     {inv.status === "pending" && (
                       <>
                         <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleApprove(inv.id)}>
@@ -221,7 +239,7 @@ export default function Investors() {
             <tr className="border-t border-border bg-muted/30">
               <td className="px-4 py-3 font-semibold text-foreground">Total</td>
               <td className="px-4 py-3 text-right font-semibold text-foreground">{fmt(totalInvested)}</td>
-              <td colSpan={4} />
+              <td colSpan={3} />
               <td className="px-4 py-3 text-right font-bold text-profit">{fmt(profit)}</td>
               <td />
             </tr>
