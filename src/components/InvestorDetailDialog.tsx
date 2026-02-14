@@ -88,7 +88,7 @@ export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: 
                 <tbody>
                   {investor.history.map((h) => {
                     const tc = typeConfig[h.type] || typeConfig.deposit;
-                    const sb = statusBadge[h.status];
+                    const sb = statusBadge[h.status] || statusBadge.pending;
                     const SIcon = sb.icon;
                     return (
                       <tr key={h.id} className="border-b border-border last:border-0">
@@ -156,7 +156,7 @@ export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: 
                   </thead>
                   <tbody>
                     {payouts.map((p) => {
-                      const sb = statusBadge[p.status];
+                      const sb = statusBadge[p.status] || statusBadge.pending;
                       const SIcon = sb.icon;
                       return (
                         <tr key={p.id} className="border-b border-border last:border-0">
