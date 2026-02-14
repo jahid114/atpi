@@ -1,5 +1,5 @@
-import { useState, useMemo } from "react";
-import { UserPlus, Eye, CheckCircle, XCircle, Clock, Send } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { UserPlus, Eye, CheckCircle, XCircle, Clock, Send, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
@@ -38,6 +38,7 @@ export default function Investors() {
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
   const [registerOpen, setRegisterOpen] = useState(false);
   const [detailInvestor, setDetailInvestor] = useState<Investor | null>(null);
+  const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
   const [form, setForm] = useState({ name: "", email: "", phone: "", invested: "", investmentDate: "" });
 
   const approvedInvestors = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
@@ -53,6 +54,14 @@ export default function Investors() {
   );
 
   const totalInvested = approvedInvestors.reduce((s, i) => s + i.invested, 0);
+
+  const toggleExpand = (id: number) => {
+    setExpandedRows((prev) => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
 
   const currentDetailInvestor = detailInvestor ? investors.find((i) => i.id === detailInvestor.id) || null : null;
 
@@ -198,8 +207,18 @@ export default function Investors() {
               const sc = statusConfig[inv.status];
               const StatusIcon = sc.icon;
               return (
-                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3 font-medium text-foreground">{inv.name}</td>
+                <React.Fragment key={inv.id}>
+                <tr className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                  <td className="px-4 py-3 font-medium text-foreground">
+                    <div className="flex items-center gap-1.5">
+                      {inv.status === "approved" && inv.history.filter(h => h.type === "deposit" && h.status === "approved").length > 0 && (
+                        <button onClick={() => toggleExpand(inv.id)} className="p-0.5 rounded hover:bg-muted transition-colors">
+                          {expandedRows.has(inv.id) ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+                        </button>
+                      )}
+                      {inv.name}
+                    </div>
+                  </td>
                   <td className="px-4 py-3 text-right text-foreground">{fmt(inv.invested)}</td>
                   <td className="px-4 py-3 text-muted-foreground">{inv.investmentDate}</td>
                   <td className="px-4 py-3 text-right text-foreground">{inv.daysActive}</td>
@@ -232,6 +251,16 @@ export default function Investors() {
                     )}
                   </td>
                 </tr>
+                {expandedRows.has(inv.id) && inv.history.filter(h => h.type === "deposit" && h.status === "approved").map((dep) => (
+                  <tr key={`dep-${dep.id}`} className="bg-muted/20 border-b border-border last:border-0">
+                    <td className="px-4 py-2 pl-10 text-sm text-muted-foreground">↳ Deposit on {dep.date}</td>
+                    <td className="px-4 py-2 text-right text-sm text-muted-foreground">{fmt(dep.amount)}</td>
+                    <td className="px-4 py-2 text-sm text-muted-foreground">{dep.date}</td>
+                    <td className="px-4 py-2 text-right text-sm text-foreground font-medium">{calcDaysActive(dep.date)}</td>
+                    <td colSpan={3} />
+                  </tr>
+                ))}
+                </React.Fragment>
               );
             })}
           </tbody>
