@@ -10,10 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
-import { calcDaysActive, fmt } from "@/lib/investor-utils";
+import { calcDaysActive, calculateProRata, fmt, QUARTER_TOTAL_DAYS } from "@/lib/investor-utils";
 
 interface InvestorDetailDialogProps {
   investor: Investor | null;
+  allInvestors: Investor[];
+  profit: number;
   onClose: () => void;
   onUpdateInvestment: (investorId: number, entryId: number, status: InvestmentStatus) => void;
 }
@@ -30,7 +32,7 @@ const statusBadge: Record<InvestmentStatus, { label: string; icon: React.Element
   rejected: { label: "Rejected", icon: XCircle, variant: "destructive" },
 };
 
-export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: InvestorDetailDialogProps) {
+export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, onUpdateInvestment }: InvestorDetailDialogProps) {
   if (!investor) return null;
 
   const deposits = investor.history.filter((h) => h.type === "deposit");
@@ -81,6 +83,8 @@ export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: 
                     <th className="text-left px-3 py-2 font-medium text-muted-foreground">Date</th>
                     <th className="text-left px-3 py-2 font-medium text-muted-foreground">Type</th>
                     <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground">Days Active</th>
+                    <th className="text-right px-3 py-2 font-medium text-muted-foreground">Profit Share</th>
                     <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
                     <th className="text-center px-3 py-2 font-medium text-muted-foreground">Actions</th>
                   </tr>
@@ -90,6 +94,10 @@ export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: 
                     const tc = typeConfig[h.type] || typeConfig.deposit;
                     const sb = statusBadge[h.status] || statusBadge.pending;
                     const SIcon = sb.icon;
+                    const daysActive = h.type === "deposit" && h.status === "approved" ? calcDaysActive(h.date) : 0;
+                    const depositShare = h.type === "deposit" && h.status === "approved"
+                      ? calculateProRata(h.amount, h.date, QUARTER_TOTAL_DAYS, profit, allInvestors)
+                      : 0;
                     return (
                       <tr key={h.id} className="border-b border-border last:border-0">
                         <td className="px-3 py-2 text-muted-foreground">{h.date}</td>
@@ -97,6 +105,12 @@ export function InvestorDetailDialog({ investor, onClose, onUpdateInvestment }: 
                         <td className={`px-3 py-2 text-right font-medium ${h.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
                           {h.type === "withdrawal" ? "-" : "+"}
                           {fmt(h.amount)}
+                        </td>
+                        <td className="px-3 py-2 text-right text-foreground">
+                          {h.type === "deposit" && h.status === "approved" ? daysActive : "—"}
+                        </td>
+                        <td className="px-3 py-2 text-right font-medium text-profit">
+                          {h.type === "deposit" && h.status === "approved" ? fmt(Math.round(depositShare)) : "—"}
                         </td>
                         <td className="px-3 py-2 text-center">
                           <Badge variant={sb.variant} className="text-[11px] gap-1">
