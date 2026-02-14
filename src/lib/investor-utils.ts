@@ -11,6 +11,50 @@ export const calcDaysActive = (dateStr: string): number => {
   return Math.max(0, Math.ceil((TODAY.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
 };
 
+/**
+ * Calculate time-weighted balance for an investor,
+ * accounting for deposits and withdrawals at different dates.
+ */
+export const calcTimeWeightedBalance = (investor: Investor): number => {
+  const events = investor.history
+    .filter((h) => (h.type === "deposit" || h.type === "withdrawal") && h.status === "approved")
+    .map((h) => ({
+      date: new Date(h.date),
+      delta: h.type === "deposit" ? h.amount : -h.amount,
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  if (events.length === 0) return 0;
+
+  let weight = 0;
+  let balance = 0;
+
+  for (let i = 0; i < events.length; i++) {
+    const eventDate = events[i].date;
+    const effectiveStart = eventDate > QUARTER_START ? eventDate : QUARTER_START;
+    const nextDate = i < events.length - 1
+      ? (events[i + 1].date > QUARTER_START ? events[i + 1].date : QUARTER_START)
+      : TODAY;
+
+    balance += events[i].delta;
+    const days = Math.max(0, Math.ceil((nextDate.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)));
+
+    // Only count days from this event to the next event (or today)
+    if (i < events.length - 1) {
+      const segmentStart = effectiveStart;
+      const segmentEnd = events[i + 1].date > QUARTER_START ? events[i + 1].date : QUARTER_START;
+      const segmentDays = Math.max(0, Math.ceil((segmentEnd.getTime() - segmentStart.getTime()) / (1000 * 60 * 60 * 24)));
+      weight += balance * segmentDays;
+    } else {
+      // Last event to today
+      const segmentDays = Math.max(0, Math.ceil((TODAY.getTime() - effectiveStart.getTime()) / (1000 * 60 * 60 * 24)));
+      weight += balance * segmentDays;
+    }
+  }
+
+  return Math.max(0, weight);
+};
+
 export const calculateProRata = (
   amount: number,
   joinDate: string,
@@ -19,9 +63,28 @@ export const calculateProRata = (
   allInvestors: Investor[]
 ): number => {
   const approved = allInvestors.filter((i) => i.status === "approved");
+  const investor = approved.find((i) => i.invested === amount && i.investmentDate === joinDate);
+  
+  // For per-deposit share calculation, use simple amount × days
   const daysActive = calcDaysActive(joinDate);
   const weight = amount * daysActive;
-  const totalWeight = approved.reduce((s, inv) => s + inv.invested * calcDaysActive(inv.investmentDate), 0);
+
+  // Total weight uses time-weighted balances for all investors
+  const totalWeight = approved.reduce((s, inv) => s + calcTimeWeightedBalance(inv), 0);
+  return totalWeight > 0 ? (weight / totalWeight) * totalProfit : 0;
+};
+
+/**
+ * Calculate total pro-rata share for an investor using time-weighted balance.
+ */
+export const calculateInvestorShare = (
+  investor: Investor,
+  totalProfit: number,
+  allInvestors: Investor[]
+): number => {
+  const approved = allInvestors.filter((i) => i.status === "approved");
+  const weight = calcTimeWeightedBalance(investor);
+  const totalWeight = approved.reduce((s, inv) => s + calcTimeWeightedBalance(inv), 0);
   return totalWeight > 0 ? (weight / totalWeight) * totalProfit : 0;
 };
 

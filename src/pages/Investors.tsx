@@ -21,7 +21,7 @@ import {
   QUARTER_TOTAL_DAYS,
   quarterDaysElapsed,
   calcDaysActive,
-  calculateProRata,
+  calculateInvestorShare,
   fmt,
   initialInvestors,
   TODAY,
@@ -46,7 +46,7 @@ export default function Investors() {
     () =>
       investors.map((inv) => {
         const daysActive = inv.status === "approved" ? calcDaysActive(inv.investmentDate) : 0;
-        const share = inv.status === "approved" ? calculateProRata(inv.invested, inv.investmentDate, QUARTER_TOTAL_DAYS, profit, investors) : 0;
+        const share = inv.status === "approved" ? calculateInvestorShare(inv, profit, investors) : 0;
         return { ...inv, daysActive, share };
       }),
     [profit, investors]
@@ -60,7 +60,7 @@ export default function Investors() {
   const handleRelease = (id: number) => {
     const inv = investors.find((i) => i.id === id);
     if (!inv || inv.status !== "approved") return;
-    const share = calculateProRata(inv.invested, inv.investmentDate, QUARTER_TOTAL_DAYS, profit, investors);
+    const share = calculateInvestorShare(inv, profit, investors);
     if (share <= 0) {
       toast.error("No profit to release for this investor.");
       return;
