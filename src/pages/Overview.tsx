@@ -27,13 +27,13 @@ export default function Overview() {
   const totalInvested = grossProfit; // Client returns represent deployed capital returns
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 xl:space-y-8">
       <div>
-        <h1 className="text-2xl font-bold text-foreground">Command Center</h1>
+        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Command Center</h1>
         <p className="text-sm text-muted-foreground mt-1">Real-time financial overview</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
         <KpiCard
           title="Gross Profit"
           value={fmt(grossProfit)}
@@ -68,9 +68,9 @@ export default function Overview() {
         />
       </div>
 
-      <div className="bg-card border border-border rounded-lg p-6 kpi-shadow">
+      <div className="bg-card border border-border rounded-lg p-6 xl:p-8 kpi-shadow">
         <h2 className="text-sm font-semibold text-foreground mb-4">Profit vs Expenses — Last 12 Months</h2>
-        <ResponsiveContainer width="100%" height={320}>
+        <ResponsiveContainer width="100%" height={360}>
           <LineChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(214 32% 91%)" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(215 16% 47%)" />

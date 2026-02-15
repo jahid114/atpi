@@ -114,16 +114,16 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
       </div>
 
       {/* Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden kpi-shadow">
-        <table className="w-full text-sm">
+      <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
+        <table className="w-full text-sm min-w-[750px]">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Investor</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Actions</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Date</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Investor</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Type</th>
+              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Amount</th>
+              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Status</th>
+              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -137,20 +137,20 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
                 const SIcon = sb.icon;
                 return (
                   <tr key={`${t.investorId}-${t.id}`} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 text-muted-foreground">{t.date}</td>
-                    <td className="px-4 py-3 font-medium text-foreground">{t.investorName}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground">{t.date}</td>
+                    <td className="px-4 xl:px-6 py-3 xl:py-4 font-medium text-foreground">{t.investorName}</td>
+                    <td className="px-4 xl:px-6 py-3 xl:py-4">
                       <Badge variant="secondary" className="text-[11px]">{typeLabels[t.type] || t.type}</Badge>
                     </td>
-                    <td className={`px-4 py-3 text-right font-medium ${t.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
+                    <td className={`px-4 xl:px-6 py-3 xl:py-4 text-right font-medium ${t.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
                       {t.type === "withdrawal" ? "-" : "+"}{fmt(t.amount)}
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
                       <Badge variant={sb.variant} className="text-[11px] gap-1">
                         <SIcon className="h-3 w-3" /> {sb.label}
                       </Badge>
                     </td>
-                    <td className="px-4 py-3 text-center">
+                    <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
                       {t.status === "pending" && onUpdateInvestment ? (
                         <div className="flex items-center justify-center gap-1">
                           <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-profit hover:text-profit" onClick={() => onUpdateInvestment(t.investorId, t.id, "approved")}>
