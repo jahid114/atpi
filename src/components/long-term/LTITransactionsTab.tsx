@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { Search, Filter } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -32,9 +32,10 @@ const typeLabels: Record<string, string> = {
 
 interface Props {
   investors: Investor[];
+  onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
 }
 
-export function LTITransactionsTab({ investors }: Props) {
+export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -122,12 +123,13 @@ export function LTITransactionsTab({ investors }: Props) {
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
+              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No transactions found.</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No transactions found.</td>
               </tr>
             ) : (
               filtered.map((t) => {
@@ -147,6 +149,20 @@ export function LTITransactionsTab({ investors }: Props) {
                       <Badge variant={sb.variant} className="text-[11px] gap-1">
                         <SIcon className="h-3 w-3" /> {sb.label}
                       </Badge>
+                    </td>
+                    <td className="px-4 py-3 text-center">
+                      {t.status === "pending" && onUpdateInvestment ? (
+                        <div className="flex items-center justify-center gap-1">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-profit hover:text-profit" onClick={() => onUpdateInvestment(t.investorId, t.id, "approved")}>
+                            <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                          </Button>
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-destructive hover:text-destructive" onClick={() => onUpdateInvestment(t.investorId, t.id, "rejected")}>
+                            <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
+                      )}
                     </td>
                   </tr>
                 );
