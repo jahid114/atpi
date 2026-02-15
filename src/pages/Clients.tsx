@@ -1,29 +1,14 @@
-import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-
-interface Client {
-  id: number;
-  name: string;
-  invested: number;
-  expectedReturn: string;
-  actualReturn: number | null;
-}
-
-const initialClients: Client[] = [
-  { id: 1, name: "Apex Ventures", invested: 500000, expectedReturn: "2026-06-15", actualReturn: 62000 },
-  { id: 2, name: "BlueStone Capital", invested: 750000, expectedReturn: "2026-04-01", actualReturn: null },
-  { id: 3, name: "Crestline Holdings", invested: 320000, expectedReturn: "2026-08-30", actualReturn: 41000 },
-  { id: 4, name: "Delta Equity Group", invested: 1200000, expectedReturn: "2026-05-20", actualReturn: null },
-  { id: 5, name: "Evergreen Fund", invested: 450000, expectedReturn: "2026-03-10", actualReturn: 58000 },
-];
+import { useFinancial } from "@/contexts/FinancialContext";
 
 const fmt = (n: number) => "$" + n.toLocaleString();
 
 export default function Clients() {
-  const [clients, setClients] = useState<Client[]>(initialClients);
+  const { clients, setClients } = useFinancial();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", invested: "", expectedReturn: "" });
 
@@ -32,8 +17,8 @@ export default function Clients() {
 
   const addClient = () => {
     if (!form.name || !form.invested) return;
-    setClients([
-      ...clients,
+    setClients((prev) => [
+      ...prev,
       { id: Date.now(), name: form.name, invested: Number(form.invested), expectedReturn: form.expectedReturn, actualReturn: null },
     ]);
     setForm({ name: "", invested: "", expectedReturn: "" });

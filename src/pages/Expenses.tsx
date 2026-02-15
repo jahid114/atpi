@@ -1,42 +1,25 @@
-import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface Expense {
-  id: number;
-  date: string;
-  category: string;
-  description: string;
-  amount: number;
-}
-
-const initialExpenses: Expense[] = [
-  { id: 1, date: "2026-02-01", category: "Salary", description: "January payroll", amount: 85000 },
-  { id: 2, date: "2026-02-03", category: "Rent", description: "Office lease Q1", amount: 12000 },
-  { id: 3, date: "2026-02-05", category: "Utilities", description: "Internet + Power", amount: 2400 },
-  { id: 4, date: "2026-02-10", category: "Software", description: "SaaS subscriptions", amount: 4500 },
-  { id: 5, date: "2026-02-12", category: "Legal", description: "Compliance review", amount: 8000 },
-];
+import { useFinancial } from "@/contexts/FinancialContext";
 
 const categories = ["Salary", "Rent", "Utilities", "Software", "Legal", "Marketing", "Travel", "Other"];
-
 const fmt = (n: number) => "$" + n.toLocaleString();
 
 export default function Expenses() {
-  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
+  const { expenses, setExpenses, totalExpenses } = useFinancial();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ category: "", description: "", amount: "" });
 
-  const total = expenses.reduce((s, e) => s + e.amount, 0);
-  const burnRate = Math.round(total / 12);
+  const burnRate = Math.round(totalExpenses / 12);
 
   const addExpense = () => {
     if (!form.category || !form.amount) return;
-    setExpenses([
-      ...expenses,
+    setExpenses((prev) => [
+      ...prev,
       {
         id: Date.now(),
         date: new Date().toISOString().slice(0, 10),
@@ -49,7 +32,7 @@ export default function Expenses() {
     setOpen(false);
   };
 
-  const remove = (id: number) => setExpenses(expenses.filter((e) => e.id !== id));
+  const remove = (id: number) => setExpenses((prev) => prev.filter((e) => e.id !== id));
 
   return (
     <div className="space-y-6">
@@ -82,7 +65,7 @@ export default function Expenses() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Expenses</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{fmt(total)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monthly Burn Rate</p>

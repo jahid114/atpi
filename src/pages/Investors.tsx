@@ -4,13 +4,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Users, UserPlus, ArrowLeftRight } from "lucide-react";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
+import { useFinancial } from "@/contexts/FinancialContext";
 import { LTIOverviewTab } from "@/components/long-term/LTIOverviewTab";
 import { LTIInvestorsTab } from "@/components/long-term/LTIInvestorsTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
 
 export default function Investors() {
-  const [profit, setProfit] = useState(0);
+  const { netProfit: profit } = useFinancial();
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
 
   const handleRelease = (id: number) => {
@@ -121,7 +122,7 @@ export default function Investors() {
         </TabsList>
 
         <TabsContent value="overview">
-          <LTIOverviewTab investors={investors} profit={profit} onProfitChange={setProfit} />
+          <LTIOverviewTab investors={investors} profit={profit} />
         </TabsContent>
         <TabsContent value="investors">
           <LTIInvestorsTab investors={investors} profit={profit} onRelease={handleRelease} onUpdateInvestment={handleUpdateInvestment} onWithdraw={handleWithdraw} />
