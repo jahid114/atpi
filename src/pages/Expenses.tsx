@@ -35,10 +35,10 @@ export default function Expenses() {
   const remove = (id: number) => setExpenses((prev) => prev.filter((e) => e.id !== id));
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 xl:space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Expense Ledger</h1>
+          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Expense Ledger</h1>
           <p className="text-sm text-muted-foreground mt-1">Track and categorize all operational expenses</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -62,38 +62,38 @@ export default function Expenses() {
         </Dialog>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6">
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Expenses</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
+          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monthly Burn Rate</p>
-          <p className="text-2xl font-bold text-loss mt-1">{fmt(burnRate)}/mo</p>
+          <p className="text-2xl xl:text-3xl font-bold text-loss mt-1">{fmt(burnRate)}/mo</p>
         </div>
       </div>
 
-      <div className="bg-card border border-border rounded-lg overflow-hidden kpi-shadow">
-        <table className="w-full text-sm">
+      <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
+        <table className="w-full text-sm min-w-[600px]">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Category</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Description</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-              <th className="px-4 py-3 w-10"></th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Date</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Category</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Description</th>
+              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Amount</th>
+              <th className="px-4 xl:px-6 py-3 xl:py-4 w-10"></th>
             </tr>
           </thead>
           <tbody>
             {expenses.map((e) => (
               <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-4 py-3 text-muted-foreground">{e.date}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground">{e.date}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4">
                   <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground">{e.category}</span>
                 </td>
-                <td className="px-4 py-3 text-foreground">{e.description}</td>
-                <td className="px-4 py-3 text-right font-medium text-foreground">{fmt(e.amount)}</td>
-                <td className="px-4 py-3">
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-foreground">{e.description}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-medium text-foreground">{fmt(e.amount)}</td>
+                <td className="px-4 xl:px-6 py-3 xl:py-4">
                   <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-loss transition-colors">
                     <Trash2 size={14} />
                   </button>
