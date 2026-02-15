@@ -10,7 +10,7 @@ import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
 
 export default function Investors() {
-  const [profit, setProfit] = useState(280000);
+  const [profit, setProfit] = useState(0);
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
 
   const handleRelease = (id: number) => {
