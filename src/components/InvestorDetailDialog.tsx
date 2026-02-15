@@ -22,7 +22,6 @@ interface InvestorDetailDialogProps {
   allInvestors: Investor[];
   profit: number;
   onClose: () => void;
-  onUpdateInvestment: (investorId: number, entryId: number, status: InvestmentStatus) => void;
   onWithdraw: (investorId: number, amount: number) => void;
 }
 
@@ -38,7 +37,7 @@ const statusBadge: Record<InvestmentStatus, { label: string; icon: React.Element
   rejected: { label: "Rejected", icon: XCircle, variant: "destructive" },
 };
 
-export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, onUpdateInvestment, onWithdraw }: InvestorDetailDialogProps) {
+export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, onWithdraw }: InvestorDetailDialogProps) {
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
 
@@ -129,72 +128,41 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
                     <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
                     <th className="text-right px-3 py-2 font-medium text-muted-foreground">Days Active</th>
                     <th className="text-right px-3 py-2 font-medium text-muted-foreground">Profit Share</th>
-                    <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
-                    <th className="text-center px-3 py-2 font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {investor.history.map((h) => {
-                    const tc = typeConfig[h.type] || typeConfig.deposit;
-                    const sb = statusBadge[h.status] || statusBadge.pending;
-                    const SIcon = sb.icon;
-                    const daysActive = h.type === "deposit" && h.status === "approved" ? calcDaysActive(h.date) : 0;
-                    const depositShare = h.type === "deposit" && h.status === "approved"
-                      ? calculateProRata(h.amount, h.date, QUARTER_TOTAL_DAYS, profit, allInvestors)
-                      : 0;
-                    return (
-                      <tr key={h.id} className="border-b border-border last:border-0">
-                        <td className="px-3 py-2 text-muted-foreground">{h.date}</td>
-                        <td className="px-3 py-2 text-foreground capitalize">{tc.label}</td>
-                        <td className={`px-3 py-2 text-right font-medium ${h.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
-                          {h.type === "withdrawal" ? "-" : "+"}
-                          {fmt(h.amount)}
-                        </td>
-                        <td className="px-3 py-2 text-right text-foreground">
-                          {h.type === "deposit" && h.status === "approved" ? daysActive : "—"}
-                        </td>
-                        <td className="px-3 py-2 text-right font-medium text-profit">
-                          {h.type === "deposit" && h.status === "approved" ? fmt(Math.round(depositShare)) : "—"}
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <Badge variant={sb.variant} className="text-[11px] gap-1">
-                            <SIcon className="h-3 w-3" /> {sb.label}
-                          </Badge>
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          {h.status === "pending" && (h.type === "deposit" || h.type === "withdrawal") ? (
-                            <div className="flex items-center justify-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-profit hover:text-profit h-7 px-2"
-                                onClick={() => {
-                                  onUpdateInvestment(investor.id, h.id, "approved");
-                                  toast.success(`${h.type === "deposit" ? "Investment" : "Withdrawal"} approved.`);
-                                }}
-                              >
-                                <CheckCircle className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive h-7 px-2"
-                                onClick={() => {
-                                  onUpdateInvestment(investor.id, h.id, "rejected");
-                                  toast(`${h.type === "deposit" ? "Investment" : "Withdrawal"} rejected.`);
-                                }}
-                              >
-                                <XCircle className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
+                     <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
+                   </tr>
+                 </thead>
+                 <tbody>
+                   {investor.history.map((h) => {
+                     const tc = typeConfig[h.type] || typeConfig.deposit;
+                     const sb = statusBadge[h.status] || statusBadge.pending;
+                     const SIcon = sb.icon;
+                     const daysActive = h.type === "deposit" && h.status === "approved" ? calcDaysActive(h.date) : 0;
+                     const depositShare = h.type === "deposit" && h.status === "approved"
+                       ? calculateProRata(h.amount, h.date, QUARTER_TOTAL_DAYS, profit, allInvestors)
+                       : 0;
+                     return (
+                       <tr key={h.id} className="border-b border-border last:border-0">
+                         <td className="px-3 py-2 text-muted-foreground">{h.date}</td>
+                         <td className="px-3 py-2 text-foreground capitalize">{tc.label}</td>
+                         <td className={`px-3 py-2 text-right font-medium ${h.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
+                           {h.type === "withdrawal" ? "-" : "+"}
+                           {fmt(h.amount)}
+                         </td>
+                         <td className="px-3 py-2 text-right text-foreground">
+                           {h.type === "deposit" && h.status === "approved" ? daysActive : "—"}
+                         </td>
+                         <td className="px-3 py-2 text-right font-medium text-profit">
+                           {h.type === "deposit" && h.status === "approved" ? fmt(Math.round(depositShare)) : "—"}
+                         </td>
+                         <td className="px-3 py-2 text-center">
+                           <Badge variant={sb.variant} className="text-[11px] gap-1">
+                             <SIcon className="h-3 w-3" /> {sb.label}
+                           </Badge>
+                         </td>
+                       </tr>
+                     );
+                   })}
+                 </tbody>
               </table>
             </div>
           </div>

@@ -108,7 +108,6 @@ export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestme
         allInvestors={investors}
         profit={profit}
         onClose={() => setDetailInvestor(null)}
-        onUpdateInvestment={onUpdateInvestment}
         onWithdraw={onWithdraw}
       />
     </div>
