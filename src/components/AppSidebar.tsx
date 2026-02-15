@@ -9,8 +9,12 @@ import {
   UsersRound,
   ChevronLeft,
   ChevronRight,
+  Menu,
+  X,
 } from "lucide-react";
 import { useState } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
   { title: "Overview", path: "/", icon: LayoutDashboard },
@@ -23,12 +27,64 @@ const navItems = [
   { title: "Users", path: "/users", icon: UsersRound },
 ];
 
+function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  return (
+    <nav className="flex-1 py-3 space-y-0.5 px-2">
+      {navItems.map((item) => (
+        <NavLink
+          key={item.path}
+          to={item.path}
+          end={item.path === "/"}
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+              isActive
+                ? "bg-sidebar-active text-sidebar-active-foreground font-medium"
+                : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"
+            }`
+          }
+        >
+          <item.icon size={18} className="shrink-0" />
+          <span className="truncate">{item.title}</span>
+        </NavLink>
+      ))}
+    </nav>
+  );
+}
+
+export function MobileSidebarTrigger() {
+  const [open, setOpen] = useState(false);
+  
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button className="md:hidden p-2 rounded-md hover:bg-muted transition-colors text-foreground">
+          <Menu size={20} />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-60 p-0 bg-sidebar text-sidebar-foreground border-sidebar-border">
+        <div className="flex items-center h-14 px-4 border-b border-sidebar-border">
+          <span className="text-sm font-bold tracking-tight">InvestFarm</span>
+        </div>
+        <SidebarNav onNavigate={() => setOpen(false)} />
+        <div className="p-4 border-t border-sidebar-border">
+          <p className="text-xs text-sidebar-muted">v1.0 · Admin Panel</p>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+}
+
 export function AppSidebar() {
   const [collapsed, setCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+
+  // On mobile, sidebar is hidden — use MobileSidebarTrigger in header instead
+  if (isMobile) return null;
 
   return (
     <aside
-      className={`flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-200 ${
+      className={`hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-200 ${
         collapsed ? "w-16" : "w-60"
       }`}
     >

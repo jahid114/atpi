@@ -1,13 +1,20 @@
 import { ReactNode } from "react";
-import { AppSidebar } from "./AppSidebar";
+import { AppSidebar, MobileSidebarTrigger } from "./AppSidebar";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen w-full bg-background">
       <AppSidebar />
-      <main className="flex-1 overflow-auto">
-        <div className="p-4 sm:p-6 lg:p-8 xl:p-10 max-w-[1600px] mx-auto w-full">{children}</div>
-      </main>
+      <div className="flex-1 flex flex-col overflow-auto">
+        {/* Mobile header with hamburger */}
+        <header className="md:hidden flex items-center h-14 px-4 border-b border-border bg-background sticky top-0 z-30">
+          <MobileSidebarTrigger />
+          <span className="ml-3 text-sm font-bold tracking-tight text-foreground">InvestFarm</span>
+        </header>
+        <main className="flex-1 overflow-auto">
+          <div className="p-4 sm:p-6 lg:p-8 xl:p-10 max-w-[1600px] mx-auto w-full">{children}</div>
+        </main>
+      </div>
     </div>
   );
 }
