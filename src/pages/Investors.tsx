@@ -131,7 +131,7 @@ export default function Investors() {
           <LTIRequestsTab investors={investors} onApprove={handleApprove} onReject={handleReject} onRegister={handleRegister} />
         </TabsContent>
         <TabsContent value="transactions">
-          <LTITransactionsTab investors={investors} />
+          <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} />
         </TabsContent>
       </Tabs>
     </div>
