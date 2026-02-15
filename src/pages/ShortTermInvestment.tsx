@@ -167,35 +167,35 @@ export default function ShortTermInvestment() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 xl:gap-6">
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Projects</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{projects.length}</p>
+          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{projects.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Active Projects</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{projects.filter((p) => p.status === "active").length}</p>
+          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{projects.filter((p) => p.status === "active").length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Funded</p>
-          <p className="text-2xl font-bold text-profit mt-1">
+          <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">
             {fmt(projects.reduce((s, p) => s + p.contributions.filter((c) => c.status === "approved").reduce((a, c) => a + c.amount, 0), 0))}
           </p>
         </div>
       </div>
 
       {/* Projects Table */}
-      <div className="bg-card border border-border rounded-lg overflow-hidden kpi-shadow">
-        <table className="w-full text-sm">
+      <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
+        <table className="w-full text-sm min-w-[700px]">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Project Name</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Target</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Funded</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Return %</th>
-              <th className="text-left px-4 py-3 font-medium text-muted-foreground">Duration</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Actions</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Project Name</th>
+              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Target</th>
+              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Funded</th>
+              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Return %</th>
+              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Duration</th>
+              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Status</th>
+              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -204,20 +204,20 @@ export default function ShortTermInvestment() {
               const sc = statusConfig[project.status];
               return (
                 <tr key={project.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 py-3">
+                  <td className="px-4 xl:px-6 py-3 xl:py-4">
                     <p className="font-medium text-foreground">{project.name}</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">{project.description}</p>
+                    <p className="text-xs text-muted-foreground truncate max-w-xs xl:max-w-md">{project.description}</p>
                   </td>
-                  <td className="px-4 py-3 text-right text-foreground">{fmt(project.targetAmount)}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-profit">{fmt(funded)}</td>
-                  <td className="px-4 py-3 text-center text-foreground">{project.expectedReturn}%</td>
-                  <td className="px-4 py-3 text-muted-foreground text-xs">
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-right text-foreground">{fmt(project.targetAmount)}</td>
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-semibold text-profit">{fmt(funded)}</td>
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center text-foreground">{project.expectedReturn}%</td>
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground text-xs">
                     <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {project.startDate} → {project.endDate}</span>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
                     <Badge variant={sc.variant} className="text-[11px]">{sc.label}</Badge>
                   </td>
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
                     <Button variant="ghost" size="sm" onClick={() => setDetailProject(project)}>
                       <Eye className="h-4 w-4" />
                     </Button>
