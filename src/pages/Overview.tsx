@@ -1,5 +1,6 @@
 import { KpiCard } from "@/components/KpiCard";
 import { DollarSign, Users, CreditCard, TrendingUp } from "lucide-react";
+import { useFinancial } from "@/contexts/FinancialContext";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
@@ -19,14 +20,12 @@ const chartData = [
   { month: "Feb", profit: 85000, expenses: 39000 },
 ];
 
-const totalCapital = 4_250_000;
-const totalDeployments = 3_120_000;
-const totalExpenses = 420_000;
-const netProfit = totalDeployments - totalExpenses;
-
 const fmt = (n: number) => "$" + n.toLocaleString();
 
 export default function Overview() {
+  const { grossProfit, totalExpenses, netProfit } = useFinancial();
+  const totalInvested = grossProfit; // Client returns represent deployed capital returns
+
   return (
     <div className="space-y-6">
       <div>
@@ -36,17 +35,17 @@ export default function Overview() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard
-          title="Total Pooled Capital"
-          value={fmt(totalCapital)}
-          change="+12.3% from last quarter"
+          title="Gross Profit"
+          value={fmt(grossProfit)}
+          change="From client returns"
           changeType="positive"
           icon={<DollarSign size={18} className="text-primary-foreground" />}
           accentColor="bg-kpi-blue"
         />
         <KpiCard
-          title="Client Deployments"
-          value={fmt(totalDeployments)}
-          change="+8.1% deployed"
+          title="Client Returns"
+          value={fmt(grossProfit)}
+          change="Actual returns received"
           changeType="positive"
           icon={<TrendingUp size={18} className="text-primary-foreground" />}
           accentColor="bg-kpi-emerald"
@@ -54,7 +53,7 @@ export default function Overview() {
         <KpiCard
           title="Operational Expenses"
           value={fmt(totalExpenses)}
-          change="+2.4% vs last month"
+          change="Total deductions"
           changeType="negative"
           icon={<CreditCard size={18} className="text-primary-foreground" />}
           accentColor="bg-kpi-amber"
@@ -62,10 +61,10 @@ export default function Overview() {
         <KpiCard
           title="Net Profit"
           value={fmt(netProfit)}
-          change="Margin: 86.5%"
-          changeType="positive"
+          change={netProfit >= 0 ? `Margin: ${grossProfit > 0 ? ((netProfit / grossProfit) * 100).toFixed(1) : 0}%` : "Loss"}
+          changeType={netProfit >= 0 ? "positive" : "negative"}
           icon={<Users size={18} className="text-primary-foreground" />}
-          accentColor="bg-kpi-emerald"
+          accentColor={netProfit >= 0 ? "bg-kpi-emerald" : "bg-destructive"}
         />
       </div>
 

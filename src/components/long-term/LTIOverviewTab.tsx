@@ -1,5 +1,4 @@
 import { useMemo } from "react";
-import { Input } from "@/components/ui/input";
 import type { Investor } from "@/types/investor";
 import {
   QUARTER_TOTAL_DAYS,
@@ -7,14 +6,15 @@ import {
   calculateInvestorShare,
   fmt,
 } from "@/lib/investor-utils";
+import { useFinancial } from "@/contexts/FinancialContext";
 
 interface Props {
   investors: Investor[];
   profit: number;
-  onProfitChange: (v: number) => void;
 }
 
-export function LTIOverviewTab({ investors, profit, onProfitChange }: Props) {
+export function LTIOverviewTab({ investors, profit }: Props) {
+  const { grossProfit, totalExpenses } = useFinancial();
   const approved = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
   const pending = useMemo(() => investors.filter((i) => i.status === "pending"), [investors]);
   const totalInvested = approved.reduce((s, i) => s + i.invested, 0);
@@ -67,25 +67,28 @@ export function LTIOverviewTab({ investors, profit, onProfitChange }: Props) {
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Quarter Profit</p>
-          <p className="text-2xl font-bold text-profit mt-1">{fmt(profit)}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Net Profit</p>
+          <p className={`text-2xl font-bold mt-1 ${profit >= 0 ? "text-profit" : "text-destructive"}`}>{fmt(profit)}</p>
         </div>
       </div>
 
-      {/* Profit Input */}
+      {/* Profit Breakdown */}
       <div className="bg-card border border-border rounded-lg p-5 kpi-shadow space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">Quarter Net Profit</p>
-          <span className="text-sm font-bold text-profit">{fmt(profit)}</span>
+        <p className="text-sm font-medium text-foreground">Profit Calculation</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Gross Profit (Client Returns)</span>
+            <span className="text-lg font-bold text-profit mt-1">{fmt(grossProfit)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Total Expenses</span>
+            <span className="text-lg font-bold text-destructive mt-1">− {fmt(totalExpenses)}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider">Net Profit</span>
+            <span className={`text-lg font-bold mt-1 ${profit >= 0 ? "text-profit" : "text-destructive"}`}>{fmt(profit)}</span>
+          </div>
         </div>
-        <Input
-          type="number"
-          min={0}
-          value={profit || ""}
-          onChange={(e) => onProfitChange(Number(e.target.value) || 0)}
-          placeholder="Enter actual profit amount"
-          className="max-w-xs"
-        />
       </div>
 
       {/* Summary cards row */}
