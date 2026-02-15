@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import type { Investor } from "@/types/investor";
 import {
   QUARTER_TOTAL_DAYS,
@@ -67,22 +67,25 @@ export function LTIOverviewTab({ investors, profit, onProfitChange }: Props) {
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Simulated Profit</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Quarter Profit</p>
           <p className="text-2xl font-bold text-profit mt-1">{fmt(profit)}</p>
         </div>
       </div>
 
-      {/* Profit Slider */}
+      {/* Profit Input */}
       <div className="bg-card border border-border rounded-lg p-5 kpi-shadow space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-foreground">Simulate Quarter Net Profit</p>
+          <p className="text-sm font-medium text-foreground">Quarter Net Profit</p>
           <span className="text-sm font-bold text-profit">{fmt(profit)}</span>
         </div>
-        <Slider min={0} max={1000000} step={10000} value={[profit]} onValueChange={(v) => onProfitChange(v[0])} />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>$0</span>
-          <span>$1,000,000</span>
-        </div>
+        <Input
+          type="number"
+          min={0}
+          value={profit || ""}
+          onChange={(e) => onProfitChange(Number(e.target.value) || 0)}
+          placeholder="Enter actual profit amount"
+          className="max-w-xs"
+        />
       </div>
 
       {/* Summary cards row */}
