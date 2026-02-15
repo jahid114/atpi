@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -69,6 +69,16 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
     });
   }, [allTransactions, typeFilter, statusFilter, dateFrom, dateTo, search]);
 
+  const hasActiveFilters = search !== "" || typeFilter !== "all" || statusFilter !== "all" || !!dateFrom || !!dateTo;
+
+  const clearFilters = useCallback(() => {
+    setSearch("");
+    setTypeFilter("all");
+    setStatusFilter("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  }, []);
+
 
   return (
     <div className="space-y-4">
@@ -122,6 +132,11 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
             <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
           </PopoverContent>
         </Popover>
+        {hasActiveFilters && (
+          <Button variant="ghost" size="sm" className="h-10 px-3 text-xs text-muted-foreground hover:text-foreground" onClick={clearFilters}>
+            <FilterX className="h-4 w-4 mr-1" /> Clear
+          </Button>
+        )}
         <p className="text-xs text-muted-foreground ml-auto">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
       </div>
 
