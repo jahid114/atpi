@@ -153,7 +153,7 @@ export default function Investors() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Investor Ledger</h1>
+          <h1 className="text-2xl font-bold text-foreground">Long-Term Investment</h1>
           <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Q1 2026</p>
         </div>
         <Button onClick={() => setRegisterOpen(true)}>
