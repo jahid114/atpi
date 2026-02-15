@@ -1,8 +1,12 @@
 import { useMemo, useState } from "react";
-import { Search, CheckCircle, XCircle, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -39,7 +43,8 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [investorFilter, setInvestorFilter] = useState("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
 
   const allTransactions = useMemo<FlatTransaction[]>(() => {
     return investors
@@ -57,17 +62,13 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
     return allTransactions.filter((t) => {
       if (typeFilter !== "all" && t.type !== typeFilter) return false;
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
-      if (investorFilter !== "all" && String(t.investorId) !== investorFilter) return false;
+      if (dateFrom && new Date(t.date) < dateFrom) return false;
+      if (dateTo && new Date(t.date) > dateTo) return false;
       if (search && !t.investorName.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [allTransactions, typeFilter, statusFilter, investorFilter, search]);
+  }, [allTransactions, typeFilter, statusFilter, dateFrom, dateTo, search]);
 
-  const uniqueInvestors = useMemo(() => {
-    const map = new Map<number, string>();
-    investors.forEach((i) => map.set(i.id, i.name));
-    return Array.from(map.entries());
-  }, [investors]);
 
   return (
     <div className="space-y-4">
@@ -99,17 +100,28 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
             <SelectItem value="rejected">Rejected</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={investorFilter} onValueChange={setInvestorFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Investor" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Investors</SelectItem>
-            {uniqueInvestors.map(([id, name]) => (
-              <SelectItem key={id} value={String(id)}>{name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[150px] justify-start text-left text-sm font-normal", !dateFrom && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className={cn("w-[150px] justify-start text-left text-sm font-normal", !dateTo && "text-muted-foreground")}>
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
+          </PopoverContent>
+        </Popover>
         <p className="text-xs text-muted-foreground ml-auto">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
       </div>
 
