@@ -6,6 +6,7 @@ import {
   TrendingUp,
   ToggleLeft,
   FileText,
+  UsersRound,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -18,6 +19,7 @@ const navItems = [
   { title: "Investors", path: "/investors", icon: Users },
   { title: "Distribution", path: "/distribution", icon: ToggleLeft },
   { title: "Invoice Vault", path: "/invoices", icon: FileText },
+  { title: "Users", path: "/users", icon: UsersRound },
 ];
 
 export function AppSidebar() {

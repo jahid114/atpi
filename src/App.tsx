@@ -10,6 +10,7 @@ import Clients from "./pages/Clients";
 import Investors from "./pages/Investors";
 import Distribution from "./pages/Distribution";
 import Invoices from "./pages/Invoices";
+import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/investors" element={<Investors />} />
             <Route path="/distribution" element={<Distribution />} />
             <Route path="/invoices" element={<Invoices />} />
+            <Route path="/users" element={<Users />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </DashboardLayout>
