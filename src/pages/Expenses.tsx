@@ -1,108 +1,68 @@
-import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BarChart3, Receipt, Tag } from "lucide-react";
 import { useFinancial } from "@/contexts/FinancialContext";
+import { ExpenseOverviewTab } from "@/components/expenses/ExpenseOverviewTab";
+import { ExpenseListTab } from "@/components/expenses/ExpenseListTab";
+import { ExpenseCategoryTab } from "@/components/expenses/ExpenseCategoryTab";
 
-const categories = ["Salary", "Rent", "Utilities", "Software", "Legal", "Marketing", "Travel", "Other"];
-const fmt = (n: number) => "$" + n.toLocaleString();
+const defaultCategories = ["Salary", "Rent", "Utilities", "Software", "Legal", "Marketing", "Travel", "Other"];
 
 export default function Expenses() {
-  const { expenses, setExpenses, totalExpenses } = useFinancial();
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ category: "", description: "", amount: "" });
+  const { setExpenses } = useFinancial();
+  const [categories, setCategories] = useState<string[]>(defaultCategories);
 
-  const burnRate = Math.round(totalExpenses / 12);
-
-  const addExpense = () => {
-    if (!form.category || !form.amount) return;
-    setExpenses((prev) => [
-      ...prev,
-      {
-        id: Date.now(),
-        date: new Date().toISOString().slice(0, 10),
-        category: form.category,
-        description: form.description,
-        amount: Number(form.amount),
-      },
-    ]);
-    setForm({ category: "", description: "", amount: "" });
-    setOpen(false);
+  const handleAddCategory = (name: string) => {
+    setCategories((prev) => [...prev, name]);
   };
 
-  const remove = (id: number) => setExpenses((prev) => prev.filter((e) => e.id !== id));
+  const handleEditCategory = (oldName: string, newName: string) => {
+    setCategories((prev) => prev.map((c) => (c === oldName ? newName : c)));
+    // Update existing expenses with the old category name
+    setExpenses((prev) =>
+      prev.map((e) => (e.category === oldName ? { ...e, category: newName } : e))
+    );
+  };
+
+  const handleDeleteCategory = (name: string) => {
+    setCategories((prev) => prev.filter((c) => c !== name));
+  };
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Expense Ledger</h1>
-          <p className="text-sm text-muted-foreground mt-1">Track and categorize all operational expenses</p>
-        </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm"><Plus size={16} className="mr-1.5" /> Add Expense</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle>New Expense</DialogTitle></DialogHeader>
-            <div className="space-y-3 pt-2">
-              <Select value={form.category} onValueChange={(v) => setForm({ ...form, category: v })}>
-                <SelectTrigger><SelectValue placeholder="Category" /></SelectTrigger>
-                <SelectContent>
-                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Input placeholder="Description" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
-              <Input placeholder="Amount" type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-              <Button className="w-full" onClick={addExpense}>Add Expense</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+      <div>
+        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Expense Ledger</h1>
+        <p className="text-sm text-muted-foreground mt-1">Track and categorize all operational expenses</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 xl:gap-6">
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Expenses</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Monthly Burn Rate</p>
-          <p className="text-2xl xl:text-3xl font-bold text-loss mt-1">{fmt(burnRate)}/mo</p>
-        </div>
-      </div>
+      <Tabs defaultValue="overview" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
+            <BarChart3 className="h-4 w-4" /> Overview
+          </TabsTrigger>
+          <TabsTrigger value="expenses" className="gap-1.5 text-xs sm:text-sm">
+            <Receipt className="h-4 w-4" /> Expenses
+          </TabsTrigger>
+          <TabsTrigger value="categories" className="gap-1.5 text-xs sm:text-sm">
+            <Tag className="h-4 w-4" /> Categories
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
-        <table className="w-full text-sm min-w-[600px]">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Date</th>
-              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Category</th>
-              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Description</th>
-              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Amount</th>
-              <th className="px-4 xl:px-6 py-3 xl:py-4 w-10"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {expenses.map((e) => (
-              <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground">{e.date}</td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4">
-                  <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground">{e.category}</span>
-                </td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-foreground">{e.description}</td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-medium text-foreground">{fmt(e.amount)}</td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4">
-                  <button onClick={() => remove(e.id)} className="text-muted-foreground hover:text-loss transition-colors">
-                    <Trash2 size={14} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        <TabsContent value="overview">
+          <ExpenseOverviewTab categories={categories} />
+        </TabsContent>
+        <TabsContent value="expenses">
+          <ExpenseListTab categories={categories} />
+        </TabsContent>
+        <TabsContent value="categories">
+          <ExpenseCategoryTab
+            categories={categories}
+            onAddCategory={handleAddCategory}
+            onEditCategory={handleEditCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
