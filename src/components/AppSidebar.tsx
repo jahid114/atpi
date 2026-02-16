@@ -4,8 +4,6 @@ import {
   Receipt,
   Users,
   TrendingUp,
-  ToggleLeft,
-  FileText,
   UsersRound,
   ChevronLeft,
   ChevronRight,
@@ -22,8 +20,6 @@ const navItems = [
   { title: "Client Tracker", path: "/clients", icon: TrendingUp },
   { title: "Long-Term Investment", path: "/long-term-investment", icon: Users },
   { title: "Short-Term Investment", path: "/short-term-investment", icon: TrendingUp },
-  { title: "Distribution", path: "/distribution", icon: ToggleLeft },
-  { title: "Invoice Vault", path: "/invoices", icon: FileText },
   { title: "Users", path: "/users", icon: UsersRound },
 ];
 
