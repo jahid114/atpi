@@ -32,9 +32,10 @@ const fmtCurrency = (n: number) => "$" + n.toLocaleString();
 interface Props {
   investors: Investor[];
   profit: number;
+  selectedYear: number;
 }
 
-export function LTIProfitShareTab({ investors, profit }: Props) {
+export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   const [profitVisible, setProfitVisible] = useState(false);
   const [payoutConfirmed, setPayoutConfirmed] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");

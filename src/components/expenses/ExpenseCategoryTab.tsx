@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Plus, Pencil, Trash2, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,10 +17,12 @@ interface Props {
   onAddCategory: (name: string) => void;
   onEditCategory: (oldName: string, newName: string) => void;
   onDeleteCategory: (name: string) => void;
+  selectedYear: number;
 }
 
-export function ExpenseCategoryTab({ categories, onAddCategory, onEditCategory, onDeleteCategory }: Props) {
+export function ExpenseCategoryTab({ categories, onAddCategory, onEditCategory, onDeleteCategory, selectedYear }: Props) {
   const { expenses } = useFinancial();
+  const yearExpenses = useMemo(() => expenses.filter((e) => e.date.startsWith(String(selectedYear))), [expenses, selectedYear]);
 
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -73,8 +75,8 @@ export function ExpenseCategoryTab({ categories, onAddCategory, onEditCategory, 
     toast.success(`Category "${deleteName}" deleted.`);
   };
 
-  const getCategoryCount = (cat: string) => expenses.filter((e) => e.category === cat).length;
-  const getCategoryTotal = (cat: string) => expenses.filter((e) => e.category === cat).reduce((s, e) => s + e.amount, 0);
+  const getCategoryCount = (cat: string) => yearExpenses.filter((e) => e.category === cat).length;
+  const getCategoryTotal = (cat: string) => yearExpenses.filter((e) => e.category === cat).reduce((s, e) => s + e.amount, 0);
 
   return (
     <div className="space-y-4">

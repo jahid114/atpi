@@ -11,23 +11,24 @@ import { useFinancial } from "@/contexts/FinancialContext";
 interface Props {
   investors: Investor[];
   profit: number;
+  selectedYear: number;
 }
 
-export function LTIOverviewTab({ investors, profit }: Props) {
+export function LTIOverviewTab({ investors, profit, selectedYear }: Props) {
   const { grossProfit, totalExpenses } = useFinancial();
   const approved = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
   const pending = useMemo(() => investors.filter((i) => i.status === "pending"), [investors]);
   const totalInvested = approved.reduce((s, i) => s + i.invested, 0);
   const totalProfitDistributed = approved.reduce(
-    (s, inv) => s + inv.history.filter((h) => h.type === "payout" && h.status === "approved").reduce((a, h) => a + h.amount, 0),
+    (s, inv) => s + inv.history.filter((h) => h.type === "payout" && h.status === "approved" && h.date.startsWith(String(selectedYear))).reduce((a, h) => a + h.amount, 0),
     0
   );
   const totalWithdrawals = approved.reduce(
-    (s, inv) => s + inv.history.filter((h) => h.type === "withdrawal" && h.status === "approved").reduce((a, h) => a + h.amount, 0),
+    (s, inv) => s + inv.history.filter((h) => h.type === "withdrawal" && h.status === "approved" && h.date.startsWith(String(selectedYear))).reduce((a, h) => a + h.amount, 0),
     0
   );
   const pendingDeposits = pending.reduce(
-    (s, inv) => s + inv.history.filter((h) => h.type === "deposit" && h.status === "pending").reduce((a, h) => a + h.amount, 0),
+    (s, inv) => s + inv.history.filter((h) => h.type === "deposit" && h.status === "pending" && h.date.startsWith(String(selectedYear))).reduce((a, h) => a + h.amount, 0),
     0
   );
 

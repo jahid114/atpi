@@ -11,7 +11,11 @@ import type { Client } from "@/contexts/FinancialContext";
 
 const emptyForm = { name: "", description: "", status: "active" as Client["status"] };
 
-export function ClientListTab() {
+interface Props {
+  selectedYear: number;
+}
+
+export function ClientListTab({ selectedYear }: Props) {
   const { clients, setClients, clientTransactions } = useFinancial();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -28,7 +32,7 @@ export function ClientListTab() {
   }, [clients, search, statusFilter]);
 
   const getClientStats = (clientId: number) => {
-    const txns = clientTransactions.filter((t) => t.clientId === clientId);
+    const txns = clientTransactions.filter((t) => t.clientId === clientId && t.date.startsWith(String(selectedYear)));
     return {
       invested: txns.filter((t) => t.type === "investment").reduce((s, t) => s + t.amount, 0),
       profit: txns.filter((t) => t.type === "profit_receive").reduce((s, t) => s + t.amount, 0),

@@ -21,9 +21,10 @@ interface Props {
   onRelease: (id: number) => void;
   onUpdateInvestment: (investorId: number, entryId: number, status: InvestmentStatus) => void;
   onWithdraw: (investorId: number, amount: number) => void;
+  selectedYear: number;
 }
 
-export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestment, onWithdraw }: Props) {
+export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestment, onWithdraw, selectedYear }: Props) {
   const [search, setSearch] = useState("");
   const [detailInvestor, setDetailInvestor] = useState<Investor | null>(null);
 

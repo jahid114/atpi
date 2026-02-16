@@ -7,39 +7,48 @@ import {
 
 const fmt = (n: number) => "$" + n.toLocaleString();
 
-export function ClientOverviewTab() {
+interface Props {
+  selectedYear: number;
+}
+
+export function ClientOverviewTab({ selectedYear }: Props) {
   const { clients, clientTransactions } = useFinancial();
 
+  const yearTransactions = useMemo(
+    () => clientTransactions.filter((t) => t.date.startsWith(String(selectedYear))),
+    [clientTransactions, selectedYear]
+  );
+
   const totalInvested = useMemo(
-    () => clientTransactions.filter((t) => t.type === "investment").reduce((s, t) => s + t.amount, 0),
-    [clientTransactions]
+    () => yearTransactions.filter((t) => t.type === "investment").reduce((s, t) => s + t.amount, 0),
+    [yearTransactions]
   );
   const totalProfitReceived = useMemo(
-    () => clientTransactions.filter((t) => t.type === "profit_receive").reduce((s, t) => s + t.amount, 0),
-    [clientTransactions]
+    () => yearTransactions.filter((t) => t.type === "profit_receive").reduce((s, t) => s + t.amount, 0),
+    [yearTransactions]
   );
   const totalPrincipalReturned = useMemo(
-    () => clientTransactions.filter((t) => t.type === "principal_return").reduce((s, t) => s + t.amount, 0),
-    [clientTransactions]
+    () => yearTransactions.filter((t) => t.type === "principal_return").reduce((s, t) => s + t.amount, 0),
+    [yearTransactions]
   );
 
   const activeClients = clients.filter((c) => c.status === "active").length;
 
   const byClient = useMemo(() => {
     return clients.map((c) => {
-      const txns = clientTransactions.filter((t) => t.clientId === c.id);
+      const txns = yearTransactions.filter((t) => t.clientId === c.id);
       return {
         name: c.name,
         invested: txns.filter((t) => t.type === "investment").reduce((s, t) => s + t.amount, 0),
         profit: txns.filter((t) => t.type === "profit_receive").reduce((s, t) => s + t.amount, 0),
         returned: txns.filter((t) => t.type === "principal_return").reduce((s, t) => s + t.amount, 0),
       };
-    });
-  }, [clients, clientTransactions]);
+    }).filter((c) => c.invested > 0 || c.profit > 0 || c.returned > 0);
+  }, [clients, yearTransactions]);
 
   const byMonth = useMemo(() => {
     const map: Record<string, { investment: number; profit: number; principal: number }> = {};
-    clientTransactions.forEach((t) => {
+    yearTransactions.forEach((t) => {
       const month = t.date.slice(0, 7);
       if (!map[month]) map[month] = { investment: 0, profit: 0, principal: 0 };
       if (t.type === "investment") map[month].investment += t.amount;
@@ -49,7 +58,7 @@ export function ClientOverviewTab() {
     return Object.entries(map)
       .sort((a, b) => a[0].localeCompare(b[0]))
       .map(([month, data]) => ({ month, ...data }));
-  }, [clientTransactions]);
+  }, [yearTransactions]);
 
   return (
     <div className="space-y-6">
@@ -59,21 +68,21 @@ export function ClientOverviewTab() {
             <DollarSign className="h-4 w-4" /> Total Invested
           </div>
           <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
-          <p className="text-xs text-muted-foreground mt-1">capital deployed</p>
+          <p className="text-xs text-muted-foreground mt-1">capital deployed in {selectedYear}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <TrendingUp className="h-4 w-4" /> Profit Received
           </div>
           <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">{fmt(totalProfitReceived)}</p>
-          <p className="text-xs text-muted-foreground mt-1">total returns</p>
+          <p className="text-xs text-muted-foreground mt-1">total returns in {selectedYear}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <ArrowDownLeft className="h-4 w-4" /> Principal Returned
           </div>
           <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalPrincipalReturned)}</p>
-          <p className="text-xs text-muted-foreground mt-1">capital returned</p>
+          <p className="text-xs text-muted-foreground mt-1">capital returned in {selectedYear}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -84,33 +93,33 @@ export function ClientOverviewTab() {
         </div>
       </div>
 
-      {/* Per-client breakdown */}
-      <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
-        <p className="text-sm font-semibold text-foreground mb-4">Capital by Client</p>
-        <div className="space-y-3">
-          {byClient.map((c) => {
-            const pct = totalInvested > 0 ? (c.invested / totalInvested) * 100 : 0;
-            return (
-              <div key={c.name} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-foreground">{c.name}</span>
-                  <span className="text-muted-foreground">
-                    {fmt(c.invested)} <span className="text-xs">({pct.toFixed(1)}%)</span>
-                  </span>
+      {byClient.length > 0 && (
+        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+          <p className="text-sm font-semibold text-foreground mb-4">Capital by Client ({selectedYear})</p>
+          <div className="space-y-3">
+            {byClient.map((c) => {
+              const pct = totalInvested > 0 ? (c.invested / totalInvested) * 100 : 0;
+              return (
+                <div key={c.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-foreground">{c.name}</span>
+                    <span className="text-muted-foreground">
+                      {fmt(c.invested)} <span className="text-xs">({pct.toFixed(1)}%)</span>
+                    </span>
+                  </div>
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  </div>
                 </div>
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Monthly chart */}
       {byMonth.length > 0 && (
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
-          <p className="text-sm font-semibold text-foreground mb-3">Monthly Transaction Volume</p>
+          <p className="text-sm font-semibold text-foreground mb-3">Monthly Transaction Volume ({selectedYear})</p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={byMonth}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -127,6 +136,12 @@ export function ClientOverviewTab() {
               <Bar dataKey="principal" fill="hsl(var(--muted-foreground))" radius={[4, 4, 0, 0]} name="Principal Return" />
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {byMonth.length === 0 && byClient.length === 0 && (
+        <div className="bg-card border border-border rounded-lg p-8 text-center kpi-shadow">
+          <p className="text-sm text-muted-foreground">No transaction data for {selectedYear}.</p>
         </div>
       )}
     </div>
