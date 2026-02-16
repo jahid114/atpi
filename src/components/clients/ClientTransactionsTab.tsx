@@ -79,9 +79,8 @@ export function ClientTransactionsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-          <div className="relative flex-1 w-full sm:max-w-xs">
+      <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input placeholder="Search transactions..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
           </div>
@@ -101,9 +100,6 @@ export function ClientTransactionsTab() {
               {clients.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
             </SelectContent>
           </Select>
-          <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add Transaction</Button>
-        </div>
-        <div className="flex items-center gap-3">
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className={cn("w-[150px] justify-start text-left text-sm font-normal", !dateFrom && "text-muted-foreground")}>
@@ -131,7 +127,7 @@ export function ClientTransactionsTab() {
               <FilterX className="h-4 w-4 mr-1" /> Clear
             </Button>
           )}
-        </div>
+          <Button size="sm" onClick={openAdd} className="ml-auto"><Plus size={16} className="mr-1.5" /> Add Transaction</Button>
       </div>
 
       <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
