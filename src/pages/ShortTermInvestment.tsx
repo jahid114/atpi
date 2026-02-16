@@ -257,18 +257,18 @@ export default function ShortTermInvestment() {
               {/* Header image */}
               <div className="relative h-40 overflow-hidden bg-muted shrink-0">
                 <img src={detailProject.image} alt={detailProject.name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                 <Button
                   variant="secondary"
                   size="icon"
-                  className="absolute top-3 left-3 h-8 w-8 bg-background/70 backdrop-blur-sm hover:bg-background/90"
+                  className="absolute top-3 left-3 h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60 text-white border-0"
                   onClick={() => setExpanded(!expanded)}
                 >
                   {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </Button>
                 <div className="absolute bottom-3 left-4 right-12">
-                  <h2 className="text-lg font-bold text-foreground">{detailProject.name}</h2>
-                  <p className="text-xs text-muted-foreground line-clamp-1">{detailProject.description}</p>
+                  <h2 className="text-lg font-bold text-white drop-shadow-md">{detailProject.name}</h2>
+                  <p className="text-xs text-white/80 line-clamp-1 drop-shadow-sm">{detailProject.description}</p>
                 </div>
               </div>
 
