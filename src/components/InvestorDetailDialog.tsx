@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
-import { calcDaysActive, calculateProRata, fmt, QUARTER_TOTAL_DAYS, TODAY } from "@/lib/investor-utils";
+import { calcDaysActive, calculateProRata, fmt, YEAR_TOTAL_DAYS, TODAY } from "@/lib/investor-utils";
 
 interface InvestorDetailDialogProps {
   investor: Investor | null;
@@ -138,7 +138,7 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
                      const SIcon = sb.icon;
                      const daysActive = h.type === "deposit" && h.status === "approved" ? calcDaysActive(h.date) : 0;
                      const depositShare = h.type === "deposit" && h.status === "approved"
-                       ? calculateProRata(h.amount, h.date, QUARTER_TOTAL_DAYS, profit, allInvestors)
+                       ? calculateProRata(h.amount, h.date, YEAR_TOTAL_DAYS, profit, allInvestors)
                        : 0;
                      return (
                        <tr key={h.id} className="border-b border-border last:border-0">

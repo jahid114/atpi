@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import type { Investor } from "@/types/investor";
 import {
-  QUARTER_TOTAL_DAYS,
-  quarterDaysElapsed,
+  YEAR_TOTAL_DAYS,
+  yearDaysElapsed,
   calculateInvestorShare,
   fmt,
 } from "@/lib/investor-utils";
@@ -57,12 +57,12 @@ export function LTIOverviewTab({ investors, profit }: Props) {
           <p className="text-xs text-muted-foreground mt-1">{fmt(pendingDeposits)} pending</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Quarter Progress</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{quarterDaysElapsed} / {QUARTER_TOTAL_DAYS}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Year Progress</p>
+          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{yearDaysElapsed} / {YEAR_TOTAL_DAYS}</p>
           <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-primary rounded-full transition-all"
-              style={{ width: `${Math.min(100, (quarterDaysElapsed / QUARTER_TOTAL_DAYS) * 100)}%` }}
+              style={{ width: `${Math.min(100, (yearDaysElapsed / YEAR_TOTAL_DAYS) * 100)}%` }}
             />
           </div>
         </div>
