@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
-import { Plus, Pencil, Trash2, Search, X } from "lucide-react";
+import { format } from "date-fns";
+import { Plus, Pencil, Trash2, Search, CalendarIcon, FilterX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,8 +34,8 @@ export function ClientTransactionsTab() {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [clientFilter, setClientFilter] = useState("all");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>();
+  const [dateTo, setDateTo] = useState<Date | undefined>();
 
   const fmt = (n: number) => "$" + n.toLocaleString();
 
@@ -41,14 +45,14 @@ export function ClientTransactionsTab() {
       const matchSearch = t.description.toLowerCase().includes(search.toLowerCase()) || (client?.name.toLowerCase().includes(search.toLowerCase()) ?? false);
       const matchType = typeFilter === "all" || t.type === typeFilter;
       const matchClient = clientFilter === "all" || t.clientId === Number(clientFilter);
-      const matchFrom = !dateFrom || t.date >= dateFrom;
-      const matchTo = !dateTo || t.date <= dateTo;
+      const matchFrom = !dateFrom || new Date(t.date) >= dateFrom;
+      const matchTo = !dateTo || new Date(t.date) <= dateTo;
       return matchSearch && matchType && matchClient && matchFrom && matchTo;
     }).sort((a, b) => b.date.localeCompare(a.date));
   }, [clientTransactions, clients, search, typeFilter, clientFilter, dateFrom, dateTo]);
 
-  const hasFilters = search || typeFilter !== "all" || clientFilter !== "all" || dateFrom || dateTo;
-  const clearFilters = () => { setSearch(""); setTypeFilter("all"); setClientFilter("all"); setDateFrom(""); setDateTo(""); };
+  const hasFilters = search || typeFilter !== "all" || clientFilter !== "all" || !!dateFrom || !!dateTo;
+  const clearFilters = () => { setSearch(""); setTypeFilter("all"); setClientFilter("all"); setDateFrom(undefined); setDateTo(undefined); };
 
   const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (t: ClientTransaction) => {
@@ -100,17 +104,31 @@ export function ClientTransactionsTab() {
           <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add Transaction</Button>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground">From</label>
-            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[160px]" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <label className="text-xs text-muted-foreground">To</label>
-            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[160px]" />
-          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("w-[150px] justify-start text-left text-sm font-normal", !dateFrom && "text-muted-foreground")}>
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateFrom ? format(dateFrom, "MMM d, yyyy") : "From"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className={cn("w-[150px] justify-start text-left text-sm font-normal", !dateTo && "text-muted-foreground")}>
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {dateTo ? format(dateTo, "MMM d, yyyy") : "To"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar mode="single" selected={dateTo} onSelect={setDateTo} initialFocus className={cn("p-3 pointer-events-auto")} />
+            </PopoverContent>
+          </Popover>
           {hasFilters && (
-            <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
-              <X className="h-4 w-4 mr-1" /> Clear
+            <Button variant="ghost" size="sm" onClick={clearFilters} className="h-10 px-3 text-xs text-muted-foreground hover:text-foreground">
+              <FilterX className="h-4 w-4 mr-1" /> Clear
             </Button>
           )}
         </div>
