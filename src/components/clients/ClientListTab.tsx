@@ -79,7 +79,7 @@ export function ClientListTab() {
             <SelectItem value="inactive">Inactive</SelectItem>
           </SelectContent>
         </Select>
-        <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add Client</Button>
+        <Button size="sm" onClick={openAdd} className="ml-auto"><Plus size={16} className="mr-1.5" /> Add Client</Button>
       </div>
 
       <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
