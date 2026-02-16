@@ -100,8 +100,14 @@ export function ClientTransactionsTab() {
           <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add Transaction</Button>
         </div>
         <div className="flex items-center gap-3">
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[160px]" placeholder="From" />
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[160px]" placeholder="To" />
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">From</label>
+            <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="w-[160px]" />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-muted-foreground">To</label>
+            <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="w-[160px]" />
+          </div>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
               <X className="h-4 w-4 mr-1" /> Clear
