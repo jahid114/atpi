@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Eye, CheckCircle, XCircle, Clock, Calendar, TrendingUp, Users, Image } from "lucide-react";
+import { Plus, CheckCircle, XCircle, Clock, Calendar, TrendingUp, Users, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,13 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { toast } from "sonner";
 import projectCommercial from "@/assets/project-commercial.jpg";
 import projectEquipment from "@/assets/project-equipment.jpg";
@@ -97,6 +104,7 @@ export default function ShortTermInvestment() {
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProject, setDetailProject] = useState<ShortTermProject | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const [addInvestorOpen, setAddInvestorOpen] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
   const [investorForm, setInvestorForm] = useState({ investorName: "", email: "", amount: "" });
@@ -162,6 +170,16 @@ export default function ShortTermInvestment() {
     toast.success(`Investor ${status}.`);
   };
 
+  const closeDetail = () => {
+    setDetailProject(null);
+    setExpanded(false);
+  };
+
+  // Get the live version of the selected project
+  const currentDetail = detailProject ? (projects.find((p) => p.id === detailProject.id) || detailProject) : null;
+  const detailFunded = currentDetail ? currentDetail.investors.filter((inv) => inv.status === "approved").reduce((s, inv) => s + inv.amount, 0) : 0;
+  const detailProgress = currentDetail ? Math.min(100, (detailFunded / currentDetail.targetAmount) * 100) : 0;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -203,28 +221,17 @@ export default function ShortTermInvestment() {
             <div
               key={project.id}
               className="bg-card border border-border rounded-xl overflow-hidden kpi-shadow hover:shadow-md transition-shadow group cursor-pointer"
-              onClick={() => setDetailProject(project)}
+              onClick={() => { setDetailProject(project); setExpanded(false); }}
             >
-              {/* Image */}
               <div className="relative h-40 overflow-hidden bg-muted">
-                <img
-                  src={project.image}
-                  alt={project.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <Badge variant={sc.variant} className="absolute top-3 right-3 text-[11px]">
-                  {sc.label}
-                </Badge>
+                <img src={project.image} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <Badge variant={sc.variant} className="absolute top-3 right-3 text-[11px]">{sc.label}</Badge>
               </div>
-
-              {/* Content */}
               <div className="p-4 space-y-3">
                 <div>
                   <h3 className="font-semibold text-foreground text-base">{project.name}</h3>
                   <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{project.description}</p>
                 </div>
-
-                {/* Progress */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-muted-foreground">Funded</span>
@@ -232,8 +239,6 @@ export default function ShortTermInvestment() {
                   </div>
                   <Progress value={progress} className="h-2" />
                 </div>
-
-                {/* Stats row */}
                 <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
                   <span className="flex items-center gap-1">
                     <TrendingUp className="h-3.5 w-3.5 text-profit" />
@@ -298,45 +303,72 @@ export default function ShortTermInvestment() {
         </DialogContent>
       </Dialog>
 
-      {/* Project Detail Dialog */}
-      <Dialog open={!!detailProject} onOpenChange={(open) => !open && setDetailProject(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-          {detailProject && (() => {
-            const current = projects.find((p) => p.id === detailProject.id) || detailProject;
-            const funded = current.investors.filter((inv) => inv.status === "approved").reduce((s, inv) => s + inv.amount, 0);
-            const progress = Math.min(100, (funded / current.targetAmount) * 100);
-            return (
-              <>
-                <DialogHeader>
-                  <DialogTitle>{current.name}</DialogTitle>
-                  <DialogDescription>{current.description}</DialogDescription>
-                </DialogHeader>
+      {/* Project Detail - Right Sidebar Sheet */}
+      <Sheet open={!!detailProject} onOpenChange={(open) => !open && closeDetail()}>
+        <SheetContent
+          side="right"
+          className={`p-0 overflow-y-auto transition-all duration-300 ${
+            expanded ? "sm:max-w-full w-full" : "sm:max-w-xl w-full"
+          }`}
+        >
+          {currentDetail && (
+            <div className="flex flex-col h-full">
+              {/* Header image */}
+              <div className="relative h-48 overflow-hidden bg-muted shrink-0">
+                <img src={currentDetail.image} alt={currentDetail.name} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="absolute top-3 left-3 h-8 w-8 bg-background/70 backdrop-blur-sm hover:bg-background/90"
+                  onClick={() => setExpanded(!expanded)}
+                >
+                  {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </Button>
+              </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-3">
+              <div className="p-6 space-y-5 flex-1">
+                <SheetHeader className="space-y-1">
+                  <SheetTitle className="text-xl">{currentDetail.name}</SheetTitle>
+                  <SheetDescription>{currentDetail.description}</SheetDescription>
+                </SheetHeader>
+
+                {/* KPI cards */}
+                <div className={`grid gap-3 ${expanded ? "grid-cols-4" : "grid-cols-2"}`}>
                   <div className="bg-muted/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground">Target</p>
-                    <p className="font-bold text-foreground">{fmt(current.targetAmount)}</p>
+                    <p className="font-bold text-foreground">{fmt(currentDetail.targetAmount)}</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground">Funded</p>
-                    <p className="font-bold text-profit">{fmt(funded)}</p>
+                    <p className="font-bold text-profit">{fmt(detailFunded)}</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground">Progress</p>
-                    <p className="font-bold text-foreground">{progress.toFixed(1)}%</p>
+                    <p className="font-bold text-foreground">{detailProgress.toFixed(1)}%</p>
                   </div>
                   <div className="bg-muted/50 rounded-lg p-3 text-center">
                     <p className="text-xs text-muted-foreground">Return</p>
-                    <p className="font-bold text-foreground">{current.expectedReturn}%</p>
+                    <p className="font-bold text-foreground">{currentDetail.expectedReturn}%</p>
                   </div>
                 </div>
 
                 {/* Progress bar */}
                 <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${detailProgress}%` }} />
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                {/* Duration info */}
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Calendar className="h-3.5 w-3.5" />
+                  <span>{currentDetail.startDate} → {currentDetail.endDate}</span>
+                  <Badge variant={statusConfig[currentDetail.status].variant} className="text-[11px] ml-auto">
+                    {statusConfig[currentDetail.status].label}
+                  </Badge>
+                </div>
+
+                {/* Investors section */}
+                <div className="flex items-center justify-between">
                   <h3 className="text-sm font-semibold text-foreground">Investors</h3>
                   <Button size="sm" onClick={() => setAddInvestorOpen(true)}>
                     <Plus className="h-3.5 w-3.5 mr-1" /> Add Investor
@@ -355,7 +387,7 @@ export default function ShortTermInvestment() {
                       </tr>
                     </thead>
                     <tbody>
-                      {current.investors.map((inv) => {
+                      {currentDetail.investors.map((inv) => {
                         const es = entryStatusConfig[inv.status];
                         const StatusIcon = es.icon;
                         return (
@@ -371,10 +403,10 @@ export default function ShortTermInvestment() {
                             <td className="px-3 py-2 text-center space-x-1">
                               {inv.status === "pending" && (
                                 <>
-                                  <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleInvestorStatus(current.id, inv.id, "approved")}>
+                                  <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleInvestorStatus(currentDetail.id, inv.id, "approved")}>
                                     <CheckCircle className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleInvestorStatus(current.id, inv.id, "rejected")}>
+                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleInvestorStatus(currentDetail.id, inv.id, "rejected")}>
                                     <XCircle className="h-4 w-4" />
                                   </Button>
                                 </>
@@ -383,17 +415,17 @@ export default function ShortTermInvestment() {
                           </tr>
                         );
                       })}
-                      {current.investors.length === 0 && (
+                      {currentDetail.investors.length === 0 && (
                         <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No investors yet.</td></tr>
                       )}
                     </tbody>
                   </table>
                 </div>
-              </>
-            );
-          })()}
-        </DialogContent>
-      </Dialog>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
 
       {/* Add Investor Dialog */}
       <Dialog open={addInvestorOpen} onOpenChange={setAddInvestorOpen}>
