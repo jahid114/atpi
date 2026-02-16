@@ -103,7 +103,7 @@ export default function Investors() {
     <div className="space-y-6 xl:space-y-8">
       <div>
         <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
-        <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Q1 2026</p>
+        <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Year 2026</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">

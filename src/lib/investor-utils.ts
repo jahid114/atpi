@@ -1,13 +1,13 @@
 import type { Investor } from "@/types/investor";
 
-export const QUARTER_START = new Date("2026-01-01");
+export const YEAR_START = new Date("2026-01-01");
 export const TODAY = new Date("2026-02-14");
-export const QUARTER_TOTAL_DAYS = 90;
-export const quarterDaysElapsed = Math.ceil((TODAY.getTime() - QUARTER_START.getTime()) / (1000 * 60 * 60 * 24));
+export const YEAR_TOTAL_DAYS = 365;
+export const yearDaysElapsed = Math.ceil((TODAY.getTime() - YEAR_START.getTime()) / (1000 * 60 * 60 * 24));
 
 export const calcDaysActive = (dateStr: string): number => {
   const d = new Date(dateStr);
-  const start = d > QUARTER_START ? d : QUARTER_START;
+  const start = d > YEAR_START ? d : YEAR_START;
   return Math.max(0, Math.ceil((TODAY.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
 };
 
@@ -31,9 +31,9 @@ export const calcTimeWeightedBalance = (investor: Investor): number => {
 
   for (let i = 0; i < events.length; i++) {
     const eventDate = events[i].date;
-    const effectiveStart = eventDate > QUARTER_START ? eventDate : QUARTER_START;
+    const effectiveStart = eventDate > YEAR_START ? eventDate : YEAR_START;
     const nextDate = i < events.length - 1
-      ? (events[i + 1].date > QUARTER_START ? events[i + 1].date : QUARTER_START)
+      ? (events[i + 1].date > YEAR_START ? events[i + 1].date : YEAR_START)
       : TODAY;
 
     balance += events[i].delta;
@@ -42,7 +42,7 @@ export const calcTimeWeightedBalance = (investor: Investor): number => {
     // Only count days from this event to the next event (or today)
     if (i < events.length - 1) {
       const segmentStart = effectiveStart;
-      const segmentEnd = events[i + 1].date > QUARTER_START ? events[i + 1].date : QUARTER_START;
+      const segmentEnd = events[i + 1].date > YEAR_START ? events[i + 1].date : YEAR_START;
       const segmentDays = Math.max(0, Math.ceil((segmentEnd.getTime() - segmentStart.getTime()) / (1000 * 60 * 60 * 24)));
       weight += balance * segmentDays;
     } else {
@@ -90,8 +90,8 @@ export const calculateInvestorShare = (
 
 export const getPeriodBadge = (dateStr: string): "Early-Period" | "Mid-Period" => {
   const daysActive = calcDaysActive(dateStr);
-  const quarterElapsed = Math.ceil((TODAY.getTime() - QUARTER_START.getTime()) / (1000 * 60 * 60 * 24));
-  return daysActive >= quarterElapsed * 0.75 ? "Early-Period" : "Mid-Period";
+  const elapsed = Math.ceil((TODAY.getTime() - YEAR_START.getTime()) / (1000 * 60 * 60 * 24));
+  return daysActive >= elapsed * 0.75 ? "Early-Period" : "Mid-Period";
 };
 
 export const fmt = (n: number) => "$" + n.toLocaleString(undefined, { maximumFractionDigits: 0 });
