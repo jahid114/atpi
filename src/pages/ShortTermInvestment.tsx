@@ -1,69 +1,27 @@
 import { useState } from "react";
-import { Plus, CheckCircle, XCircle, Clock, Calendar, TrendingUp, Users, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-  DialogClose,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
 } from "@/components/ui/dialog";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
+  Sheet, SheetContent,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import projectCommercial from "@/assets/project-commercial.jpg";
 import projectEquipment from "@/assets/project-equipment.jpg";
-
-type ProjectStatus = "active" | "completed" | "cancelled";
-type InvestorEntryStatus = "pending" | "approved" | "rejected";
-
-interface InvestorEntry {
-  id: number;
-  investorName: string;
-  email: string;
-  amount: number;
-  date: string;
-  status: InvestorEntryStatus;
-}
-
-interface ShortTermProject {
-  id: number;
-  name: string;
-  description: string;
-  targetAmount: number;
-  startDate: string;
-  endDate: string;
-  expectedReturn: number;
-  status: ProjectStatus;
-  image: string;
-  investors: InvestorEntry[];
-}
-
-const fmt = (n: number) => "$" + n.toLocaleString("en-US");
-
-const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-  active: { label: "Active", variant: "default" },
-  completed: { label: "Completed", variant: "secondary" },
-  cancelled: { label: "Cancelled", variant: "destructive" },
-};
-
-const entryStatusConfig: Record<InvestorEntryStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" }> = {
-  pending: { label: "Pending", icon: Clock, variant: "secondary" },
-  approved: { label: "Approved", icon: CheckCircle, variant: "default" },
-  rejected: { label: "Rejected", icon: XCircle, variant: "destructive" },
-};
+import type { ShortTermProject, STInvestorEntry, InvestorEntryStatus } from "@/types/short-term";
+import { fmt, statusConfig } from "@/types/short-term";
+import { STIOverviewTab } from "@/components/short-term/STIOverviewTab";
+import { STIInvestorsTab } from "@/components/short-term/STIInvestorsTab";
+import { STIRequestsTab } from "@/components/short-term/STIRequestsTab";
+import { STITransactionsTab } from "@/components/short-term/STITransactionsTab";
 
 const defaultImages = [projectCommercial, projectEquipment];
 
@@ -103,11 +61,11 @@ const initialProjects: ShortTermProject[] = [
 export default function ShortTermInvestment() {
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
-  const [detailProject, setDetailProject] = useState<ShortTermProject | null>(null);
+  const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const [addInvestorOpen, setAddInvestorOpen] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
-  const [investorForm, setInvestorForm] = useState({ investorName: "", email: "", amount: "" });
+
+  const detailProject = detailProjectId ? projects.find((p) => p.id === detailProjectId) || null : null;
 
   const handleCreateProject = () => {
     if (!projectForm.name || !projectForm.targetAmount || !projectForm.startDate || !projectForm.endDate) {
@@ -132,29 +90,22 @@ export default function ShortTermInvestment() {
     toast.success(`Project "${newProject.name}" created.`);
   };
 
-  const handleAddInvestor = () => {
-    if (!detailProject || !investorForm.investorName || !investorForm.amount) {
-      toast.error("Please fill all required fields.");
-      return;
-    }
-    const newEntry: InvestorEntry = {
+  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number }) => {
+    const newEntry: STInvestorEntry = {
       id: Date.now(),
-      investorName: investorForm.investorName,
-      email: investorForm.email,
-      amount: Number(investorForm.amount),
+      investorName: data.investorName,
+      email: data.email,
+      amount: data.amount,
       date: new Date().toISOString().split("T")[0],
       status: "pending",
     };
     setProjects((prev) =>
-      prev.map((p) => (p.id === detailProject.id ? { ...p, investors: [...p.investors, newEntry] } : p))
+      prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
     );
-    setDetailProject((prev) => prev ? { ...prev, investors: [...prev.investors, newEntry] } : null);
-    setInvestorForm({ investorName: "", email: "", amount: "" });
-    setAddInvestorOpen(false);
     toast.success("Investor added for review.");
   };
 
-  const handleInvestorStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
+  const handleUpdateStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
     setProjects((prev) =>
       prev.map((p) =>
         p.id === projectId
@@ -162,23 +113,13 @@ export default function ShortTermInvestment() {
           : p
       )
     );
-    setDetailProject((prev) =>
-      prev && prev.id === projectId
-        ? { ...prev, investors: prev.investors.map((inv) => (inv.id === entryId ? { ...inv, status } : inv)) }
-        : prev
-    );
     toast.success(`Investor ${status}.`);
   };
 
   const closeDetail = () => {
-    setDetailProject(null);
+    setDetailProjectId(null);
     setExpanded(false);
   };
-
-  // Get the live version of the selected project
-  const currentDetail = detailProject ? (projects.find((p) => p.id === detailProject.id) || detailProject) : null;
-  const detailFunded = currentDetail ? currentDetail.investors.filter((inv) => inv.status === "approved").reduce((s, inv) => s + inv.amount, 0) : 0;
-  const detailProgress = currentDetail ? Math.min(100, (detailFunded / currentDetail.targetAmount) * 100) : 0;
 
   return (
     <div className="space-y-6">
@@ -221,7 +162,7 @@ export default function ShortTermInvestment() {
             <div
               key={project.id}
               className="bg-card border border-border rounded-xl overflow-hidden kpi-shadow hover:shadow-md transition-shadow group cursor-pointer"
-              onClick={() => { setDetailProject(project); setExpanded(false); }}
+              onClick={() => { setDetailProjectId(project.id); setExpanded(false); }}
             >
               <div className="relative h-40 overflow-hidden bg-muted">
                 <img src={project.image} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -303,7 +244,7 @@ export default function ShortTermInvestment() {
         </DialogContent>
       </Dialog>
 
-      {/* Project Detail - Right Sidebar Sheet */}
+      {/* Project Detail - Right Sidebar with Tabs */}
       <Sheet open={!!detailProject} onOpenChange={(open) => !open && closeDetail()}>
         <SheetContent
           side="right"
@@ -311,11 +252,11 @@ export default function ShortTermInvestment() {
             expanded ? "sm:max-w-full w-full" : "sm:max-w-xl w-full"
           }`}
         >
-          {currentDetail && (
+          {detailProject && (
             <div className="flex flex-col h-full">
               {/* Header image */}
-              <div className="relative h-48 overflow-hidden bg-muted shrink-0">
-                <img src={currentDetail.image} alt={currentDetail.name} className="w-full h-full object-cover" />
+              <div className="relative h-40 overflow-hidden bg-muted shrink-0">
+                <img src={detailProject.image} alt={detailProject.name} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                 <Button
                   variant="secondary"
@@ -325,135 +266,47 @@ export default function ShortTermInvestment() {
                 >
                   {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </Button>
-              </div>
-
-              <div className="p-6 space-y-5 flex-1">
-                <SheetHeader className="space-y-1">
-                  <SheetTitle className="text-xl">{currentDetail.name}</SheetTitle>
-                  <SheetDescription>{currentDetail.description}</SheetDescription>
-                </SheetHeader>
-
-                {/* KPI cards */}
-                <div className={`grid gap-3 ${expanded ? "grid-cols-4" : "grid-cols-2"}`}>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Target</p>
-                    <p className="font-bold text-foreground">{fmt(currentDetail.targetAmount)}</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Funded</p>
-                    <p className="font-bold text-profit">{fmt(detailFunded)}</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Progress</p>
-                    <p className="font-bold text-foreground">{detailProgress.toFixed(1)}%</p>
-                  </div>
-                  <div className="bg-muted/50 rounded-lg p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Return</p>
-                    <p className="font-bold text-foreground">{currentDetail.expectedReturn}%</p>
-                  </div>
-                </div>
-
-                {/* Progress bar */}
-                <div className="w-full bg-muted rounded-full h-2">
-                  <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${detailProgress}%` }} />
-                </div>
-
-                {/* Duration info */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>{currentDetail.startDate} → {currentDetail.endDate}</span>
-                  <Badge variant={statusConfig[currentDetail.status].variant} className="text-[11px] ml-auto">
-                    {statusConfig[currentDetail.status].label}
-                  </Badge>
-                </div>
-
-                {/* Investors section */}
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-foreground">Investors</h3>
-                  <Button size="sm" onClick={() => setAddInvestorOpen(true)}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Add Investor
-                  </Button>
-                </div>
-
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted/50">
-                        <th className="text-left px-3 py-2 font-medium text-muted-foreground">Investor</th>
-                        <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
-                        <th className="text-left px-3 py-2 font-medium text-muted-foreground">Date</th>
-                        <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
-                        <th className="text-center px-3 py-2 font-medium text-muted-foreground">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {currentDetail.investors.map((inv) => {
-                        const es = entryStatusConfig[inv.status];
-                        const StatusIcon = es.icon;
-                        return (
-                          <tr key={inv.id} className="border-b border-border last:border-0">
-                            <td className="px-3 py-2 font-medium text-foreground">{inv.investorName}</td>
-                            <td className="px-3 py-2 text-right text-foreground">{fmt(inv.amount)}</td>
-                            <td className="px-3 py-2 text-muted-foreground">{inv.date}</td>
-                            <td className="px-3 py-2 text-center">
-                              <Badge variant={es.variant} className="text-[11px] gap-1">
-                                <StatusIcon className="h-3 w-3" /> {es.label}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-2 text-center space-x-1">
-                              {inv.status === "pending" && (
-                                <>
-                                  <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleInvestorStatus(currentDetail.id, inv.id, "approved")}>
-                                    <CheckCircle className="h-4 w-4" />
-                                  </Button>
-                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleInvestorStatus(currentDetail.id, inv.id, "rejected")}>
-                                    <XCircle className="h-4 w-4" />
-                                  </Button>
-                                </>
-                              )}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                      {currentDetail.investors.length === 0 && (
-                        <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No investors yet.</td></tr>
-                      )}
-                    </tbody>
-                  </table>
+                <div className="absolute bottom-3 left-4 right-12">
+                  <h2 className="text-lg font-bold text-foreground">{detailProject.name}</h2>
+                  <p className="text-xs text-muted-foreground line-clamp-1">{detailProject.description}</p>
                 </div>
               </div>
+
+              {/* Tabs */}
+              <Tabs defaultValue="overview" className="flex-1 flex flex-col">
+                <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-4 h-11 shrink-0">
+                  <TabsTrigger value="overview" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Overview</TabsTrigger>
+                  <TabsTrigger value="investors" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Investors</TabsTrigger>
+                  <TabsTrigger value="requests" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Requests</TabsTrigger>
+                  <TabsTrigger value="transactions" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Transactions</TabsTrigger>
+                </TabsList>
+
+                <div className="flex-1 overflow-y-auto p-4">
+                  <TabsContent value="overview" className="mt-0">
+                    <STIOverviewTab project={detailProject} />
+                  </TabsContent>
+                  <TabsContent value="investors" className="mt-0">
+                    <STIInvestorsTab project={detailProject} />
+                  </TabsContent>
+                  <TabsContent value="requests" className="mt-0">
+                    <STIRequestsTab
+                      project={detailProject}
+                      onAddInvestor={(data) => handleAddInvestor(detailProject.id, data)}
+                      onUpdateStatus={(entryId, status) => handleUpdateStatus(detailProject.id, entryId, status)}
+                    />
+                  </TabsContent>
+                  <TabsContent value="transactions" className="mt-0">
+                    <STITransactionsTab
+                      project={detailProject}
+                      onUpdateStatus={(entryId, status) => handleUpdateStatus(detailProject.id, entryId, status)}
+                    />
+                  </TabsContent>
+                </div>
+              </Tabs>
             </div>
           )}
         </SheetContent>
       </Sheet>
-
-      {/* Add Investor Dialog */}
-      <Dialog open={addInvestorOpen} onOpenChange={setAddInvestorOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Add Investor</DialogTitle>
-            <DialogDescription>Add an investor to this project.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-1.5">
-              <Label>Investor Name *</Label>
-              <Input placeholder="e.g. John Doe" value={investorForm.investorName} onChange={(e) => setInvestorForm((f) => ({ ...f, investorName: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Email</Label>
-              <Input type="email" placeholder="john@example.com" value={investorForm.email} onChange={(e) => setInvestorForm((f) => ({ ...f, email: e.target.value }))} />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Amount *</Label>
-              <Input type="number" placeholder="50000" value={investorForm.amount} onChange={(e) => setInvestorForm((f) => ({ ...f, amount: e.target.value }))} />
-            </div>
-          </div>
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-            <Button onClick={handleAddInvestor}>Submit</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
