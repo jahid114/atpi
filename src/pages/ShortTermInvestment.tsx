@@ -1,10 +1,11 @@
-import { useState, useMemo } from "react";
-import { Plus, Eye, CheckCircle, XCircle, Clock, Calendar } from "lucide-react";
+import { useState } from "react";
+import { Plus, Eye, CheckCircle, XCircle, Clock, Calendar, TrendingUp, Users, Image } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Progress } from "@/components/ui/progress";
 import {
   Dialog,
   DialogContent,
@@ -15,17 +16,19 @@ import {
   DialogClose,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import projectCommercial from "@/assets/project-commercial.jpg";
+import projectEquipment from "@/assets/project-equipment.jpg";
 
 type ProjectStatus = "active" | "completed" | "cancelled";
-type ContributionStatus = "pending" | "approved" | "rejected";
+type InvestorEntryStatus = "pending" | "approved" | "rejected";
 
-interface Contribution {
+interface InvestorEntry {
   id: number;
   investorName: string;
   email: string;
   amount: number;
   date: string;
-  status: ContributionStatus;
+  status: InvestorEntryStatus;
 }
 
 interface ShortTermProject {
@@ -35,9 +38,10 @@ interface ShortTermProject {
   targetAmount: number;
   startDate: string;
   endDate: string;
-  expectedReturn: number; // percentage
+  expectedReturn: number;
   status: ProjectStatus;
-  contributions: Contribution[];
+  image: string;
+  investors: InvestorEntry[];
 }
 
 const fmt = (n: number) => "$" + n.toLocaleString("en-US");
@@ -48,11 +52,13 @@ const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | 
   cancelled: { label: "Cancelled", variant: "destructive" },
 };
 
-const contribStatusConfig: Record<ContributionStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" }> = {
+const entryStatusConfig: Record<InvestorEntryStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" }> = {
   pending: { label: "Pending", icon: Clock, variant: "secondary" },
   approved: { label: "Approved", icon: CheckCircle, variant: "default" },
   rejected: { label: "Rejected", icon: XCircle, variant: "destructive" },
 };
+
+const defaultImages = [projectCommercial, projectEquipment];
 
 const initialProjects: ShortTermProject[] = [
   {
@@ -64,7 +70,8 @@ const initialProjects: ShortTermProject[] = [
     endDate: "2026-06-15",
     expectedReturn: 18,
     status: "active",
-    contributions: [
+    image: projectCommercial,
+    investors: [
       { id: 101, investorName: "Alice Johnson", email: "alice@example.com", amount: 100000, date: "2026-01-20", status: "approved" },
       { id: 102, investorName: "Bob Smith", email: "bob@example.com", amount: 75000, date: "2026-01-22", status: "approved" },
       { id: 103, investorName: "David Lee", email: "david@example.com", amount: 50000, date: "2026-02-01", status: "pending" },
@@ -79,7 +86,8 @@ const initialProjects: ShortTermProject[] = [
     endDate: "2026-08-01",
     expectedReturn: 12,
     status: "active",
-    contributions: [
+    image: projectEquipment,
+    investors: [
       { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
     ],
   },
@@ -89,9 +97,9 @@ export default function ShortTermInvestment() {
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProject, setDetailProject] = useState<ShortTermProject | null>(null);
-  const [contributeOpen, setContributeOpen] = useState(false);
+  const [addInvestorOpen, setAddInvestorOpen] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
-  const [contribForm, setContribForm] = useState({ investorName: "", email: "", amount: "" });
+  const [investorForm, setInvestorForm] = useState({ investorName: "", email: "", amount: "" });
 
   const handleCreateProject = () => {
     if (!projectForm.name || !projectForm.targetAmount || !projectForm.startDate || !projectForm.endDate) {
@@ -107,7 +115,8 @@ export default function ShortTermInvestment() {
       endDate: projectForm.endDate,
       expectedReturn: Number(projectForm.expectedReturn) || 0,
       status: "active",
-      contributions: [],
+      image: defaultImages[projects.length % defaultImages.length],
+      investors: [],
     };
     setProjects((prev) => [...prev, newProject]);
     setProjectForm({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
@@ -115,42 +124,42 @@ export default function ShortTermInvestment() {
     toast.success(`Project "${newProject.name}" created.`);
   };
 
-  const handleContribute = () => {
-    if (!detailProject || !contribForm.investorName || !contribForm.amount) {
+  const handleAddInvestor = () => {
+    if (!detailProject || !investorForm.investorName || !investorForm.amount) {
       toast.error("Please fill all required fields.");
       return;
     }
-    const newContrib: Contribution = {
+    const newEntry: InvestorEntry = {
       id: Date.now(),
-      investorName: contribForm.investorName,
-      email: contribForm.email,
-      amount: Number(contribForm.amount),
+      investorName: investorForm.investorName,
+      email: investorForm.email,
+      amount: Number(investorForm.amount),
       date: new Date().toISOString().split("T")[0],
       status: "pending",
     };
     setProjects((prev) =>
-      prev.map((p) => (p.id === detailProject.id ? { ...p, contributions: [...p.contributions, newContrib] } : p))
+      prev.map((p) => (p.id === detailProject.id ? { ...p, investors: [...p.investors, newEntry] } : p))
     );
-    setDetailProject((prev) => prev ? { ...prev, contributions: [...prev.contributions, newContrib] } : null);
-    setContribForm({ investorName: "", email: "", amount: "" });
-    setContributeOpen(false);
-    toast.success("Contribution submitted for review.");
+    setDetailProject((prev) => prev ? { ...prev, investors: [...prev.investors, newEntry] } : null);
+    setInvestorForm({ investorName: "", email: "", amount: "" });
+    setAddInvestorOpen(false);
+    toast.success("Investor added for review.");
   };
 
-  const handleContribStatus = (projectId: number, contribId: number, status: ContributionStatus) => {
+  const handleInvestorStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
     setProjects((prev) =>
       prev.map((p) =>
         p.id === projectId
-          ? { ...p, contributions: p.contributions.map((c) => (c.id === contribId ? { ...c, status } : c)) }
+          ? { ...p, investors: p.investors.map((inv) => (inv.id === entryId ? { ...inv, status } : inv)) }
           : p
       )
     );
     setDetailProject((prev) =>
       prev && prev.id === projectId
-        ? { ...prev, contributions: prev.contributions.map((c) => (c.id === contribId ? { ...c, status } : c)) }
+        ? { ...prev, investors: prev.investors.map((inv) => (inv.id === entryId ? { ...inv, status } : inv)) }
         : prev
     );
-    toast.success(`Contribution ${status}.`);
+    toast.success(`Investor ${status}.`);
   };
 
   return (
@@ -167,7 +176,7 @@ export default function ShortTermInvestment() {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 gap-4 xl:gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xl:gap-6">
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Projects</p>
           <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{projects.length}</p>
@@ -179,54 +188,70 @@ export default function ShortTermInvestment() {
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Funded</p>
           <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">
-            {fmt(projects.reduce((s, p) => s + p.contributions.filter((c) => c.status === "approved").reduce((a, c) => a + c.amount, 0), 0))}
+            {fmt(projects.reduce((s, p) => s + p.investors.filter((inv) => inv.status === "approved").reduce((a, inv) => a + inv.amount, 0), 0))}
           </p>
         </div>
       </div>
 
-      {/* Projects Table */}
-      <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
-        <table className="w-full text-sm min-w-[700px]">
-          <thead>
-            <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Project Name</th>
-              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Target</th>
-              <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Funded</th>
-              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Return %</th>
-              <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Duration</th>
-              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Status</th>
-              <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((project) => {
-              const funded = project.contributions.filter((c) => c.status === "approved").reduce((s, c) => s + c.amount, 0);
-              const sc = statusConfig[project.status];
-              return (
-                <tr key={project.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                  <td className="px-4 xl:px-6 py-3 xl:py-4">
-                    <p className="font-medium text-foreground">{project.name}</p>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs xl:max-w-md">{project.description}</p>
-                  </td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-right text-foreground">{fmt(project.targetAmount)}</td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-semibold text-profit">{fmt(funded)}</td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center text-foreground">{project.expectedReturn}%</td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground text-xs">
-                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {project.startDate} → {project.endDate}</span>
-                  </td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
-                    <Badge variant={sc.variant} className="text-[11px]">{sc.label}</Badge>
-                  </td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
-                    <Button variant="ghost" size="sm" onClick={() => setDetailProject(project)}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      {/* Project Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        {projects.map((project) => {
+          const funded = project.investors.filter((inv) => inv.status === "approved").reduce((s, inv) => s + inv.amount, 0);
+          const progress = Math.min(100, (funded / project.targetAmount) * 100);
+          const sc = statusConfig[project.status];
+          return (
+            <div
+              key={project.id}
+              className="bg-card border border-border rounded-xl overflow-hidden kpi-shadow hover:shadow-md transition-shadow group cursor-pointer"
+              onClick={() => setDetailProject(project)}
+            >
+              {/* Image */}
+              <div className="relative h-40 overflow-hidden bg-muted">
+                <img
+                  src={project.image}
+                  alt={project.name}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+                <Badge variant={sc.variant} className="absolute top-3 right-3 text-[11px]">
+                  {sc.label}
+                </Badge>
+              </div>
+
+              {/* Content */}
+              <div className="p-4 space-y-3">
+                <div>
+                  <h3 className="font-semibold text-foreground text-base">{project.name}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{project.description}</p>
+                </div>
+
+                {/* Progress */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Funded</span>
+                    <span className="font-medium text-foreground">{fmt(funded)} / {fmt(project.targetAmount)}</span>
+                  </div>
+                  <Progress value={progress} className="h-2" />
+                </div>
+
+                {/* Stats row */}
+                <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                  <span className="flex items-center gap-1">
+                    <TrendingUp className="h-3.5 w-3.5 text-profit" />
+                    <span className="font-medium text-foreground">{project.expectedReturn}%</span> return
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Users className="h-3.5 w-3.5" />
+                    {project.investors.length} investor{project.investors.length !== 1 ? "s" : ""}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    {project.endDate}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Create Project Dialog */}
@@ -278,7 +303,7 @@ export default function ShortTermInvestment() {
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           {detailProject && (() => {
             const current = projects.find((p) => p.id === detailProject.id) || detailProject;
-            const funded = current.contributions.filter((c) => c.status === "approved").reduce((s, c) => s + c.amount, 0);
+            const funded = current.investors.filter((inv) => inv.status === "approved").reduce((s, inv) => s + inv.amount, 0);
             const progress = Math.min(100, (funded / current.targetAmount) * 100);
             return (
               <>
@@ -312,9 +337,9 @@ export default function ShortTermInvestment() {
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <h3 className="text-sm font-semibold text-foreground">Contributions</h3>
-                  <Button size="sm" onClick={() => setContributeOpen(true)}>
-                    <Plus className="h-3.5 w-3.5 mr-1" /> Add Contribution
+                  <h3 className="text-sm font-semibold text-foreground">Investors</h3>
+                  <Button size="sm" onClick={() => setAddInvestorOpen(true)}>
+                    <Plus className="h-3.5 w-3.5 mr-1" /> Add Investor
                   </Button>
                 </div>
 
@@ -330,26 +355,26 @@ export default function ShortTermInvestment() {
                       </tr>
                     </thead>
                     <tbody>
-                      {current.contributions.map((c) => {
-                        const cs = contribStatusConfig[c.status];
-                        const StatusIcon = cs.icon;
+                      {current.investors.map((inv) => {
+                        const es = entryStatusConfig[inv.status];
+                        const StatusIcon = es.icon;
                         return (
-                          <tr key={c.id} className="border-b border-border last:border-0">
-                            <td className="px-3 py-2 font-medium text-foreground">{c.investorName}</td>
-                            <td className="px-3 py-2 text-right text-foreground">{fmt(c.amount)}</td>
-                            <td className="px-3 py-2 text-muted-foreground">{c.date}</td>
+                          <tr key={inv.id} className="border-b border-border last:border-0">
+                            <td className="px-3 py-2 font-medium text-foreground">{inv.investorName}</td>
+                            <td className="px-3 py-2 text-right text-foreground">{fmt(inv.amount)}</td>
+                            <td className="px-3 py-2 text-muted-foreground">{inv.date}</td>
                             <td className="px-3 py-2 text-center">
-                              <Badge variant={cs.variant} className="text-[11px] gap-1">
-                                <StatusIcon className="h-3 w-3" /> {cs.label}
+                              <Badge variant={es.variant} className="text-[11px] gap-1">
+                                <StatusIcon className="h-3 w-3" /> {es.label}
                               </Badge>
                             </td>
                             <td className="px-3 py-2 text-center space-x-1">
-                              {c.status === "pending" && (
+                              {inv.status === "pending" && (
                                 <>
-                                  <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleContribStatus(current.id, c.id, "approved")}>
+                                  <Button variant="ghost" size="sm" className="text-profit hover:text-profit" onClick={() => handleInvestorStatus(current.id, inv.id, "approved")}>
                                     <CheckCircle className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleContribStatus(current.id, c.id, "rejected")}>
+                                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive" onClick={() => handleInvestorStatus(current.id, inv.id, "rejected")}>
                                     <XCircle className="h-4 w-4" />
                                   </Button>
                                 </>
@@ -358,8 +383,8 @@ export default function ShortTermInvestment() {
                           </tr>
                         );
                       })}
-                      {current.contributions.length === 0 && (
-                        <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No contributions yet.</td></tr>
+                      {current.investors.length === 0 && (
+                        <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No investors yet.</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -370,30 +395,30 @@ export default function ShortTermInvestment() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Contribution Dialog */}
-      <Dialog open={contributeOpen} onOpenChange={setContributeOpen}>
+      {/* Add Investor Dialog */}
+      <Dialog open={addInvestorOpen} onOpenChange={setAddInvestorOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Add Contribution</DialogTitle>
-            <DialogDescription>Submit an investment contribution to this project.</DialogDescription>
+            <DialogTitle>Add Investor</DialogTitle>
+            <DialogDescription>Add an investor to this project.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Investor Name *</Label>
-              <Input placeholder="e.g. John Doe" value={contribForm.investorName} onChange={(e) => setContribForm((f) => ({ ...f, investorName: e.target.value }))} />
+              <Input placeholder="e.g. John Doe" value={investorForm.investorName} onChange={(e) => setInvestorForm((f) => ({ ...f, investorName: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
               <Label>Email</Label>
-              <Input type="email" placeholder="john@example.com" value={contribForm.email} onChange={(e) => setContribForm((f) => ({ ...f, email: e.target.value }))} />
+              <Input type="email" placeholder="john@example.com" value={investorForm.email} onChange={(e) => setInvestorForm((f) => ({ ...f, email: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
               <Label>Amount *</Label>
-              <Input type="number" placeholder="50000" value={contribForm.amount} onChange={(e) => setContribForm((f) => ({ ...f, amount: e.target.value }))} />
+              <Input type="number" placeholder="50000" value={investorForm.amount} onChange={(e) => setInvestorForm((f) => ({ ...f, amount: e.target.value }))} />
             </div>
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
-            <Button onClick={handleContribute}>Submit</Button>
+            <Button onClick={handleAddInvestor}>Submit</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
