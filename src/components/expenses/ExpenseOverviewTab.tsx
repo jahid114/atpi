@@ -1,6 +1,9 @@
 import { useMemo } from "react";
 import { DollarSign, TrendingDown, Flame, PieChart } from "lucide-react";
 import { useFinancial } from "@/contexts/FinancialContext";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from "recharts";
 
 const fmt = (n: number) => "$" + n.toLocaleString();
 
@@ -111,14 +114,19 @@ export function ExpenseOverviewTab({ categories }: Props) {
       {byMonth.length > 0 && (
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <p className="text-sm font-semibold text-foreground mb-3">Monthly Breakdown</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {byMonth.map(([month, amount]) => (
-              <div key={month} className="bg-muted/50 rounded-lg p-3 text-center">
-                <p className="text-xs text-muted-foreground">{month}</p>
-                <p className="text-sm font-bold text-foreground mt-0.5">{fmt(amount)}</p>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={byMonth.map(([month, amount]) => ({ month, amount }))}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tickFormatter={(v) => `$${v / 1000}k`} tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+              <Tooltip
+                formatter={(value: number) => fmt(value)}
+                contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))", fontSize: 13, background: "hsl(var(--card))" }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+              />
+              <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name="Expenses" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </div>
