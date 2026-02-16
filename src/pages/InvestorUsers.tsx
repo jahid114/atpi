@@ -24,17 +24,18 @@ interface InvestorUser {
   joinedDate: string;
   status: "active" | "inactive";
   investmentType: InvestmentType;
-  totalInvested: number;
+  longTermInvested: number;
+  shortTermInvested: number;
   totalProfit: number;
   activePlans: number;
 }
 
 const initialInvestors: InvestorUser[] = [
-  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", joinedDate: "2025-10-01", status: "active", investmentType: "long-term", totalInvested: 50000, totalProfit: 4200, activePlans: 2 },
-  { id: 4, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", joinedDate: "2025-11-15", status: "active", investmentType: "short-term", totalInvested: 25000, totalProfit: 1800, activePlans: 1 },
-  { id: 5, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", joinedDate: "2025-12-01", status: "active", investmentType: "both", totalInvested: 120000, totalProfit: 9500, activePlans: 4 },
-  { id: 6, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", joinedDate: "2026-01-10", status: "active", investmentType: "long-term", totalInvested: 75000, totalProfit: 5600, activePlans: 3 },
-  { id: 7, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", joinedDate: "2026-01-20", status: "inactive", investmentType: "short-term", totalInvested: 10000, totalProfit: 600, activePlans: 0 },
+  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", joinedDate: "2025-10-01", status: "active", investmentType: "long-term", longTermInvested: 50000, shortTermInvested: 0, totalProfit: 4200, activePlans: 2 },
+  { id: 4, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", joinedDate: "2025-11-15", status: "active", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 25000, totalProfit: 1800, activePlans: 1 },
+  { id: 5, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", joinedDate: "2025-12-01", status: "active", investmentType: "both", longTermInvested: 80000, shortTermInvested: 40000, totalProfit: 9500, activePlans: 4 },
+  { id: 6, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", joinedDate: "2026-01-10", status: "active", investmentType: "long-term", longTermInvested: 75000, shortTermInvested: 0, totalProfit: 5600, activePlans: 3 },
+  { id: 7, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", joinedDate: "2026-01-20", status: "inactive", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 10000, totalProfit: 600, activePlans: 0 },
 ];
 
 const investmentTypeLabels: Record<InvestmentType, string> = {
@@ -47,7 +48,7 @@ const emptyForm = {
   name: "", email: "", phone: "",
   status: "active" as "active" | "inactive",
   investmentType: "long-term" as InvestmentType,
-  totalInvested: 0, totalProfit: 0, activePlans: 0,
+  longTermInvested: 0, shortTermInvested: 0, totalProfit: 0, activePlans: 0,
 };
 
 const formatCurrency = (v: number) => `$${v.toLocaleString()}`;
@@ -66,14 +67,14 @@ export default function InvestorUsers() {
     return matchesSearch && matchesType;
   }), [investors, search, typeFilter]);
 
-  const totalInvestedAll = investors.reduce((s, i) => s + i.totalInvested, 0);
+  const totalInvestedAll = investors.reduce((s, i) => s + i.longTermInvested + i.shortTermInvested, 0);
   const totalProfitAll = investors.reduce((s, i) => s + i.totalProfit, 0);
   const totalActivePlans = investors.reduce((s, i) => s + i.activePlans, 0);
 
   const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (u: InvestorUser) => {
     setEditId(u.id);
-    setForm({ name: u.name, email: u.email, phone: u.phone, status: u.status, investmentType: u.investmentType, totalInvested: u.totalInvested, totalProfit: u.totalProfit, activePlans: u.activePlans });
+    setForm({ name: u.name, email: u.email, phone: u.phone, status: u.status, investmentType: u.investmentType, longTermInvested: u.longTermInvested, shortTermInvested: u.shortTermInvested, totalProfit: u.totalProfit, activePlans: u.activePlans });
     setOpen(true);
   };
 
@@ -147,7 +148,8 @@ export default function InvestorUsers() {
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Type</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Invested</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">LTI Amount</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">STI Amount</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Profit</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Plans</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
@@ -169,8 +171,9 @@ export default function InvestorUsers() {
                 <td className="px-4 py-3 text-center">
                   <Badge variant="secondary" className="text-[11px]">{investmentTypeLabels[user.investmentType]}</Badge>
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.totalInvested)}</td>
-                <td className="px-4 py-3 text-right font-medium text-green-600">{formatCurrency(user.totalProfit)}</td>
+                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.longTermInvested)}</td>
+                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.shortTermInvested)}</td>
+                <td className="px-4 py-3 text-right font-medium text-profit">{formatCurrency(user.totalProfit)}</td>
                 <td className="px-4 py-3 text-center text-foreground">{user.activePlans}</td>
                 <td className="px-4 py-3 text-center">
                   <Badge variant={user.status === "active" ? "default" : "destructive"} className="text-[11px]">
@@ -204,7 +207,7 @@ export default function InvestorUsers() {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">No investors found.</td></tr>
+              <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No investors found.</td></tr>
             )}
           </tbody>
         </table>
@@ -255,11 +258,17 @@ export default function InvestorUsers() {
                 </Select>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Total Invested</Label>
-                <Input type="number" placeholder="50000" value={form.totalInvested || ""} onChange={(e) => setForm({ ...form, totalInvested: Number(e.target.value) })} />
+                <Label>Long-Term Invested</Label>
+                <Input type="number" placeholder="50000" value={form.longTermInvested || ""} onChange={(e) => setForm({ ...form, longTermInvested: Number(e.target.value) })} />
               </div>
+              <div className="space-y-1.5">
+                <Label>Short-Term Invested</Label>
+                <Input type="number" placeholder="25000" value={form.shortTermInvested || ""} onChange={(e) => setForm({ ...form, shortTermInvested: Number(e.target.value) })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Total Profit</Label>
                 <Input type="number" placeholder="4200" value={form.totalProfit || ""} onChange={(e) => setForm({ ...form, totalProfit: Number(e.target.value) })} />
