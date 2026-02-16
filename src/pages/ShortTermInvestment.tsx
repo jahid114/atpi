@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2 } from "lucide-react";
+import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Sheet, SheetContent,
 } from "@/components/ui/sheet";
@@ -64,6 +67,9 @@ export default function ShortTermInvestment() {
   const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
+  const [editOpen, setEditOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const detailProject = detailProjectId ? projects.find((p) => p.id === detailProjectId) || null : null;
 
@@ -114,6 +120,53 @@ export default function ShortTermInvestment() {
       )
     );
     toast.success(`Investor ${status}.`);
+  };
+
+  const openEdit = () => {
+    if (!detailProject) return;
+    setEditForm({
+      name: detailProject.name,
+      description: detailProject.description,
+      targetAmount: String(detailProject.targetAmount),
+      startDate: detailProject.startDate,
+      endDate: detailProject.endDate,
+      expectedReturn: String(detailProject.expectedReturn),
+    });
+    setEditOpen(true);
+  };
+
+  const handleEditProject = () => {
+    if (!detailProject || !editForm.name || !editForm.targetAmount || !editForm.startDate || !editForm.endDate) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === detailProject.id
+          ? {
+              ...p,
+              name: editForm.name,
+              description: editForm.description,
+              targetAmount: Number(editForm.targetAmount),
+              startDate: editForm.startDate,
+              endDate: editForm.endDate,
+              expectedReturn: Number(editForm.expectedReturn) || 0,
+            }
+          : p
+      )
+    );
+    setEditOpen(false);
+    toast.success(`Project "${editForm.name}" updated.`);
+  };
+
+  const handleDeleteProject = () => {
+    if (!detailProject) return;
+    const name = detailProject.name;
+    setProjects((prev) => prev.filter((p) => p.id !== detailProject.id));
+    setDetailProjectId(null);
+    setExpanded(false);
+    setDeleteOpen(false);
+    toast.success(`Project "${name}" deleted.`);
   };
 
   const closeDetail = () => {
@@ -266,6 +319,24 @@ export default function ShortTermInvestment() {
                 >
                   {expanded ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
                 </Button>
+                <div className="absolute top-3 right-12 flex items-center gap-1">
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60 text-white border-0"
+                    onClick={openEdit}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    size="icon"
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-destructive/80 text-white border-0"
+                    onClick={() => setDeleteOpen(true)}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
                 <div className="absolute bottom-3 left-4 right-12">
                   <h2 className="text-lg font-bold text-white drop-shadow-md">{detailProject.name}</h2>
                   <p className="text-xs text-white/80 line-clamp-1 drop-shadow-sm">{detailProject.description}</p>
@@ -307,6 +378,68 @@ export default function ShortTermInvestment() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Edit Project</DialogTitle>
+            <DialogDescription>Update the project details.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Project Name *</Label>
+              <Input value={editForm.name} onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Description</Label>
+              <Textarea value={editForm.description} onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Target Amount *</Label>
+                <Input type="number" value={editForm.targetAmount} onChange={(e) => setEditForm((f) => ({ ...f, targetAmount: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Expected Return %</Label>
+                <Input type="number" value={editForm.expectedReturn} onChange={(e) => setEditForm((f) => ({ ...f, expectedReturn: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Start Date *</Label>
+                <Input type="date" value={editForm.startDate} onChange={(e) => setEditForm((f) => ({ ...f, startDate: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>End Date *</Label>
+                <Input type="date" value={editForm.endDate} onChange={(e) => setEditForm((f) => ({ ...f, endDate: e.target.value }))} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleEditProject}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Project</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{detailProject?.name}"? This will remove the project and all its investor records. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProject} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
