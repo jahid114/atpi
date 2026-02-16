@@ -37,9 +37,10 @@ const typeLabels: Record<string, string> = {
 interface Props {
   investors: Investor[];
   onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
+  selectedYear: number;
 }
 
-export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
+export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear }: Props) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -60,6 +61,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
 
   const filtered = useMemo(() => {
     return allTransactions.filter((t) => {
+      if (!t.date.startsWith(String(selectedYear))) return false;
       if (typeFilter !== "all" && t.type !== typeFilter) return false;
       if (statusFilter !== "all" && t.status !== statusFilter) return false;
       if (dateFrom && new Date(t.date) < dateFrom) return false;
@@ -67,7 +69,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment }: Props) {
       if (search && !t.investorName.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [allTransactions, typeFilter, statusFilter, dateFrom, dateTo, search]);
+  }, [allTransactions, typeFilter, statusFilter, dateFrom, dateTo, search, selectedYear]);
 
   const hasActiveFilters = search !== "" || typeFilter !== "all" || statusFilter !== "all" || !!dateFrom || !!dateTo;
 

@@ -26,7 +26,11 @@ const typeBadgeStyles: Record<ClientTransaction["type"], string> = {
 
 const emptyForm = { clientId: "", type: "investment" as ClientTransaction["type"], amount: "", date: "", description: "" };
 
-export function ClientTransactionsTab() {
+interface Props {
+  selectedYear: number;
+}
+
+export function ClientTransactionsTab({ selectedYear }: Props) {
   const { clients, clientTransactions, setClientTransactions } = useFinancial();
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
@@ -41,6 +45,7 @@ export function ClientTransactionsTab() {
 
   const filtered = useMemo(() => {
     return clientTransactions.filter((t) => {
+      if (!t.date.startsWith(String(selectedYear))) return false;
       const client = clients.find((c) => c.id === t.clientId);
       const matchSearch = t.description.toLowerCase().includes(search.toLowerCase()) || (client?.name.toLowerCase().includes(search.toLowerCase()) ?? false);
       const matchType = typeFilter === "all" || t.type === typeFilter;
@@ -49,7 +54,7 @@ export function ClientTransactionsTab() {
       const matchTo = !dateTo || new Date(t.date) <= dateTo;
       return matchSearch && matchType && matchClient && matchFrom && matchTo;
     }).sort((a, b) => b.date.localeCompare(a.date));
-  }, [clientTransactions, clients, search, typeFilter, clientFilter, dateFrom, dateTo]);
+  }, [clientTransactions, clients, search, typeFilter, clientFilter, dateFrom, dateTo, selectedYear]);
 
   const hasFilters = search || typeFilter !== "all" || clientFilter !== "all" || !!dateFrom || !!dateTo;
   const clearFilters = () => { setSearch(""); setTypeFilter("all"); setClientFilter("all"); setDateFrom(undefined); setDateTo(undefined); };

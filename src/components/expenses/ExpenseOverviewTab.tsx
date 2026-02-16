@@ -9,33 +9,37 @@ const fmt = (n: number) => "$" + n.toLocaleString();
 
 interface Props {
   categories: string[];
+  selectedYear: number;
 }
 
-export function ExpenseOverviewTab({ categories }: Props) {
-  const { expenses, totalExpenses } = useFinancial();
+export function ExpenseOverviewTab({ categories, selectedYear }: Props) {
+  const { expenses, totalExpenses: allTotalExpenses } = useFinancial();
+
+  const yearExpenses = useMemo(() => expenses.filter((e) => e.date.startsWith(String(selectedYear))), [expenses, selectedYear]);
+  const totalExpenses = yearExpenses.reduce((s, e) => s + e.amount, 0);
 
   const burnRate = Math.round(totalExpenses / 12);
 
   const byCategory = useMemo(() => {
     const map: Record<string, number> = {};
-    expenses.forEach((e) => {
+    yearExpenses.forEach((e) => {
       map[e.category] = (map[e.category] || 0) + e.amount;
     });
     return Object.entries(map)
       .sort((a, b) => b[1] - a[1]);
-  }, [expenses]);
+  }, [yearExpenses]);
 
   const byMonth = useMemo(() => {
     const map: Record<string, number> = {};
-    expenses.forEach((e) => {
-      const month = e.date.slice(0, 7); // YYYY-MM
+    yearExpenses.forEach((e) => {
+      const month = e.date.slice(0, 7);
       map[month] = (map[month] || 0) + e.amount;
     });
     return Object.entries(map).sort((a, b) => a[0].localeCompare(b[0]));
-  }, [expenses]);
+  }, [yearExpenses]);
 
-  const avgExpense = expenses.length > 0 ? Math.round(totalExpenses / expenses.length) : 0;
-  const highestExpense = expenses.length > 0 ? expenses.reduce((max, e) => e.amount > max.amount ? e : max, expenses[0]) : null;
+  const avgExpense = yearExpenses.length > 0 ? Math.round(totalExpenses / yearExpenses.length) : 0;
+  const highestExpense = yearExpenses.length > 0 ? yearExpenses.reduce((max, e) => e.amount > max.amount ? e : max, yearExpenses[0]) : null;
   const topCategory = byCategory.length > 0 ? byCategory[0] : null;
 
   return (
@@ -47,7 +51,7 @@ export function ExpenseOverviewTab({ categories }: Props) {
             <DollarSign className="h-4 w-4" /> Total Expenses
           </div>
           <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
-          <p className="text-xs text-muted-foreground mt-1">{expenses.length} entries</p>
+          <p className="text-xs text-muted-foreground mt-1">{yearExpenses.length} entries in {selectedYear}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">

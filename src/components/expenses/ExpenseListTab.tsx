@@ -24,9 +24,10 @@ const fmt = (n: number) => "$" + n.toLocaleString();
 
 interface Props {
   categories: string[];
+  selectedYear: number;
 }
 
-export function ExpenseListTab({ categories }: Props) {
+export function ExpenseListTab({ categories, selectedYear }: Props) {
   const { expenses, setExpenses } = useFinancial();
 
   const [search, setSearch] = useState("");
@@ -43,6 +44,7 @@ export function ExpenseListTab({ categories }: Props) {
   const filtered = useMemo(() => {
     return expenses
       .filter((e) => {
+        if (!e.date.startsWith(String(selectedYear))) return false;
         if (catFilter !== "all" && e.category !== catFilter) return false;
         if (dateFrom && new Date(e.date) < dateFrom) return false;
         if (dateTo && new Date(e.date) > dateTo) return false;
@@ -50,7 +52,7 @@ export function ExpenseListTab({ categories }: Props) {
         return true;
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenses, catFilter, dateFrom, dateTo, search]);
+  }, [expenses, catFilter, dateFrom, dateTo, search, selectedYear]);
 
   const hasActiveFilters = search !== "" || catFilter !== "all" || !!dateFrom || !!dateTo;
   const clearFilters = useCallback(() => {

@@ -5,12 +5,14 @@ import { useFinancial } from "@/contexts/FinancialContext";
 import { ExpenseOverviewTab } from "@/components/expenses/ExpenseOverviewTab";
 import { ExpenseListTab } from "@/components/expenses/ExpenseListTab";
 import { ExpenseCategoryTab } from "@/components/expenses/ExpenseCategoryTab";
+import { YearSelector } from "@/components/YearSelector";
 
 const defaultCategories = ["Salary", "Rent", "Utilities", "Software", "Legal", "Marketing", "Travel", "Other"];
 
 export default function Expenses() {
   const { setExpenses } = useFinancial();
   const [categories, setCategories] = useState<string[]>(defaultCategories);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const handleAddCategory = (name: string) => {
     setCategories((prev) => [...prev, name]);
@@ -18,7 +20,6 @@ export default function Expenses() {
 
   const handleEditCategory = (oldName: string, newName: string) => {
     setCategories((prev) => prev.map((c) => (c === oldName ? newName : c)));
-    // Update existing expenses with the old category name
     setExpenses((prev) =>
       prev.map((e) => (e.category === oldName ? { ...e, category: newName } : e))
     );
@@ -30,9 +31,12 @@ export default function Expenses() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div>
-        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Expense Ledger</h1>
-        <p className="text-sm text-muted-foreground mt-1">Track and categorize all operational expenses</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Expense Ledger</h1>
+          <p className="text-sm text-muted-foreground mt-1">Track and categorize all operational expenses</p>
+        </div>
+        <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -49,10 +53,10 @@ export default function Expenses() {
         </TabsList>
 
         <TabsContent value="overview">
-          <ExpenseOverviewTab categories={categories} />
+          <ExpenseOverviewTab categories={categories} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="expenses">
-          <ExpenseListTab categories={categories} />
+          <ExpenseListTab categories={categories} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="categories">
           <ExpenseCategoryTab
@@ -60,6 +64,7 @@ export default function Expenses() {
             onAddCategory={handleAddCategory}
             onEditCategory={handleEditCategory}
             onDeleteCategory={handleDeleteCategory}
+            selectedYear={selectedYear}
           />
         </TabsContent>
       </Tabs>

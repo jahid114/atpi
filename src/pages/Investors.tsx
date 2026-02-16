@@ -10,10 +10,12 @@ import { LTIInvestorsTab } from "@/components/long-term/LTIInvestorsTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
 import { LTIProfitShareTab } from "@/components/long-term/LTIProfitShareTab";
+import { YearSelector } from "@/components/YearSelector";
 
 export default function Investors() {
   const { netProfit: profit } = useFinancial();
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const handleRelease = (id: number) => {
     const inv = investors.find((i) => i.id === id);
@@ -101,9 +103,12 @@ export default function Investors() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div>
-        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
-        <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Year 2026</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
+          <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Year {selectedYear}</p>
+        </div>
+        <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -126,19 +131,19 @@ export default function Investors() {
         </TabsList>
 
         <TabsContent value="overview">
-          <LTIOverviewTab investors={investors} profit={profit} />
+          <LTIOverviewTab investors={investors} profit={profit} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="investors">
-          <LTIInvestorsTab investors={investors} profit={profit} onRelease={handleRelease} onUpdateInvestment={handleUpdateInvestment} onWithdraw={handleWithdraw} />
+          <LTIInvestorsTab investors={investors} profit={profit} onRelease={handleRelease} onUpdateInvestment={handleUpdateInvestment} onWithdraw={handleWithdraw} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="requests">
           <LTIRequestsTab investors={investors} onApprove={handleApprove} onReject={handleReject} onRegister={handleRegister} />
         </TabsContent>
         <TabsContent value="transactions">
-          <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} />
+          <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="profit-share">
-          <LTIProfitShareTab investors={investors} profit={profit} />
+          <LTIProfitShareTab investors={investors} profit={profit} selectedYear={selectedYear} />
         </TabsContent>
       </Tabs>
     </div>
