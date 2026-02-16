@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, UserPlus, ArrowLeftRight } from "lucide-react";
+import { BarChart3, Users, UserPlus, ArrowLeftRight, DollarSign } from "lucide-react";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
@@ -9,6 +9,7 @@ import { LTIOverviewTab } from "@/components/long-term/LTIOverviewTab";
 import { LTIInvestorsTab } from "@/components/long-term/LTIInvestorsTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
+import { LTIProfitShareTab } from "@/components/long-term/LTIProfitShareTab";
 
 export default function Investors() {
   const { netProfit: profit } = useFinancial();
@@ -106,7 +107,7 @@ export default function Investors() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
           <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
             <BarChart3 className="h-4 w-4" /> Overview
           </TabsTrigger>
@@ -118,6 +119,9 @@ export default function Investors() {
           </TabsTrigger>
           <TabsTrigger value="transactions" className="gap-1.5 text-xs sm:text-sm">
             <ArrowLeftRight className="h-4 w-4" /> Transactions
+          </TabsTrigger>
+          <TabsTrigger value="profit-share" className="gap-1.5 text-xs sm:text-sm">
+            <DollarSign className="h-4 w-4" /> Profit Share
           </TabsTrigger>
         </TabsList>
 
@@ -132,6 +136,9 @@ export default function Investors() {
         </TabsContent>
         <TabsContent value="transactions">
           <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} />
+        </TabsContent>
+        <TabsContent value="profit-share">
+          <LTIProfitShareTab investors={investors} profit={profit} />
         </TabsContent>
       </Tabs>
     </div>

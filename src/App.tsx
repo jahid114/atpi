@@ -10,8 +10,6 @@ import Expenses from "./pages/Expenses";
 import Clients from "./pages/Clients";
 import Investors from "./pages/Investors";
 import ShortTermInvestment from "./pages/ShortTermInvestment";
-import Distribution from "./pages/Distribution";
-import Invoices from "./pages/Invoices";
 import Users from "./pages/Users";
 import NotFound from "./pages/NotFound";
 
@@ -31,8 +29,6 @@ const App = () => (
               <Route path="/clients" element={<Clients />} />
               <Route path="/long-term-investment" element={<Investors />} />
               <Route path="/short-term-investment" element={<ShortTermInvestment />} />
-              <Route path="/distribution" element={<Distribution />} />
-              <Route path="/invoices" element={<Invoices />} />
               <Route path="/users" element={<Users />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
