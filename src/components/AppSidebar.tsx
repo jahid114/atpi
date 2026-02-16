@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Receipt,
   Users,
+  Shield,
   TrendingUp,
   UsersRound,
   ChevronLeft,
@@ -20,7 +21,8 @@ const navItems = [
   { title: "Client Tracker", path: "/clients", icon: TrendingUp },
   { title: "Long-Term Investment", path: "/long-term-investment", icon: Users },
   { title: "Short-Term Investment", path: "/short-term-investment", icon: TrendingUp },
-  { title: "Users", path: "/users", icon: UsersRound },
+  { title: "Admins", path: "/admins", icon: Shield },
+  { title: "Investors", path: "/investor-users", icon: UsersRound },
 ];
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
