@@ -10,7 +10,8 @@ import Expenses from "./pages/Expenses";
 import Clients from "./pages/Clients";
 import Investors from "./pages/Investors";
 import ShortTermInvestment from "./pages/ShortTermInvestment";
-import Users from "./pages/Users";
+import Admins from "./pages/Admins";
+import InvestorUsers from "./pages/InvestorUsers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,7 +30,8 @@ const App = () => (
               <Route path="/clients" element={<Clients />} />
               <Route path="/long-term-investment" element={<Investors />} />
               <Route path="/short-term-investment" element={<ShortTermInvestment />} />
-              <Route path="/users" element={<Users />} />
+              <Route path="/admins" element={<Admins />} />
+              <Route path="/investor-users" element={<InvestorUsers />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </DashboardLayout>
