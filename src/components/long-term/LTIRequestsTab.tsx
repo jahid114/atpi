@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CheckCircle, XCircle, Clock, UserPlus, Eye } from "lucide-react";
+import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,14 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import type { Investor, InvestorStatus } from "@/types/investor";
 import { fmt } from "@/lib/investor-utils";
+import { useWallet } from "@/contexts/WalletContext";
+import { fmtWallet } from "@/types/wallet";
 
 interface Props {
   investors: Investor[];
@@ -25,25 +30,35 @@ interface Props {
 }
 
 export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: Props) {
+  const { investFromWallet, getWalletBalance } = useWallet();
   const [registerOpen, setRegisterOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", invested: "", investmentDate: "" });
+  const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
 
   const pendingInvestors = useMemo(() => investors.filter((i) => i.status === "pending"), [investors]);
   const rejectedInvestors = useMemo(() => investors.filter((i) => i.status === "rejected"), [investors]);
+
+  const walletBalance = form.email ? getWalletBalance(form.email) : 0;
 
   const handleRegister = () => {
     if (!form.name || !form.email || !form.invested || !form.investmentDate) {
       toast.error("Please fill all required fields.");
       return;
     }
+    const amount = Number(form.invested);
+    if (fundingSource === "wallet") {
+      const success = investFromWallet(form.name, form.email, amount, "invest_lti", "Long-term investment from wallet");
+      if (!success) return;
+    }
     onRegister({
       name: form.name,
       email: form.email,
       phone: form.phone,
-      invested: Number(form.invested),
+      invested: amount,
       investmentDate: form.investmentDate,
     });
     setForm({ name: "", email: "", phone: "", invested: "", investmentDate: "" });
+    setFundingSource("direct");
     setRegisterOpen(false);
   };
 
@@ -149,6 +164,21 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                 <Label htmlFor="reg-date">Investment Date *</Label>
                 <Input id="reg-date" type="date" value={form.investmentDate} onChange={(e) => setForm((f) => ({ ...f, investmentDate: e.target.value }))} />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Funding Source</Label>
+              <Select value={fundingSource} onValueChange={(v) => setFundingSource(v as "direct" | "wallet")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="direct">Direct Investment</SelectItem>
+                  <SelectItem value="wallet">From Wallet {walletBalance > 0 ? `(${fmtWallet(walletBalance)} available)` : "(No balance)"}</SelectItem>
+                </SelectContent>
+              </Select>
+              {fundingSource === "wallet" && walletBalance > 0 && Number(form.invested) > walletBalance && (
+                <p className="text-xs text-destructive">Amount exceeds wallet balance of {fmtWallet(walletBalance)}</p>
+              )}
             </div>
           </div>
           <DialogFooter>
