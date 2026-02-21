@@ -93,35 +93,50 @@ export default function Wallet() {
 
         {/* Wallets Tab */}
         <TabsContent value="wallets">
-          <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
-            <table className="w-full text-sm min-w-[700px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/50">
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Investor</th>
-                  <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Balance</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Total Top-Ups</th>
-                  <th className="text-right px-4 py-3 font-medium text-muted-foreground">Total Spent</th>
-                  <th className="text-center px-4 py-3 font-medium text-muted-foreground">Transactions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {wallets.map((w) => (
-                  <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedWallet(w)}>
-                    <td className="px-4 py-3 font-medium text-foreground">{w.investorName}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{w.email}</td>
-                    <td className="px-4 py-3 text-right font-semibold text-profit">{fmtWallet(w.balance)}</td>
-                    <td className="px-4 py-3 text-right text-foreground">{fmtWallet(w.totalTopUps)}</td>
-                    <td className="px-4 py-3 text-right text-foreground">{fmtWallet(w.totalSpent)}</td>
-                    <td className="px-4 py-3 text-center text-muted-foreground">{w.transactions.length}</td>
-                  </tr>
-                ))}
-                {wallets.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No wallets yet.</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {wallets.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-6">
+              {wallets.map((w) => (
+                <div
+                  key={w.id}
+                  className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow hover:kpi-shadow-hover transition-all cursor-pointer hover:border-primary/30"
+                  onClick={() => setSelectedWallet(w)}
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2.5 rounded-lg bg-primary/10">
+                      <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-foreground truncate">{w.investorName}</p>
+                      <p className="text-xs text-muted-foreground truncate">{w.email}</p>
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Balance</p>
+                    <p className="text-2xl font-bold text-profit mt-0.5">{fmtWallet(w.balance)}</p>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3 pt-3 border-t border-border">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Top-Ups</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{fmtWallet(w.totalTopUps)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Spent</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{fmtWallet(w.totalSpent)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Txns</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{w.transactions.length}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="bg-card border border-border rounded-lg p-8 text-center kpi-shadow">
+              <WalletIcon className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
+              <p className="text-sm text-muted-foreground">No wallets yet.</p>
+            </div>
+          )}
         </TabsContent>
 
         {/* Requests Tab (pending top-ups) */}
