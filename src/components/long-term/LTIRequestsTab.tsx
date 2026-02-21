@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet } from "lucide-react";
+import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet, User, Mail, Phone, Calendar, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -34,11 +34,13 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
   const [registerOpen, setRegisterOpen] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", phone: "", invested: "", investmentDate: "" });
   const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
+  const [reviewInvestor, setReviewInvestor] = useState<Investor | null>(null);
 
   const pendingInvestors = useMemo(() => investors.filter((i) => i.status === "pending"), [investors]);
   const rejectedInvestors = useMemo(() => investors.filter((i) => i.status === "rejected"), [investors]);
 
   const walletBalance = form.email ? getWalletBalance(form.email) : 0;
+  const reviewWalletBalance = reviewInvestor ? getWalletBalance(reviewInvestor.email) : 0;
 
   const handleRegister = () => {
     if (!form.name || !form.email || !form.invested || !form.investmentDate) {
@@ -62,6 +64,18 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
     setRegisterOpen(false);
   };
 
+  const handleReviewApprove = () => {
+    if (!reviewInvestor) return;
+    onApprove(reviewInvestor.id);
+    setReviewInvestor(null);
+  };
+
+  const handleReviewReject = () => {
+    if (!reviewInvestor) return;
+    onReject(reviewInvestor.id);
+    setReviewInvestor(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -83,7 +97,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
           </div>
           <div className="divide-y divide-border">
             {pendingInvestors.map((inv) => (
-              <div key={inv.id} className="px-4 py-4 flex items-center justify-between">
+              <div key={inv.id} className="px-4 py-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
                 <div className="space-y-1">
                   <p className="font-medium text-foreground">{inv.name}</p>
                   <p className="text-xs text-muted-foreground">{inv.email} · {inv.phone || "No phone"}</p>
@@ -93,6 +107,9 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setReviewInvestor(inv)}>
+                    <Eye className="h-4 w-4 mr-1" /> Review
+                  </Button>
                   <Button size="sm" variant="outline" className="text-profit border-profit/30 hover:bg-profit/10 hover:text-profit" onClick={() => onApprove(inv.id)}>
                     <CheckCircle className="h-4 w-4 mr-1" /> Approve
                   </Button>
@@ -187,6 +204,137 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
             </DialogClose>
             <Button onClick={handleRegister}>Submit for Review</Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Review Detail Dialog */}
+      <Dialog open={!!reviewInvestor} onOpenChange={(open) => !open && setReviewInvestor(null)}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          {reviewInvestor && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" /> Review Investment Request
+                </DialogTitle>
+                <DialogDescription>Review all details before approving or rejecting this request.</DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-5 py-2">
+                {/* Investor Profile */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Investor Profile</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Name</p>
+                        <p className="text-sm font-medium text-foreground">{reviewInvestor.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Email</p>
+                        <p className="text-sm font-medium text-foreground">{reviewInvestor.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Phone</p>
+                        <p className="text-sm font-medium text-foreground">{reviewInvestor.phone || "Not provided"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Investment Date</p>
+                        <p className="text-sm font-medium text-foreground">{reviewInvestor.investmentDate}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Investment Details */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Investment Details</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <DollarSign className="h-5 w-5 text-profit mx-auto mb-1" />
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Requested Amount</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{fmt(reviewInvestor.invested)}</p>
+                    </div>
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Wallet Balance</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{fmtWallet(reviewWalletBalance)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Existing History */}
+                {reviewInvestor.history.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Previous History</p>
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead>
+                          <tr className="bg-muted/50 border-b border-border">
+                            <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Date</th>
+                            <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Type</th>
+                            <th className="text-right px-3 py-2 font-medium text-muted-foreground text-xs">Amount</th>
+                            <th className="text-center px-3 py-2 font-medium text-muted-foreground text-xs">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {reviewInvestor.history.map((h) => (
+                            <tr key={h.id} className="border-b border-border last:border-0">
+                              <td className="px-3 py-2 text-xs text-muted-foreground">{h.date}</td>
+                              <td className="px-3 py-2 text-xs text-foreground capitalize">{h.type}</td>
+                              <td className={`px-3 py-2 text-right text-xs font-medium ${h.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
+                                {h.type === "withdrawal" ? "-" : "+"}{fmt(h.amount)}
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <Badge variant={h.status === "approved" ? "default" : h.status === "rejected" ? "destructive" : "secondary"} className="text-[10px]">
+                                  {h.status}
+                                </Badge>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Status */}
+                <div className="flex items-center gap-2 px-1">
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground">Current Status:</span>
+                  <Badge variant="secondary" className="text-xs">Pending</Badge>
+                </div>
+              </div>
+
+              <DialogFooter className="gap-2 sm:gap-0">
+                <DialogClose asChild>
+                  <Button variant="outline">Close</Button>
+                </DialogClose>
+                <Button
+                  variant="outline"
+                  className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                  onClick={handleReviewReject}
+                >
+                  <XCircle className="h-4 w-4 mr-1" /> Reject
+                </Button>
+                <Button
+                  className="bg-profit text-white hover:bg-profit/90"
+                  onClick={handleReviewApprove}
+                >
+                  <CheckCircle className="h-4 w-4 mr-1" /> Approve
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
