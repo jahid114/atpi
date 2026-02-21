@@ -10,7 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { useWallet } from "@/contexts/WalletContext";
 import { fmtWallet, walletTxTypeConfig, walletTxStatusConfig } from "@/types/wallet";
-import type { WalletTransactionStatus } from "@/types/wallet";
+import type { InvestorWallet, WalletTransactionStatus } from "@/types/wallet";
+import WalletDetailDialog from "@/components/wallet/WalletDetailDialog";
 
 export default function Wallet() {
   const { wallets, requestTopUp, approveTransaction, rejectTransaction } = useWallet();
@@ -18,7 +19,7 @@ export default function Wallet() {
   const [topUpForm, setTopUpForm] = useState({ investorName: "", email: "", amount: "" });
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
-
+  const [selectedWallet, setSelectedWallet] = useState<InvestorWallet | null>(null);
   const totalBalance = useMemo(() => wallets.reduce((s, w) => s + w.balance, 0), [wallets]);
   const totalTopUps = useMemo(() => wallets.reduce((s, w) => s + w.totalTopUps, 0), [wallets]);
   const totalSpent = useMemo(() => wallets.reduce((s, w) => s + w.totalSpent, 0), [wallets]);
@@ -106,7 +107,7 @@ export default function Wallet() {
               </thead>
               <tbody>
                 {wallets.map((w) => (
-                  <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                  <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => setSelectedWallet(w)}>
                     <td className="px-4 py-3 font-medium text-foreground">{w.investorName}</td>
                     <td className="px-4 py-3 text-muted-foreground">{w.email}</td>
                     <td className="px-4 py-3 text-right font-semibold text-profit">{fmtWallet(w.balance)}</td>
@@ -265,6 +266,8 @@ export default function Wallet() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <WalletDetailDialog wallet={selectedWallet} open={!!selectedWallet} onOpenChange={(open) => !open && setSelectedWallet(null)} />
     </div>
   );
 }
