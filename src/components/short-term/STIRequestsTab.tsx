@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CheckCircle, XCircle, Clock, Plus } from "lucide-react";
+import { CheckCircle, XCircle, Clock, Plus, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,14 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import type { ShortTermProject, InvestorEntryStatus } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
+import { useWallet } from "@/contexts/WalletContext";
+import { fmtWallet } from "@/types/wallet";
 
 interface Props {
   project: ShortTermProject;
@@ -18,19 +23,29 @@ interface Props {
 }
 
 export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props) {
+  const { investFromWallet, getWalletBalance } = useWallet();
   const [addOpen, setAddOpen] = useState(false);
   const [form, setForm] = useState({ investorName: "", email: "", amount: "" });
+  const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
 
   const pending = useMemo(() => project.investors.filter((inv) => inv.status === "pending"), [project.investors]);
   const rejected = useMemo(() => project.investors.filter((inv) => inv.status === "rejected"), [project.investors]);
+
+  const walletBalance = form.email ? getWalletBalance(form.email) : 0;
 
   const handleSubmit = () => {
     if (!form.investorName || !form.amount) {
       toast.error("Please fill all required fields.");
       return;
     }
-    onAddInvestor({ investorName: form.investorName, email: form.email, amount: Number(form.amount) });
+    const amount = Number(form.amount);
+    if (fundingSource === "wallet") {
+      const success = investFromWallet(form.investorName, form.email, amount, "invest_sti", `Investment in ${project.name}`);
+      if (!success) return;
+    }
+    onAddInvestor({ investorName: form.investorName, email: form.email, amount });
     setForm({ investorName: "", email: "", amount: "" });
+    setFundingSource("direct");
     setAddOpen(false);
   };
 
@@ -118,6 +133,21 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
             <div className="space-y-1.5">
               <Label>Amount *</Label>
               <Input type="number" placeholder="50000" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Funding Source</Label>
+              <Select value={fundingSource} onValueChange={(v) => setFundingSource(v as "direct" | "wallet")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="direct">Direct Investment</SelectItem>
+                  <SelectItem value="wallet">From Wallet {walletBalance > 0 ? `(${fmtWallet(walletBalance)} available)` : "(No balance)"}</SelectItem>
+                </SelectContent>
+              </Select>
+              {fundingSource === "wallet" && walletBalance > 0 && Number(form.amount) > walletBalance && (
+                <p className="text-xs text-destructive">Amount exceeds wallet balance of {fmtWallet(walletBalance)}</p>
+              )}
             </div>
           </div>
           <DialogFooter>

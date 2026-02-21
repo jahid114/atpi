@@ -6,6 +6,7 @@ import {
   Shield,
   TrendingUp,
   UsersRound,
+  Wallet,
   ChevronLeft,
   ChevronRight,
   Menu,
@@ -21,6 +22,7 @@ const navItems = [
   { title: "Client Tracker", path: "/clients", icon: TrendingUp },
   { title: "Long-Term Investment", path: "/long-term-investment", icon: Users },
   { title: "Short-Term Investment", path: "/short-term-investment", icon: TrendingUp },
+  { title: "Wallet", path: "/wallet", icon: Wallet },
   { title: "Admins", path: "/admins", icon: Shield },
   { title: "Investors", path: "/investor-users", icon: UsersRound },
 ];
