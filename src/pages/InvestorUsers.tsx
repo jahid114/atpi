@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { User, Mail, Phone, Search, Plus, Pencil, Trash2, DollarSign, TrendingUp, Calendar } from "lucide-react";
+import { User, Mail, Phone, Search, Plus, Pencil, Trash2, DollarSign, TrendingUp, Calendar, Eye, Briefcase, Globe, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,8 @@ interface InvestorUser {
   name: string;
   email: string;
   phone: string;
+  occupation: string;
+  country: string;
   joinedDate: string;
   status: "active" | "inactive";
   investmentType: InvestmentType;
@@ -31,11 +33,11 @@ interface InvestorUser {
 }
 
 const initialInvestors: InvestorUser[] = [
-  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", joinedDate: "2025-10-01", status: "active", investmentType: "long-term", longTermInvested: 50000, shortTermInvested: 0, totalProfit: 4200, activePlans: 2 },
-  { id: 4, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", joinedDate: "2025-11-15", status: "active", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 25000, totalProfit: 1800, activePlans: 1 },
-  { id: 5, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", joinedDate: "2025-12-01", status: "active", investmentType: "both", longTermInvested: 80000, shortTermInvested: 40000, totalProfit: 9500, activePlans: 4 },
-  { id: 6, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", joinedDate: "2026-01-10", status: "active", investmentType: "long-term", longTermInvested: 75000, shortTermInvested: 0, totalProfit: 5600, activePlans: 3 },
-  { id: 7, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", joinedDate: "2026-01-20", status: "inactive", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 10000, totalProfit: 600, activePlans: 0 },
+  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", investmentType: "long-term", longTermInvested: 50000, shortTermInvested: 0, totalProfit: 4200, activePlans: 2 },
+  { id: 4, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", occupation: "Business Owner", country: "Canada", joinedDate: "2025-11-15", status: "active", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 25000, totalProfit: 1800, activePlans: 1 },
+  { id: 5, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", occupation: "Financial Analyst", country: "United Kingdom", joinedDate: "2025-12-01", status: "active", investmentType: "both", longTermInvested: 80000, shortTermInvested: 40000, totalProfit: 9500, activePlans: 4 },
+  { id: 6, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", occupation: "Real Estate Agent", country: "Australia", joinedDate: "2026-01-10", status: "active", investmentType: "long-term", longTermInvested: 75000, shortTermInvested: 0, totalProfit: 5600, activePlans: 3 },
+  { id: 7, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", occupation: "Marketing Director", country: "Spain", joinedDate: "2026-01-20", status: "inactive", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 10000, totalProfit: 600, activePlans: 0 },
 ];
 
 const investmentTypeLabels: Record<InvestmentType, string> = {
@@ -45,7 +47,7 @@ const investmentTypeLabels: Record<InvestmentType, string> = {
 };
 
 const emptyForm = {
-  name: "", email: "", phone: "",
+  name: "", email: "", phone: "", occupation: "", country: "",
   status: "active" as "active" | "inactive",
   investmentType: "long-term" as InvestmentType,
   longTermInvested: 0, shortTermInvested: 0, totalProfit: 0, activePlans: 0,
@@ -60,6 +62,7 @@ export default function InvestorUsers() {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [form, setForm] = useState(emptyForm);
+  const [viewUser, setViewUser] = useState<InvestorUser | null>(null);
 
   const filtered = useMemo(() => investors.filter((u) => {
     const matchesSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
@@ -74,7 +77,7 @@ export default function InvestorUsers() {
   const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (u: InvestorUser) => {
     setEditId(u.id);
-    setForm({ name: u.name, email: u.email, phone: u.phone, status: u.status, investmentType: u.investmentType, longTermInvested: u.longTermInvested, shortTermInvested: u.shortTermInvested, totalProfit: u.totalProfit, activePlans: u.activePlans });
+    setForm({ name: u.name, email: u.email, phone: u.phone, occupation: u.occupation, country: u.country, status: u.status, investmentType: u.investmentType, longTermInvested: u.longTermInvested, shortTermInvested: u.shortTermInvested, totalProfit: u.totalProfit, activePlans: u.activePlans });
     setOpen(true);
   };
 
@@ -83,7 +86,7 @@ export default function InvestorUsers() {
     if (editId) {
       setInvestors((prev) => prev.map((u) => u.id === editId ? { ...u, ...form } : u));
     } else {
-      setInvestors((prev) => [...prev, { id: Date.now(), ...form, joinedDate: new Date().toISOString().slice(0, 10) }]);
+      setInvestors((prev) => [...prev, { id: Date.now(), ...form, joinedDate: new Date().toISOString().slice(0, 10) } as InvestorUser]);
     }
     setOpen(false);
   };
@@ -182,6 +185,9 @@ export default function InvestorUsers() {
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setViewUser(user)}>
+                      <Eye className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(user)}>
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -214,6 +220,60 @@ export default function InvestorUsers() {
       </div>
 
       {/* Add/Edit Dialog */}
+      {/* View Detail Dialog */}
+      <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
+        <DialogContent className="sm:max-w-lg">
+          {viewUser && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2"><User className="h-5 w-5" /> {viewUser.name}</DialogTitle>
+                <DialogDescription>Investor profile & portfolio summary</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.email}</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Phone className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.phone}</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Briefcase className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.occupation || "—"}</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Globe className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.country || "—"}</span></div>
+                  <div className="flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">Joined {viewUser.joinedDate}</span></div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Badge variant={viewUser.status === "active" ? "default" : "destructive"} className="text-[11px]">
+                      {viewUser.status === "active" ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="border-t border-border pt-3">
+                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">Portfolio</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-[11px] text-muted-foreground">Investment Type</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{investmentTypeLabels[viewUser.investmentType]}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-[11px] text-muted-foreground">Active Plans</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{viewUser.activePlans}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-[11px] text-muted-foreground">Long-Term Invested</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{formatCurrency(viewUser.longTermInvested)}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3">
+                      <p className="text-[11px] text-muted-foreground">Short-Term Invested</p>
+                      <p className="text-sm font-semibold text-foreground mt-0.5">{formatCurrency(viewUser.shortTermInvested)}</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 col-span-2">
+                      <p className="text-[11px] text-muted-foreground">Total Profit</p>
+                      <p className="text-sm font-semibold text-profit mt-0.5">{formatCurrency(viewUser.totalProfit)}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Add/Edit Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
@@ -233,6 +293,16 @@ export default function InvestorUsers() {
               <div className="space-y-1.5">
                 <Label>Phone</Label>
                 <Input placeholder="+1 555-0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Occupation</Label>
+                <Input placeholder="e.g. Software Engineer" value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Country</Label>
+                <Input placeholder="e.g. United States" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
