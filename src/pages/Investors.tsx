@@ -2,6 +2,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Users, UserPlus, ArrowLeftRight, DollarSign } from "lucide-react";
+import type { NomineeInfo } from "@/types/investor";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
@@ -38,7 +39,7 @@ export default function Investors() {
     toast.success(`Released ${fmt(Math.round(share))} to ${inv.name}.`);
   };
 
-  const handleRegister = (data: { name: string; email: string; phone: string; invested: number; investmentDate: string }) => {
+  const handleRegister = (data: { name: string; email: string; phone: string; invested: number; investmentDate: string; shares: number; bloodGroup: string; nidNumber: string; jerseySize: string; nominee: NomineeInfo }) => {
     const entryId = Date.now();
     const newInvestor: Investor = {
       id: entryId,
@@ -48,6 +49,11 @@ export default function Investors() {
       invested: data.invested,
       investmentDate: data.investmentDate,
       status: "pending",
+      shares: data.shares,
+      bloodGroup: data.bloodGroup,
+      nidNumber: data.nidNumber,
+      jerseySize: data.jerseySize,
+      nominee: data.nominee,
       history: [{ id: entryId + 1, date: data.investmentDate, amount: data.invested, type: "deposit", status: "pending" }],
     };
     setInvestors((prev) => [...prev, newInvestor]);
