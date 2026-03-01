@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { User, Mail, Phone, Search, Plus, Pencil, Trash2, DollarSign, TrendingUp, Calendar, Eye, Briefcase, Globe, MapPin } from "lucide-react";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -69,6 +71,8 @@ export default function InvestorUsers() {
     const matchesType = typeFilter === "all" || u.investmentType === typeFilter || (typeFilter !== "both" && u.investmentType === "both");
     return matchesSearch && matchesType;
   }), [investors, search, typeFilter]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const totalInvestedAll = investors.reduce((s, i) => s + i.longTermInvested + i.shortTermInvested, 0);
   const totalProfitAll = investors.reduce((s, i) => s + i.totalProfit, 0);
@@ -160,7 +164,7 @@ export default function InvestorUsers() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((user) => (
+            {paginatedItems.map((user) => (
               <tr key={user.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3 font-medium text-foreground">
                   <span className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground shrink-0" />{user.name}</span>
@@ -212,12 +216,21 @@ export default function InvestorUsers() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {paginatedItems.length === 0 && (
               <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No investors found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       {/* Add/Edit Dialog */}
       {/* View Detail Dialog */}

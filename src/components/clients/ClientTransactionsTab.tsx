@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import { useFinancial } from "@/contexts/FinancialContext";
 import type { ClientTransaction } from "@/contexts/FinancialContext";
 
@@ -55,6 +57,8 @@ export function ClientTransactionsTab({ selectedYear }: Props) {
       return matchSearch && matchType && matchClient && matchFrom && matchTo;
     }).sort((a, b) => b.date.localeCompare(a.date));
   }, [clientTransactions, clients, search, typeFilter, clientFilter, dateFrom, dateTo, selectedYear]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const hasFilters = search || typeFilter !== "all" || clientFilter !== "all" || !!dateFrom || !!dateTo;
   const clearFilters = () => { setSearch(""); setTypeFilter("all"); setClientFilter("all"); setDateFrom(undefined); setDateTo(undefined); };
@@ -148,7 +152,7 @@ export function ClientTransactionsTab({ selectedYear }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((t) => (
+            {paginatedItems.map((t) => (
               <tr key={t.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-4 xl:px-6 py-3 text-muted-foreground">{t.date}</td>
                 <td className="px-4 xl:px-6 py-3 font-medium text-foreground">{getClientName(t.clientId)}</td>
@@ -185,12 +189,21 @@ export function ClientTransactionsTab({ selectedYear }: Props) {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {paginatedItems.length === 0 && (
               <tr><td colSpan={6} className="text-center py-8 text-muted-foreground">No transactions found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>

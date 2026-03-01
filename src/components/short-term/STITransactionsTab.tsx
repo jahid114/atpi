@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import type { ShortTermProject, InvestorEntryStatus, STInvestorEntry } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
 
@@ -40,6 +42,8 @@ export function STITransactionsTab({ project, onUpdateStatus }: Props) {
       return true;
     });
   }, [sorted, statusFilter, dateFrom, dateTo, search]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const hasActiveFilters = search !== "" || statusFilter !== "all" || !!dateFrom || !!dateTo;
 
@@ -102,10 +106,10 @@ export function STITransactionsTab({ project, onUpdateStatus }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
+            {paginatedItems.length === 0 ? (
               <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No transactions found.</td></tr>
             ) : (
-              filtered.map((t) => {
+              paginatedItems.map((t) => {
                 const sb = statusBadge[t.status];
                 const SIcon = sb.icon;
                 return (
@@ -139,6 +143,15 @@ export function STITransactionsTab({ project, onUpdateStatus }: Props) {
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
     </div>
   );
 }

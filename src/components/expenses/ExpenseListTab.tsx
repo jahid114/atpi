@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import { useFinancial, type Expense } from "@/contexts/FinancialContext";
 
 const fmt = (n: number) => "$" + n.toLocaleString();
@@ -53,6 +55,8 @@ export function ExpenseListTab({ categories, selectedYear }: Props) {
       })
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenses, catFilter, dateFrom, dateTo, search, selectedYear]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const hasActiveFilters = search !== "" || catFilter !== "all" || !!dateFrom || !!dateTo;
   const clearFilters = useCallback(() => {
@@ -131,9 +135,7 @@ export function ExpenseListTab({ categories, selectedYear }: Props) {
           <Input placeholder="Search expenses..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={catFilter} onValueChange={setCatFilter}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue placeholder="Category" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[140px]"><SelectValue placeholder="Category" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
             {categories.map((c) => (
@@ -188,10 +190,10 @@ export function ExpenseListTab({ categories, selectedYear }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
+            {paginatedItems.length === 0 ? (
               <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No expenses found.</td></tr>
             ) : (
-              filtered.map((e) => (
+              paginatedItems.map((e) => (
                 <tr key={e.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-4 xl:px-6 py-3 xl:py-4 text-muted-foreground">{e.date}</td>
                   <td className="px-4 xl:px-6 py-3 xl:py-4">
@@ -215,6 +217,15 @@ export function ExpenseListTab({ categories, selectedYear }: Props) {
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       {/* Add Dialog */}
       <Dialog open={addOpen} onOpenChange={setAddOpen}>

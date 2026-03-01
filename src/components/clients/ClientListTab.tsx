@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import { useFinancial } from "@/contexts/FinancialContext";
 import type { Client } from "@/contexts/FinancialContext";
 
@@ -30,6 +32,8 @@ export function ClientListTab({ selectedYear }: Props) {
       return matchSearch && matchStatus;
     });
   }, [clients, search, statusFilter]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const getClientStats = (clientId: number) => {
     const txns = clientTransactions.filter((t) => t.clientId === clientId && t.date.startsWith(String(selectedYear)));
@@ -100,7 +104,7 @@ export function ClientListTab({ selectedYear }: Props) {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((c) => {
+            {paginatedItems.map((c) => {
               const stats = getClientStats(c.id);
               return (
                 <tr key={c.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
@@ -139,12 +143,21 @@ export function ClientListTab({ selectedYear }: Props) {
                 </tr>
               );
             })}
-            {filtered.length === 0 && (
+            {paginatedItems.length === 0 && (
               <tr><td colSpan={6} className="text-center py-8 text-muted-foreground">No clients found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
