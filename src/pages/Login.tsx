@@ -8,7 +8,7 @@ import { Phone, Lock, Eye, EyeOff } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+88");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
@@ -19,6 +19,12 @@ const Login = () => {
 
     if (!phone || !password) {
       setError("Please fill in all fields.");
+      return;
+    }
+
+    const digitsOnly = phone.replace(/\D/g, "");
+    if (digitsOnly.length !== 13) {
+      setError("Phone number must be 11 digits after +88.");
       return;
     }
 
@@ -45,7 +51,15 @@ const Login = () => {
                   type="tel"
                   placeholder="+880 1XXX XXXXXX"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    // Ensure +88 prefix stays and only digits after it
+                    if (!val.startsWith("+88")) return;
+                    const afterPrefix = val.slice(3);
+                    if (afterPrefix && !/^\d*$/.test(afterPrefix)) return;
+                    if (afterPrefix.length > 11) return;
+                    setPhone(val);
+                  }}
                   className="pl-10"
                 />
               </div>
