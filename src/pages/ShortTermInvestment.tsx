@@ -43,6 +43,11 @@ const initialProjects: ShortTermProject[] = [
       { id: 101, investorName: "Alice Johnson", email: "alice@example.com", amount: 100000, date: "2026-01-20", status: "approved" },
       { id: 102, investorName: "Bob Smith", email: "bob@example.com", amount: 75000, date: "2026-01-22", status: "approved" },
       { id: 103, investorName: "David Lee", email: "david@example.com", amount: 50000, date: "2026-02-01", status: "pending" },
+      { id: 104, investorName: "Frank Müller", email: "frank@example.com", amount: 60000, date: "2026-02-05", status: "approved" },
+      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", amount: 45000, date: "2026-02-08", status: "approved" },
+      { id: 106, investorName: "Hassan Ali", email: "hassan@example.com", amount: 80000, date: "2026-02-10", status: "pending" },
+      { id: 107, investorName: "Isabella Costa", email: "isabella@example.com", amount: 35000, date: "2026-02-12", status: "approved" },
+      { id: 108, investorName: "Jack O'Brien", email: "jack@example.com", amount: 55000, date: "2026-02-14", status: "rejected" },
     ],
   },
   {
@@ -57,6 +62,11 @@ const initialProjects: ShortTermProject[] = [
     image: projectEquipment,
     investors: [
       { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
+      { id: 202, investorName: "Liam Foster", email: "liam@example.com", amount: 40000, date: "2026-02-08", status: "approved" },
+      { id: 203, investorName: "Keiko Yamamoto", email: "keiko@example.com", amount: 25000, date: "2026-02-10", status: "pending" },
+      { id: 204, investorName: "Eva Martinez", email: "eva@example.com", amount: 30000, date: "2026-02-12", status: "approved" },
+      { id: 205, investorName: "Raj Patel", email: "raj@example.com", amount: 50000, date: "2026-02-15", status: "approved" },
+      { id: 206, investorName: "Sophie Laurent", email: "sophie@example.com", amount: 20000, date: "2026-02-18", status: "rejected" },
     ],
   },
 ];

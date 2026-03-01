@@ -51,8 +51,54 @@ const initialWallets: InvestorWallet[] = [
       { id: 301, investorName: "David Lee", email: "david@example.com", type: "top_up", amount: 10000, date: "2026-02-10", status: "pending", description: "Pending top-up" },
     ],
   },
+  {
+    id: 4,
+    investorName: "Carol Williams",
+    email: "carol@example.com",
+    balance: 45000,
+    totalTopUps: 100000,
+    totalSpent: 55000,
+    transactions: [
+      { id: 401, investorName: "Carol Williams", email: "carol@example.com", type: "top_up", amount: 100000, date: "2026-01-05", status: "approved", description: "Initial funding" },
+      { id: 402, investorName: "Carol Williams", email: "carol@example.com", type: "invest_lti", amount: 55000, date: "2026-01-18", status: "approved", description: "LTI allocation" },
+    ],
+  },
+  {
+    id: 5,
+    investorName: "Frank Müller",
+    email: "frank@example.com",
+    balance: 30000,
+    totalTopUps: 80000,
+    totalSpent: 50000,
+    transactions: [
+      { id: 501, investorName: "Frank Müller", email: "frank@example.com", type: "top_up", amount: 80000, date: "2026-01-08", status: "approved", description: "Wallet deposit" },
+      { id: 502, investorName: "Frank Müller", email: "frank@example.com", type: "invest_sti", amount: 50000, date: "2026-02-03", status: "approved", description: "STI project investment" },
+    ],
+  },
+  {
+    id: 6,
+    investorName: "Grace Tanaka",
+    email: "grace@example.com",
+    balance: 60000,
+    totalTopUps: 60000,
+    totalSpent: 0,
+    transactions: [
+      { id: 601, investorName: "Grace Tanaka", email: "grace@example.com", type: "top_up", amount: 60000, date: "2026-02-12", status: "pending", description: "Top-up request" },
+    ],
+  },
+  {
+    id: 7,
+    investorName: "Hassan Ali",
+    email: "hassan@example.com",
+    balance: 20000,
+    totalTopUps: 50000,
+    totalSpent: 30000,
+    transactions: [
+      { id: 701, investorName: "Hassan Ali", email: "hassan@example.com", type: "top_up", amount: 50000, date: "2026-01-25", status: "approved", description: "Wallet top-up" },
+      { id: 702, investorName: "Hassan Ali", email: "hassan@example.com", type: "invest_lti", amount: 30000, date: "2026-02-08", status: "approved", description: "Long-term allocation" },
+    ],
+  },
 ];
-
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [wallets, setWallets] = useState<InvestorWallet[]>(initialWallets);
 

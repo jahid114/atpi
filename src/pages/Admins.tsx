@@ -28,6 +28,12 @@ interface AdminUser {
 const initialAdmins: AdminUser[] = [
   { id: 1, name: "Admin User", email: "admin@investfarm.com", phone: "+1 555-0001", joinedDate: "2025-01-01", status: "active" },
   { id: 2, name: "Sarah Chen", email: "sarah@investfarm.com", phone: "+1 555-0002", joinedDate: "2025-02-15", status: "active" },
+  { id: 3, name: "Michael Rivera", email: "michael@investfarm.com", phone: "+1 555-0003", joinedDate: "2025-03-10", status: "active" },
+  { id: 4, name: "Jessica Park", email: "jessica@investfarm.com", phone: "+1 555-0004", joinedDate: "2025-04-20", status: "active" },
+  { id: 5, name: "Omar Hassan", email: "omar@investfarm.com", phone: "+1 555-0005", joinedDate: "2025-05-08", status: "inactive" },
+  { id: 6, name: "Linda Nguyen", email: "linda@investfarm.com", phone: "+1 555-0006", joinedDate: "2025-06-12", status: "active" },
+  { id: 7, name: "Thomas Wright", email: "thomas@investfarm.com", phone: "+1 555-0007", joinedDate: "2025-07-25", status: "active" },
+  { id: 8, name: "Priya Sharma", email: "priya@investfarm.com", phone: "+1 555-0008", joinedDate: "2025-08-30", status: "active" },
 ];
 
 const emptyForm = { name: "", email: "", phone: "", status: "active" as "active" | "inactive" };
