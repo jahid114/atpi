@@ -43,7 +43,7 @@ const Login = () => {
                 <Input
                   id="phone"
                   type="tel"
-                  placeholder="+966 5XX XXX XXXX"
+                  placeholder="+880 1XXX XXXXXX"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   className="pl-10"
