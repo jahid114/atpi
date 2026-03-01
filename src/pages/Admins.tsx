@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { Shield, Mail, Phone, Search, Plus, Pencil, Trash2 } from "lucide-react";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,6 +42,8 @@ export default function Admins() {
   const filtered = useMemo(() => admins.filter((u) => {
     return u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
   }), [admins, search]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
   const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (u: AdminUser) => {
@@ -108,7 +112,7 @@ export default function Admins() {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((user) => (
+            {paginatedItems.map((user) => (
               <tr key={user.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-4 py-3 font-medium text-foreground">
                   <span className="flex items-center gap-2"><Shield className="h-4 w-4 text-primary shrink-0" />{user.name}</span>
@@ -151,12 +155,21 @@ export default function Admins() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && (
+            {paginatedItems.length === 0 && (
               <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No admins found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       {/* Add/Edit Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>

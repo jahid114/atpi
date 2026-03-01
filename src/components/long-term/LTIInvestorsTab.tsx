@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { InvestorDetailDialog } from "@/components/InvestorDetailDialog";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calcDaysActive, calculateInvestorShare, fmt } from "@/lib/investor-utils";
 
@@ -40,6 +42,8 @@ export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestme
       });
   }, [approvedInvestors, profit, investors, search]);
 
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(rows);
+
   const totalInvested = approvedInvestors.reduce((s, i) => s + i.invested, 0);
   const currentDetailInvestor = detailInvestor ? investors.find((i) => i.id === detailInvestor.id) || null : null;
 
@@ -71,7 +75,7 @@ export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestme
             </tr>
           </thead>
           <tbody>
-            {rows.map((inv) => (
+            {paginatedItems.map((inv) => (
               <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-4 xl:px-6 py-3 xl:py-4">
                   <p className="font-medium text-foreground">{inv.name}</p>
@@ -103,6 +107,15 @@ export function LTIInvestorsTab({ investors, profit, onRelease, onUpdateInvestme
           </tfoot>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
 
       <InvestorDetailDialog
         investor={currentDetailInvestor}

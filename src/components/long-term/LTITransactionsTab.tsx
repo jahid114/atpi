@@ -8,12 +8,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
 import { fmt } from "@/lib/investor-utils";
 
@@ -71,6 +69,8 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
     });
   }, [allTransactions, typeFilter, statusFilter, dateFrom, dateTo, search, selectedYear]);
 
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
+
   const hasActiveFilters = search !== "" || typeFilter !== "all" || statusFilter !== "all" || !!dateFrom || !!dateTo;
 
   const clearFilters = useCallback(() => {
@@ -81,7 +81,6 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
     setDateTo(undefined);
   }, []);
 
-
   return (
     <div className="space-y-4">
       {/* Filters */}
@@ -91,9 +90,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
           <Input placeholder="Search by investor..." className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
         <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Type" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[150px]"><SelectValue placeholder="Type" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             <SelectItem value="deposit">Deposit</SelectItem>
@@ -102,9 +99,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
           </SelectContent>
         </Select>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
+          <SelectTrigger className="w-[150px]"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
@@ -156,12 +151,12 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
+            {paginatedItems.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No transactions found.</td>
               </tr>
             ) : (
-              filtered.map((t) => {
+              paginatedItems.map((t) => {
                 const sb = statusBadge[t.status];
                 const SIcon = sb.icon;
                 return (
@@ -200,6 +195,15 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
           </tbody>
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
     </div>
   );
 }

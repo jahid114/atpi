@@ -2,6 +2,8 @@ import { useMemo, useState } from "react";
 import { Eye, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { TablePagination } from "@/components/TablePagination";
+import { usePagination } from "@/hooks/use-pagination";
 import type { ShortTermProject } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
 
@@ -17,6 +19,8 @@ export function STIInvestorsTab({ project }: Props) {
       .filter((inv) => inv.status === "approved")
       .filter((inv) => inv.investorName.toLowerCase().includes(search.toLowerCase()) || inv.email.toLowerCase().includes(search.toLowerCase()));
   }, [project.investors, search]);
+
+  const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(approved);
 
   const totalFunded = approved.reduce((s, inv) => s + inv.amount, 0);
 
@@ -40,7 +44,7 @@ export function STIInvestorsTab({ project }: Props) {
             </tr>
           </thead>
           <tbody>
-            {approved.map((inv) => (
+            {paginatedItems.map((inv) => (
               <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                 <td className="px-3 py-2">
                   <p className="font-medium text-foreground">{inv.investorName}</p>
@@ -50,7 +54,7 @@ export function STIInvestorsTab({ project }: Props) {
                 <td className="px-3 py-2 text-muted-foreground text-xs">{inv.date}</td>
               </tr>
             ))}
-            {approved.length === 0 && (
+            {paginatedItems.length === 0 && (
               <tr><td colSpan={3} className="px-3 py-6 text-center text-muted-foreground">No approved investors yet.</td></tr>
             )}
           </tbody>
@@ -65,6 +69,15 @@ export function STIInvestorsTab({ project }: Props) {
           )}
         </table>
       </div>
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={totalItems}
+        onPageChange={goToPage}
+        hasNextPage={hasNextPage}
+        hasPrevPage={hasPrevPage}
+      />
     </div>
   );
 }
