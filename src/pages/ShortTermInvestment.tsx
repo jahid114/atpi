@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,7 @@ const initialProjects: ShortTermProject[] = [
 ];
 
 export default function ShortTermInvestment() {
+  const { addNotification } = useNotifications();
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
@@ -136,10 +138,20 @@ export default function ShortTermInvestment() {
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
     );
+    const project = projects.find(p => p.id === projectId);
+    addNotification({
+      type: "sti",
+      action: "request",
+      title: "New STI Investment Request",
+      message: `${data.investorName} requested to invest $${data.amount.toLocaleString()} in ${project?.name || "a project"}`,
+      link: "/short-term-investment",
+    });
     toast.success("Investor added for review.");
   };
 
   const handleUpdateStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
+    const project = projects.find(p => p.id === projectId);
+    const entry = project?.investors.find(i => i.id === entryId);
     setProjects((prev) =>
       prev.map((p) =>
         p.id === projectId
@@ -147,6 +159,13 @@ export default function ShortTermInvestment() {
           : p
       )
     );
+    addNotification({
+      type: "sti",
+      action: status === "approved" ? "approved" : "rejected",
+      title: `STI Investor ${status === "approved" ? "Approved" : "Rejected"}`,
+      message: `${entry?.investorName || "Investor"}'s investment in ${project?.name || "project"} has been ${status}`,
+      link: "/short-term-investment",
+    });
     toast.success(`Investor ${status}.`);
   };
 

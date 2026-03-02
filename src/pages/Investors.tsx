@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, UserPlus, ArrowLeftRight, DollarSign } from "lucide-react";
 import type { NomineeInfo } from "@/types/investor";
@@ -14,6 +15,7 @@ import { YearSelector } from "@/components/YearSelector";
 
 export default function Investors() {
   const { netProfit: profit } = useFinancial();
+  const { addNotification } = useNotifications();
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -56,10 +58,18 @@ export default function Investors() {
       history: [{ id: entryId + 1, date: data.investmentDate, amount: data.invested, type: "deposit", status: "pending" }],
     };
     setInvestors((prev) => [...prev, newInvestor]);
+    addNotification({
+      type: "lti",
+      action: "request",
+      title: "New LTI Registration",
+      message: `${data.name} has registered as an investor — awaiting approval`,
+      link: "/long-term-investment",
+    });
     toast.success(`${newInvestor.name} registered — awaiting approval.`);
   };
 
   const handleApprove = (id: number) => {
+    const inv = investors.find((i) => i.id === id);
     setInvestors((prev) =>
       prev.map((i) =>
         i.id === id
@@ -67,10 +77,18 @@ export default function Investors() {
           : i
       )
     );
+    addNotification({
+      type: "lti",
+      action: "approved",
+      title: "LTI Investor Approved",
+      message: `${inv?.name || "Investor"} has been approved for long-term investment`,
+      link: "/long-term-investment",
+    });
     toast.success("Investor approved.");
   };
 
   const handleReject = (id: number) => {
+    const inv = investors.find((i) => i.id === id);
     setInvestors((prev) =>
       prev.map((i) =>
         i.id === id
@@ -78,6 +96,13 @@ export default function Investors() {
           : i
       )
     );
+    addNotification({
+      type: "lti",
+      action: "rejected",
+      title: "LTI Investor Rejected",
+      message: `${inv?.name || "Investor"}'s registration has been rejected`,
+      link: "/long-term-investment",
+    });
     toast("Investor rejected.");
   };
 
