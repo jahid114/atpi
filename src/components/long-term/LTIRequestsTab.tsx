@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet, User, Mail, Phone, Calendar, DollarSign, Heart, CreditCard, Shirt, Users, Hash, UserCheck } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet, User, Mail, Phone, Calendar, DollarSign, Heart, CreditCard, Shirt, Users, Hash, UserCheck, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,17 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
   const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
   const [reviewInvestor, setReviewInvestor] = useState<Investor | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
+  const [attachment, setAttachment] = useState<{ name: string; url: string } | null>(null);
+  const attachmentRef = useRef<HTMLInputElement>(null);
+
+  const handleAttachmentUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setAttachment({ name: file.name, url: ev.target?.result as string });
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Users not yet registered as investors (match by email)
   const availableUsers = useMemo(() => {
@@ -122,6 +133,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
     setForm(emptyForm);
     setFundingSource("direct");
     setSelectedUserId("");
+    setAttachment(null);
     setRegisterOpen(false);
   };
 
@@ -213,7 +225,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
       )}
 
       {/* Register Dialog */}
-      <Dialog open={registerOpen} onOpenChange={(open) => { if (!open) { setForm(emptyForm); setSelectedUserId(""); setFundingSource("direct"); } setRegisterOpen(open); }}>
+      <Dialog open={registerOpen} onOpenChange={(open) => { if (!open) { setForm(emptyForm); setSelectedUserId(""); setFundingSource("direct"); setAttachment(null); } setRegisterOpen(open); }}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Register New Investor</DialogTitle>
@@ -317,6 +329,25 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                     <p className="text-xs text-destructive">Amount exceeds wallet balance of {fmtWallet(walletBalance)}</p>
                   )}
                 </div>
+                {fundingSource === "direct" && (
+                  <div className="col-span-2 space-y-1.5">
+                    <Label>Payment Attachment</Label>
+                    <input type="file" ref={attachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleAttachmentUpload} />
+                    {attachment ? (
+                      <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
+                        <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <span className="text-sm text-foreground truncate flex-1">{attachment.name}</span>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setAttachment(null)}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => attachmentRef.current?.click()}>
+                        <Paperclip className="h-4 w-4" /> Upload payment proof (receipt, bank slip, etc.)
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
