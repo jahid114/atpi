@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Phone, MapPin, Briefcase, Shield, Camera, Save, KeyRound } from "lucide-react";
+import { User, Mail, Phone, MapPin, Briefcase, Shield, Camera, Save, KeyRound, Eye, EyeOff } from "lucide-react";
 
 interface ProfileData {
   name: string;
@@ -22,7 +30,23 @@ interface ProfileData {
 
 const Profile = () => {
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordErrors, setPasswordErrors] = useState<Record<string, string>>({});
+
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(() => {
+    return localStorage.getItem("profilePhoto");
+  });
+
   const [profile, setProfile] = useState<ProfileData>({
     name: "Admin User",
     email: "admin@investfarm.com",
@@ -54,8 +78,91 @@ const Profile = () => {
     setIsEditing(false);
   };
 
+  // --- Profile Photo Upload ---
+  const handlePhotoClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please upload an image file (JPG, PNG, etc.).", variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "File too large", description: "Please upload an image smaller than 5MB.", variant: "destructive" });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      setProfilePhoto(dataUrl);
+      localStorage.setItem("profilePhoto", dataUrl);
+      toast({ title: "Photo updated", description: "Your profile photo has been changed." });
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  };
+
+  // --- Change Password ---
+  const validatePassword = (): boolean => {
+    const errors: Record<string, string> = {};
+    const storedPassword = localStorage.getItem("userPassword") || "password123";
+
+    if (!passwordForm.currentPassword) {
+      errors.currentPassword = "Current password is required";
+    } else if (passwordForm.currentPassword !== storedPassword) {
+      errors.currentPassword = "Current password is incorrect";
+    }
+
+    if (!passwordForm.newPassword) {
+      errors.newPassword = "New password is required";
+    } else if (passwordForm.newPassword.length < 6) {
+      errors.newPassword = "Password must be at least 6 characters";
+    } else if (passwordForm.newPassword.length > 50) {
+      errors.newPassword = "Password must be less than 50 characters";
+    }
+
+    if (!passwordForm.confirmPassword) {
+      errors.confirmPassword = "Please confirm your new password";
+    } else if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      errors.confirmPassword = "Passwords do not match";
+    }
+
+    setPasswordErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handlePasswordChange = () => {
-    toast({ title: "Password reset", description: "Password change feature coming soon." });
+    if (!validatePassword()) return;
+
+    localStorage.setItem("userPassword", passwordForm.newPassword);
+    setChangePasswordOpen(false);
+    setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    setPasswordErrors({});
+    setShowCurrentPassword(false);
+    setShowNewPassword(false);
+    setShowConfirmPassword(false);
+    toast({ title: "Password changed", description: "Your password has been updated successfully." });
+  };
+
+  const handlePasswordDialogClose = (open: boolean) => {
+    if (!open) {
+      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordErrors({});
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
+    }
+    setChangePasswordOpen(open);
   };
 
   const infoField = (icon: React.ReactNode, label: string, value: string, field?: keyof ProfileData) => (
@@ -103,13 +210,27 @@ const Profile = () => {
           <CardContent className="pt-8 pb-6 flex flex-col items-center text-center">
             <div className="relative group">
               <Avatar className="h-28 w-28 border-4 border-primary/20">
+                {profilePhoto ? (
+                  <AvatarImage src={profilePhoto} alt={profile.name} className="object-cover" />
+                ) : null}
                 <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
                   {initials}
                 </AvatarFallback>
               </Avatar>
-              <button className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors">
+              <button
+                onClick={handlePhotoClick}
+                className="absolute bottom-0 right-0 p-2 rounded-full bg-primary text-primary-foreground shadow-md hover:bg-primary/90 transition-colors"
+                title="Upload photo"
+              >
                 <Camera className="h-4 w-4" />
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoChange}
+                className="hidden"
+              />
             </div>
             <h2 className="text-xl font-bold text-foreground mt-4">{profile.name}</h2>
             <p className="text-sm text-muted-foreground mt-1">{profile.designation}</p>
@@ -172,16 +293,124 @@ const Profile = () => {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-foreground">Password</p>
-                  <p className="text-xs text-muted-foreground">Last changed 30 days ago</p>
+                  <p className="text-xs text-muted-foreground">Change your account password</p>
                 </div>
               </div>
-              <Button variant="outline" size="sm" onClick={handlePasswordChange} className="gap-2">
+              <Button variant="outline" size="sm" onClick={() => setChangePasswordOpen(true)} className="gap-2">
                 <KeyRound className="h-3.5 w-3.5" /> Change Password
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Change Password Dialog */}
+      <Dialog open={changePasswordOpen} onOpenChange={handlePasswordDialogClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Change Password
+            </DialogTitle>
+            <DialogDescription>
+              Enter your current password and choose a new one.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Current Password */}
+            <div className="space-y-2">
+              <Label htmlFor="current-password">Current Password</Label>
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showCurrentPassword ? "text" : "password"}
+                  placeholder="Enter current password"
+                  value={passwordForm.currentPassword}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, currentPassword: e.target.value });
+                    if (passwordErrors.currentPassword) setPasswordErrors({ ...passwordErrors, currentPassword: "" });
+                  }}
+                  className={passwordErrors.currentPassword ? "border-destructive pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordErrors.currentPassword && (
+                <p className="text-xs text-destructive">{passwordErrors.currentPassword}</p>
+              )}
+            </div>
+
+            {/* New Password */}
+            <div className="space-y-2">
+              <Label htmlFor="new-password">New Password</Label>
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showNewPassword ? "text" : "password"}
+                  placeholder="Enter new password"
+                  value={passwordForm.newPassword}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, newPassword: e.target.value });
+                    if (passwordErrors.newPassword) setPasswordErrors({ ...passwordErrors, newPassword: "" });
+                  }}
+                  className={passwordErrors.newPassword ? "border-destructive pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowNewPassword(!showNewPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordErrors.newPassword && (
+                <p className="text-xs text-destructive">{passwordErrors.newPassword}</p>
+              )}
+            </div>
+
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm New Password</Label>
+              <div className="relative">
+                <Input
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="Confirm new password"
+                  value={passwordForm.confirmPassword}
+                  onChange={(e) => {
+                    setPasswordForm({ ...passwordForm, confirmPassword: e.target.value });
+                    if (passwordErrors.confirmPassword) setPasswordErrors({ ...passwordErrors, confirmPassword: "" });
+                  }}
+                  className={passwordErrors.confirmPassword ? "border-destructive pr-10" : "pr-10"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {passwordErrors.confirmPassword && (
+                <p className="text-xs text-destructive">{passwordErrors.confirmPassword}</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => handlePasswordDialogClose(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handlePasswordChange} className="gap-2">
+              <KeyRound className="h-4 w-4" /> Update Password
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
