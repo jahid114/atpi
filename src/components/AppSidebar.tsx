@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Receipt,
@@ -10,7 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  X,
+  LogOut,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,6 +26,24 @@ const navItems = [
   { title: "Admins", path: "/admins", icon: Shield },
   { title: "Investors", path: "/investor-users", icon: UsersRound },
 ];
+
+function LogoutButton({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("isLoggedIn");
+    onNavigate?.();
+    navigate("/login");
+  };
+  return (
+    <button
+      onClick={handleLogout}
+      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-sidebar-muted hover:text-destructive hover:bg-sidebar-hover w-full"
+    >
+      <LogOut size={18} className="shrink-0" />
+      {!collapsed && <span className="truncate">Logout</span>}
+    </button>
+  );
+}
 
 function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   return (
@@ -67,8 +85,8 @@ export function MobileSidebarTrigger() {
           <span className="text-sm font-bold tracking-tight">InvestFarm</span>
         </div>
         <SidebarNav onNavigate={() => setOpen(false)} />
-        <div className="p-4 border-t border-sidebar-border">
-          <p className="text-xs text-sidebar-muted">v1.0 · Admin Panel</p>
+        <div className="p-2 border-t border-sidebar-border">
+          <LogoutButton onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
     </Sheet>
@@ -122,10 +140,8 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-sidebar-border">
-        {!collapsed && (
-          <p className="text-xs text-sidebar-muted">v1.0 · Admin Panel</p>
-        )}
+      <div className="p-2 border-t border-sidebar-border">
+        <LogoutButton collapsed={collapsed} />
       </div>
     </aside>
   );
