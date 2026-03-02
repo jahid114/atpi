@@ -8,12 +8,17 @@ export interface NomineeInfo {
   nidNumber: string;
 }
 
+export type TransferMedium = "cash" | "check" | "bank_transfer";
+
 export interface InvestmentEntry {
   id: number;
   date: string;
   amount: number;
   type: "deposit" | "withdrawal" | "payout";
   status: InvestmentStatus;
+  transferMedium?: TransferMedium;
+  description?: string;
+  attachment?: { name: string; url: string };
 }
 
 export interface Investor {
