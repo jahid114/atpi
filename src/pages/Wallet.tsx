@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Search, Eye, DollarSign, Upload } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Search, Eye, DollarSign, Upload, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/select";
 import { useWallet } from "@/contexts/WalletContext";
 import { fmtWallet, walletTxTypeConfig, walletTxStatusConfig, transferMediumConfig } from "@/types/wallet";
-import type { InvestorWallet, TransferMedium } from "@/types/wallet";
+import type { InvestorWallet, TransferMedium, WalletTransaction } from "@/types/wallet";
 import WalletDetailDialog from "@/components/wallet/WalletDetailDialog";
+import { usePagination } from "@/hooks/use-pagination";
+import { TablePagination } from "@/components/TablePagination";
 
 export default function Wallet() {
   const { wallets, requestTransaction, approveTransaction, rejectTransaction } = useWallet();
@@ -27,6 +29,7 @@ export default function Wallet() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedWallet, setSelectedWallet] = useState<InvestorWallet | null>(null);
+  const [viewTx, setViewTx] = useState<(WalletTransaction & { walletId: number }) | null>(null);
 
   const totalBalance = useMemo(() => wallets.reduce((s, w) => s + w.balance, 0), [wallets]);
   const totalTopUps = useMemo(() => wallets.reduce((s, w) => s + w.totalTopUps, 0), [wallets]);
@@ -49,6 +52,11 @@ export default function Wallet() {
       })
       .sort((a, b) => b.date.localeCompare(a.date));
   }, [wallets, search, statusFilter, dateFrom, dateTo]);
+
+  // Pagination hooks
+  const walletsPagination = usePagination(wallets);
+  const requestsPagination = usePagination(pendingTopUps);
+  const txPagination = usePagination(allTransactions);
 
   const handleSubmitTransaction = () => {
     if (!txForm.investorId || !txForm.amount || Number(txForm.amount) <= 0) return;
@@ -102,7 +110,7 @@ export default function Wallet() {
           </TabsTrigger>
         </TabsList>
 
-        {/* Wallets Tab — now a table */}
+        {/* Wallets Tab */}
         <TabsContent value="wallets">
           <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
             <table className="w-full text-sm min-w-[700px]">
@@ -116,7 +124,7 @@ export default function Wallet() {
                 </tr>
               </thead>
               <tbody>
-                {wallets.map((w) => (
+                {walletsPagination.paginatedItems.map((w) => (
                   <tr key={w.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3 text-muted-foreground">#{w.id}</td>
                     <td className="px-4 py-3 font-medium text-foreground">{w.investorName}</td>
@@ -149,51 +157,72 @@ export default function Wallet() {
               </tbody>
             </table>
           </div>
+          <TablePagination
+            currentPage={walletsPagination.currentPage}
+            totalPages={walletsPagination.totalPages}
+            totalItems={walletsPagination.totalItems}
+            onPageChange={walletsPagination.goToPage}
+            hasNextPage={walletsPagination.hasNextPage}
+            hasPrevPage={walletsPagination.hasPrevPage}
+          />
         </TabsContent>
 
         {/* Requests Tab */}
         <TabsContent value="requests">
           {pendingTopUps.length > 0 ? (
-            <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
-              <table className="w-full text-sm min-w-[700px]">
-                <thead>
-                  <tr className="border-b border-border bg-muted/50">
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Investor</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
-                    <th className="text-left px-4 py-3 font-medium text-muted-foreground">Medium</th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
-                    <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pendingTopUps.map((tx) => {
-                    const typeConf = walletTxTypeConfig[tx.type];
-                    return (
-                      <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 text-muted-foreground">{tx.date}</td>
-                        <td className="px-4 py-3 font-medium text-foreground">{tx.investorName}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs font-medium ${typeConf.color}`}>{typeConf.label}</span>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground text-xs">{tx.transferMedium ? transferMediumConfig[tx.transferMedium] : "—"}</td>
-                        <td className="px-4 py-3 text-right font-semibold text-foreground">{fmtWallet(tx.amount)}</td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-1">
-                            <Button size="sm" variant="outline" className="h-7 text-profit border-profit/30 hover:bg-profit/10 hover:text-profit" onClick={() => approveTransaction(tx.walletId, tx.id)}>
-                              <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
-                            </Button>
-                            <Button size="sm" variant="outline" className="h-7 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => rejectTransaction(tx.walletId, tx.id)}>
-                              <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
+                <table className="w-full text-sm min-w-[700px]">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Date</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Investor</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Type</th>
+                      <th className="text-left px-4 py-3 font-medium text-muted-foreground">Medium</th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                      <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {requestsPagination.paginatedItems.map((tx) => {
+                      const typeConf = walletTxTypeConfig[tx.type];
+                      return (
+                        <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                          <td className="px-4 py-3 text-muted-foreground">{tx.date}</td>
+                          <td className="px-4 py-3 font-medium text-foreground">{tx.investorName}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs font-medium ${typeConf.color}`}>{typeConf.label}</span>
+                          </td>
+                          <td className="px-4 py-3 text-muted-foreground text-xs">{tx.transferMedium ? transferMediumConfig[tx.transferMedium] : "—"}</td>
+                          <td className="px-4 py-3 text-right font-semibold text-foreground">{fmtWallet(tx.amount)}</td>
+                          <td className="px-4 py-3 text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setViewTx(tx)}>
+                                <Eye className="h-3.5 w-3.5 mr-1" /> View
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-7 text-profit border-profit/30 hover:bg-profit/10 hover:text-profit" onClick={() => approveTransaction(tx.walletId, tx.id)}>
+                                <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                              </Button>
+                              <Button size="sm" variant="outline" className="h-7 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => rejectTransaction(tx.walletId, tx.id)}>
+                                <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <TablePagination
+                currentPage={requestsPagination.currentPage}
+                totalPages={requestsPagination.totalPages}
+                totalItems={requestsPagination.totalItems}
+                onPageChange={requestsPagination.goToPage}
+                hasNextPage={requestsPagination.hasNextPage}
+                hasPrevPage={requestsPagination.hasPrevPage}
+              />
+            </>
           ) : (
             <div className="bg-card border border-border rounded-lg p-8 text-center kpi-shadow">
               <CheckCircle className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
@@ -202,7 +231,7 @@ export default function Wallet() {
           )}
         </TabsContent>
 
-        {/* All Transactions Tab — no action column, added date filter */}
+        {/* All Transactions Tab */}
         <TabsContent value="transactions">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-3">
@@ -240,7 +269,7 @@ export default function Wallet() {
                   </tr>
                 </thead>
                 <tbody>
-                  {allTransactions.map((tx) => {
+                  {txPagination.paginatedItems.map((tx) => {
                     const typeConf = walletTxTypeConfig[tx.type];
                     const statusConf = walletTxStatusConfig[tx.status];
                     return (
@@ -270,6 +299,14 @@ export default function Wallet() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={txPagination.currentPage}
+              totalPages={txPagination.totalPages}
+              totalItems={txPagination.totalItems}
+              onPageChange={txPagination.goToPage}
+              hasNextPage={txPagination.hasNextPage}
+              hasPrevPage={txPagination.hasPrevPage}
+            />
           </div>
         </TabsContent>
       </Tabs>
@@ -338,6 +375,66 @@ export default function Wallet() {
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
             <Button onClick={handleSubmitTransaction}>Submit for Approval</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Request Detail Dialog */}
+      <Dialog open={!!viewTx} onOpenChange={(open) => !open && setViewTx(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Eye className="h-5 w-5 text-primary" /> Request Details
+            </DialogTitle>
+            <DialogDescription>Transaction request information</DialogDescription>
+          </DialogHeader>
+          {viewTx && (
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Investor</p>
+                  <p className="font-medium text-foreground">{viewTx.investorName}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
+                  <p className="font-medium text-foreground">{viewTx.date}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Type</p>
+                  <p className={`font-medium ${walletTxTypeConfig[viewTx.type].color}`}>{walletTxTypeConfig[viewTx.type].label}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Amount</p>
+                  <p className="font-semibold text-foreground">{fmtWallet(viewTx.amount)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Transfer Medium</p>
+                  <p className="font-medium text-foreground">{viewTx.transferMedium ? transferMediumConfig[viewTx.transferMedium] : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
+                  <Badge variant={walletTxStatusConfig[viewTx.status].variant} className="text-[11px] mt-0.5">{walletTxStatusConfig[viewTx.status].label}</Badge>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Description</p>
+                <p className="text-sm text-foreground">{viewTx.description}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Attachment</p>
+                {viewTx.attachment ? (
+                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
+                    <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                    <span className="text-sm font-medium text-foreground truncate">{viewTx.attachment}</span>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground italic">No attachment</p>
+                )}
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
           </DialogFooter>
         </DialogContent>
       </Dialog>
