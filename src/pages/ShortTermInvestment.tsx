@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2 } from "lucide-react";
+import { useState, useRef } from "react";
+import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -76,10 +76,12 @@ export default function ShortTermInvestment() {
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
   const [expanded, setExpanded] = useState(false);
-  const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
+  const [projectForm, setProjectForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "", image: "" });
   const [editOpen, setEditOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
+  const [editForm, setEditForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "", image: "" });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const createImageRef = useRef<HTMLInputElement>(null);
+  const editImageRef = useRef<HTMLInputElement>(null);
 
   const detailProject = detailProjectId ? projects.find((p) => p.id === detailProjectId) || null : null;
 
@@ -97,13 +99,29 @@ export default function ShortTermInvestment() {
       endDate: projectForm.endDate,
       expectedReturn: Number(projectForm.expectedReturn) || 0,
       status: "active",
-      image: defaultImages[projects.length % defaultImages.length],
+      image: projectForm.image || defaultImages[projects.length % defaultImages.length],
       investors: [],
     };
     setProjects((prev) => [...prev, newProject]);
-    setProjectForm({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "" });
+    setProjectForm({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "", image: "" });
     setCreateOpen(false);
     toast.success(`Project "${newProject.name}" created.`);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, target: "create" | "edit") => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target?.result as string;
+        if (target === "create") {
+          setProjectForm((f) => ({ ...f, image: dataUrl }));
+        } else {
+          setEditForm((f) => ({ ...f, image: dataUrl }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number }) => {
@@ -141,6 +159,7 @@ export default function ShortTermInvestment() {
       startDate: detailProject.startDate,
       endDate: detailProject.endDate,
       expectedReturn: String(detailProject.expectedReturn),
+      image: detailProject.image,
     });
     setEditOpen(true);
   };
@@ -161,6 +180,7 @@ export default function ShortTermInvestment() {
               startDate: editForm.startDate,
               endDate: editForm.endDate,
               expectedReturn: Number(editForm.expectedReturn) || 0,
+              image: editForm.image || p.image,
             }
           : p
       )
@@ -299,6 +319,25 @@ export default function ShortTermInvestment() {
                 <Input type="date" value={projectForm.endDate} onChange={(e) => setProjectForm((f) => ({ ...f, endDate: e.target.value }))} />
               </div>
             </div>
+            {/* Image Upload */}
+            <div className="space-y-1.5">
+              <Label>Project Image</Label>
+              <div
+                onClick={() => createImageRef.current?.click()}
+                className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+              >
+                {projectForm.image ? (
+                  <img src={projectForm.image} alt="Preview" className="w-full h-32 object-cover rounded-md" />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <ImagePlus className="h-8 w-8" />
+                    <p className="text-sm">Click to upload an image</p>
+                    <p className="text-xs">JPG, PNG or WebP</p>
+                  </div>
+                )}
+              </div>
+              <input ref={createImageRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, "create")} />
+            </div>
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
@@ -424,6 +463,25 @@ export default function ShortTermInvestment() {
                 <Label>End Date *</Label>
                 <Input type="date" value={editForm.endDate} onChange={(e) => setEditForm((f) => ({ ...f, endDate: e.target.value }))} />
               </div>
+            </div>
+            {/* Image Upload */}
+            <div className="space-y-1.5">
+              <Label>Project Image</Label>
+              <div
+                onClick={() => editImageRef.current?.click()}
+                className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+              >
+                {editForm.image ? (
+                  <img src={editForm.image} alt="Preview" className="w-full h-32 object-cover rounded-md" />
+                ) : (
+                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <ImagePlus className="h-8 w-8" />
+                    <p className="text-sm">Click to upload an image</p>
+                    <p className="text-xs">JPG, PNG or WebP</p>
+                  </div>
+                )}
+              </div>
+              <input ref={editImageRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, "edit")} />
             </div>
           </div>
           <DialogFooter>
