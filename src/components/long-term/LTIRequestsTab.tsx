@@ -429,16 +429,9 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                       <p className="text-lg font-bold text-foreground mt-0.5">{fmt(reviewInvestor.invested)}</p>
                     </div>
                     <div className="bg-card border border-border rounded-lg p-3 text-center">
-                      <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Wallet Balance</p>
-                      <p className="text-lg font-bold text-foreground mt-0.5">{fmtWallet(reviewWalletBalance)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2.5 mt-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
-                    <div>
+                      <Calendar className="h-5 w-5 text-primary mx-auto mb-1" />
                       <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Investment Date</p>
-                      <p className="text-sm font-medium text-foreground">{reviewInvestor.investmentDate}</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{reviewInvestor.investmentDate}</p>
                     </div>
                   </div>
                 </div>
