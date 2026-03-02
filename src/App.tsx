@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "./components/DashboardLayout";
 import { FinancialProvider } from "./contexts/FinancialContext";
 import { WalletProvider } from "./contexts/WalletContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import Overview from "./pages/Overview";
 import Expenses from "./pages/Expenses";
 import Clients from "./pages/Clients";
@@ -30,6 +31,7 @@ const App = () => (
     <TooltipProvider>
       <FinancialProvider>
         <WalletProvider>
+          <NotificationProvider>
           <Toaster />
           <Sonner />
           <BrowserRouter>
@@ -57,6 +59,7 @@ const App = () => (
               />
             </Routes>
           </BrowserRouter>
+          </NotificationProvider>
         </WalletProvider>
       </FinancialProvider>
     </TooltipProvider>

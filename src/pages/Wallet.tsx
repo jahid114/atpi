@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useNotifications } from "@/contexts/NotificationContext";
 import { Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Search, Eye, DollarSign, Upload, Paperclip, User, Hash, CalendarIcon, CreditCard, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +20,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { TablePagination } from "@/components/TablePagination";
 
 export default function Wallet() {
+  const { addNotification } = useNotifications();
   const { wallets, requestTransaction, approveTransaction, rejectTransaction } = useWallet();
   const [txDialogOpen, setTxDialogOpen] = useState(false);
   const [txForm, setTxForm] = useState<{ investorId: string; amount: string; type: "top_up" | "withdraw"; transferMedium: TransferMedium; attachment: string }>({
@@ -60,9 +62,43 @@ export default function Wallet() {
 
   const handleSubmitTransaction = () => {
     if (!txForm.investorId || !txForm.amount || Number(txForm.amount) <= 0) return;
+    const wallet = wallets.find(w => w.id === Number(txForm.investorId));
     requestTransaction(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.transferMedium, txForm.attachment || undefined);
+    addNotification({
+      type: "wallet",
+      action: "request",
+      title: `New ${txForm.type === "top_up" ? "Top-Up" : "Withdrawal"} Request`,
+      message: `${wallet?.investorName || "Investor"} requested a ${txForm.type === "top_up" ? "top-up" : "withdrawal"} of $${Number(txForm.amount).toLocaleString()}`,
+      link: "/wallet",
+    });
     setTxForm({ investorId: "", amount: "", type: "top_up", transferMedium: "cash", attachment: "" });
     setTxDialogOpen(false);
+  };
+
+  const handleApprove = (walletId: number, txId: number) => {
+    const wallet = wallets.find(w => w.id === walletId);
+    const tx = wallet?.transactions.find(t => t.id === txId);
+    approveTransaction(walletId, txId);
+    addNotification({
+      type: "wallet",
+      action: "approved",
+      title: "Transaction Approved",
+      message: `${tx?.investorName || "Investor"}'s ${tx?.type === "top_up" ? "top-up" : "withdrawal"} of $${tx?.amount?.toLocaleString() || 0} has been approved`,
+      link: "/wallet",
+    });
+  };
+
+  const handleReject = (walletId: number, txId: number) => {
+    const wallet = wallets.find(w => w.id === walletId);
+    const tx = wallet?.transactions.find(t => t.id === txId);
+    rejectTransaction(walletId, txId);
+    addNotification({
+      type: "wallet",
+      action: "rejected",
+      title: "Transaction Rejected",
+      message: `${tx?.investorName || "Investor"}'s ${tx?.type === "top_up" ? "top-up" : "withdrawal"} of $${tx?.amount?.toLocaleString() || 0} has been rejected`,
+      link: "/wallet",
+    });
   };
 
   return (
@@ -200,10 +236,10 @@ export default function Wallet() {
                               <Button size="sm" variant="ghost" className="h-7 px-2" onClick={() => setViewTx(tx)}>
                                 <Eye className="h-3.5 w-3.5 mr-1" /> View
                               </Button>
-                              <Button size="sm" variant="outline" className="h-7 text-profit border-profit/30 hover:bg-profit/10 hover:text-profit" onClick={() => approveTransaction(tx.walletId, tx.id)}>
+                              <Button size="sm" variant="outline" className="h-7 text-profit border-profit/30 hover:bg-profit/10 hover:text-profit" onClick={() => handleApprove(tx.walletId, tx.id)}>
                                 <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
                               </Button>
-                              <Button size="sm" variant="outline" className="h-7 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => rejectTransaction(tx.walletId, tx.id)}>
+                              <Button size="sm" variant="outline" className="h-7 text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive" onClick={() => handleReject(tx.walletId, tx.id)}>
                                 <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
                               </Button>
                             </div>
@@ -490,13 +526,13 @@ export default function Wallet() {
                       <Button
                         variant="outline"
                         className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
-                        onClick={() => { rejectTransaction(viewTx.walletId, viewTx.id); setViewTx(null); }}
+                        onClick={() => { handleReject(viewTx.walletId, viewTx.id); setViewTx(null); }}
                       >
                         <XCircle className="h-4 w-4 mr-1" /> Reject
                       </Button>
                       <Button
                         className="bg-profit text-white hover:bg-profit/90"
-                        onClick={() => { approveTransaction(viewTx.walletId, viewTx.id); setViewTx(null); }}
+                        onClick={() => { handleApprove(viewTx.walletId, viewTx.id); setViewTx(null); }}
                       >
                         <CheckCircle className="h-4 w-4 mr-1" /> Approve
                       </Button>
