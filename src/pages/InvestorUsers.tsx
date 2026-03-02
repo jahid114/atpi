@@ -1,11 +1,11 @@
-import { useState, useMemo } from "react";
-import { User, Mail, Phone, Search, Plus, Pencil, Trash2, DollarSign, TrendingUp, Calendar, Eye, Briefcase, Globe, MapPin } from "lucide-react";
+import { useState, useMemo, useRef } from "react";
+import { User, Mail, Phone, Search, Plus, Pencil, Trash2, Calendar, Eye, Briefcase, Globe, CreditCard, Heart, Shirt, Users as UsersIcon, Hash, ArrowUpDown, Camera } from "lucide-react";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import {
@@ -15,124 +15,151 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-type InvestmentType = "long-term" | "short-term" | "both";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import type { NomineeInfo } from "@/types/investor";
 
 interface InvestorUser {
   id: number;
   name: string;
   email: string;
   phone: string;
+  password: string;
   occupation: string;
   country: string;
   joinedDate: string;
   status: "active" | "inactive";
-  investmentType: InvestmentType;
-  longTermInvested: number;
-  shortTermInvested: number;
-  totalProfit: number;
-  activePlans: number;
+  totalInvested: number;
+  shares: number;
+  nidNumber: string;
+  bloodGroup: string;
+  jerseySize: string;
+  profileImage: string;
+  nominee: NomineeInfo;
 }
 
 const initialInvestors: InvestorUser[] = [
-  { id: 3, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", investmentType: "long-term", longTermInvested: 50000, shortTermInvested: 0, totalProfit: 4200, activePlans: 2 },
-  { id: 4, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", occupation: "Business Owner", country: "Canada", joinedDate: "2025-11-15", status: "active", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 25000, totalProfit: 1800, activePlans: 1 },
-  { id: 5, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", occupation: "Financial Analyst", country: "United Kingdom", joinedDate: "2025-12-01", status: "active", investmentType: "both", longTermInvested: 80000, shortTermInvested: 40000, totalProfit: 9500, activePlans: 4 },
-  { id: 6, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", occupation: "Real Estate Agent", country: "Australia", joinedDate: "2026-01-10", status: "active", investmentType: "long-term", longTermInvested: 75000, shortTermInvested: 0, totalProfit: 5600, activePlans: 3 },
-  { id: 7, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", occupation: "Marketing Director", country: "Spain", joinedDate: "2026-01-20", status: "inactive", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 10000, totalProfit: 600, activePlans: 0 },
-  { id: 8, name: "Frank Müller", email: "frank@example.com", phone: "+49 170-1001", occupation: "Architect", country: "Germany", joinedDate: "2025-09-05", status: "active", investmentType: "both", longTermInvested: 120000, shortTermInvested: 60000, totalProfit: 14200, activePlans: 5 },
-  { id: 9, name: "Grace Tanaka", email: "grace@example.com", phone: "+81 90-1001", occupation: "Doctor", country: "Japan", joinedDate: "2025-08-12", status: "active", investmentType: "long-term", longTermInvested: 200000, shortTermInvested: 0, totalProfit: 18500, activePlans: 3 },
-  { id: 10, name: "Hassan Ali", email: "hassan@example.com", phone: "+971 50-1001", occupation: "Trader", country: "UAE", joinedDate: "2025-07-22", status: "active", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 95000, totalProfit: 7800, activePlans: 2 },
-  { id: 11, name: "Isabella Costa", email: "isabella@example.com", phone: "+55 11-1001", occupation: "Lawyer", country: "Brazil", joinedDate: "2025-06-30", status: "active", investmentType: "both", longTermInvested: 150000, shortTermInvested: 45000, totalProfit: 12400, activePlans: 4 },
-  { id: 12, name: "Jack O'Brien", email: "jack@example.com", phone: "+353 87-1001", occupation: "Consultant", country: "Ireland", joinedDate: "2026-02-01", status: "active", investmentType: "long-term", longTermInvested: 95000, shortTermInvested: 0, totalProfit: 3200, activePlans: 2 },
-  { id: 13, name: "Keiko Yamamoto", email: "keiko@example.com", phone: "+81 80-2002", occupation: "Professor", country: "Japan", joinedDate: "2025-11-08", status: "inactive", investmentType: "short-term", longTermInvested: 0, shortTermInvested: 30000, totalProfit: 1500, activePlans: 0 },
-  { id: 14, name: "Liam Foster", email: "liam@example.com", phone: "+1 555-1014", occupation: "Entrepreneur", country: "United States", joinedDate: "2025-10-18", status: "active", investmentType: "both", longTermInvested: 300000, shortTermInvested: 100000, totalProfit: 28000, activePlans: 6 },
+  { id: 1001, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", password: "••••••••", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", totalInvested: 50000, shares: 5, nidNumber: "1234567890", bloodGroup: "A+", jerseySize: "M", profileImage: "", nominee: { name: "John Johnson", relationship: "Spouse", phone: "+1 555-2001", nidNumber: "9876543210" } },
+  { id: 1002, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", password: "••••••••", occupation: "Business Owner", country: "Canada", joinedDate: "2025-11-15", status: "active", totalInvested: 25000, shares: 3, nidNumber: "2345678901", bloodGroup: "B+", jerseySize: "L", profileImage: "", nominee: { name: "Mary Smith", relationship: "Spouse", phone: "+1 555-2002", nidNumber: "8765432109" } },
+  { id: 1003, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", password: "••••••••", occupation: "Financial Analyst", country: "United Kingdom", joinedDate: "2025-12-01", status: "active", totalInvested: 120000, shares: 8, nidNumber: "3456789012", bloodGroup: "O+", jerseySize: "S", profileImage: "", nominee: { name: "Tom Williams", relationship: "Brother", phone: "+1 555-2003", nidNumber: "7654321098" } },
+  { id: 1004, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", password: "••••••••", occupation: "Real Estate Agent", country: "Australia", joinedDate: "2026-01-10", status: "active", totalInvested: 75000, shares: 6, nidNumber: "4567890123", bloodGroup: "AB+", jerseySize: "XL", profileImage: "", nominee: { name: "Lisa Lee", relationship: "Spouse", phone: "+1 555-2004", nidNumber: "6543210987" } },
+  { id: 1005, name: "Eva Martinez", email: "eva@example.com", phone: "+1 555-1005", password: "••••••••", occupation: "Marketing Director", country: "Spain", joinedDate: "2026-01-20", status: "inactive", totalInvested: 0, shares: 0, nidNumber: "5678901234", bloodGroup: "O-", jerseySize: "S", profileImage: "", nominee: { name: "", relationship: "", phone: "", nidNumber: "" } },
+  { id: 1006, name: "Frank Müller", email: "frank@example.com", phone: "+49 170-1001", password: "••••••••", occupation: "Architect", country: "Germany", joinedDate: "2025-09-05", status: "active", totalInvested: 180000, shares: 12, nidNumber: "6789012345", bloodGroup: "A-", jerseySize: "L", profileImage: "", nominee: { name: "Anna Müller", relationship: "Spouse", phone: "+49 170-2001", nidNumber: "5432109876" } },
+  { id: 1007, name: "Grace Tanaka", email: "grace@example.com", phone: "+81 90-1001", password: "••••••••", occupation: "Doctor", country: "Japan", joinedDate: "2025-08-12", status: "active", totalInvested: 200000, shares: 15, nidNumber: "7890123456", bloodGroup: "B-", jerseySize: "M", profileImage: "", nominee: { name: "Kenji Tanaka", relationship: "Spouse", phone: "+81 90-2001", nidNumber: "4321098765" } },
+  { id: 1008, name: "Hassan Ali", email: "hassan@example.com", phone: "+971 50-1001", password: "••••••••", occupation: "Trader", country: "UAE", joinedDate: "2025-07-22", status: "active", totalInvested: 95000, shares: 7, nidNumber: "8901234567", bloodGroup: "AB-", jerseySize: "XL", profileImage: "", nominee: { name: "Fatima Ali", relationship: "Spouse", phone: "+971 50-2001", nidNumber: "3210987654" } },
+  { id: 1009, name: "Isabella Costa", email: "isabella@example.com", phone: "+55 11-1001", password: "••••••••", occupation: "Lawyer", country: "Brazil", joinedDate: "2025-06-30", status: "active", totalInvested: 150000, shares: 10, nidNumber: "9012345678", bloodGroup: "O+", jerseySize: "M", profileImage: "", nominee: { name: "Marco Costa", relationship: "Brother", phone: "+55 11-2001", nidNumber: "2109876543" } },
+  { id: 1010, name: "Jack O'Brien", email: "jack@example.com", phone: "+353 87-1001", password: "••••••••", occupation: "Consultant", country: "Ireland", joinedDate: "2026-02-01", status: "active", totalInvested: 0, shares: 0, nidNumber: "0123456789", bloodGroup: "A+", jerseySize: "L", profileImage: "", nominee: { name: "", relationship: "", phone: "", nidNumber: "" } },
 ];
 
-const investmentTypeLabels: Record<InvestmentType, string> = {
-  "long-term": "Long-Term",
-  "short-term": "Short-Term",
-  both: "Both",
-};
-
-const emptyForm = {
-  name: "", email: "", phone: "", occupation: "", country: "",
-  status: "active" as "active" | "inactive",
-  investmentType: "long-term" as InvestmentType,
-  longTermInvested: 0, shortTermInvested: 0, totalProfit: 0, activePlans: 0,
-};
-
 const formatCurrency = (v: number) => `$${v.toLocaleString()}`;
+
+type SortField = "id" | "name" | "shares" | "totalInvested" | "joinedDate";
+
+const emptyAddForm = { name: "", email: "", phone: "", password: "", occupation: "", country: "", status: "active" as "active" | "inactive" };
 
 export default function InvestorUsers() {
   const [investors, setInvestors] = useState<InvestorUser[]>(initialInvestors);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<SortField>("id");
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
-  const [form, setForm] = useState(emptyForm);
+  const [addForm, setAddForm] = useState(emptyAddForm);
+  const [editForm, setEditForm] = useState<InvestorUser | null>(null);
   const [viewUser, setViewUser] = useState<InvestorUser | null>(null);
+  const [editProfileImage, setEditProfileImage] = useState<string>("");
+  const editImageRef = useRef<HTMLInputElement>(null);
 
-  const filtered = useMemo(() => investors.filter((u) => {
-    const matchesSearch = u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
-    const matchesType = typeFilter === "all" || u.investmentType === typeFilter || (typeFilter !== "both" && u.investmentType === "both");
-    return matchesSearch && matchesType;
-  }), [investors, search, typeFilter]);
+  const filtered = useMemo(() => {
+    let list = investors.filter((u) => {
+      return u.name.toLowerCase().includes(search.toLowerCase()) || u.email.toLowerCase().includes(search.toLowerCase());
+    });
+    list.sort((a, b) => {
+      switch (sortBy) {
+        case "name": return a.name.localeCompare(b.name);
+        case "shares": return b.shares - a.shares;
+        case "totalInvested": return b.totalInvested - a.totalInvested;
+        case "joinedDate": return new Date(b.joinedDate).getTime() - new Date(a.joinedDate).getTime();
+        default: return a.id - b.id;
+      }
+    });
+    return list;
+  }, [investors, search, sortBy]);
 
   const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(filtered);
 
-  const totalInvestedAll = investors.reduce((s, i) => s + i.longTermInvested + i.shortTermInvested, 0);
-  const totalProfitAll = investors.reduce((s, i) => s + i.totalProfit, 0);
-  const totalActivePlans = investors.reduce((s, i) => s + i.activePlans, 0);
+  // Summary KPIs
+  const totalRegistered = investors.length;
+  const totalInvestors = investors.filter((i) => i.totalInvested > 0).length;
+  const notInvestedYet = investors.filter((i) => i.totalInvested === 0).length;
+  const totalInvestedAmount = investors.reduce((s, i) => s + i.totalInvested, 0);
 
-  const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
-  const openEdit = (u: InvestorUser) => {
-    setEditId(u.id);
-    setForm({ name: u.name, email: u.email, phone: u.phone, occupation: u.occupation, country: u.country, status: u.status, investmentType: u.investmentType, longTermInvested: u.longTermInvested, shortTermInvested: u.shortTermInvested, totalProfit: u.totalProfit, activePlans: u.activePlans });
-    setOpen(true);
+  // Add form
+  const openAdd = () => { setEditId(null); setAddForm(emptyAddForm); setOpen(true); };
+  const handleAdd = () => {
+    if (!addForm.name.trim() || !addForm.email.trim() || !addForm.password.trim()) return;
+    const newId = Math.max(...investors.map((i) => i.id), 1000) + 1;
+    setInvestors((prev) => [...prev, {
+      id: newId, name: addForm.name, email: addForm.email, phone: addForm.phone, password: addForm.password,
+      occupation: addForm.occupation, country: addForm.country, status: addForm.status,
+      joinedDate: new Date().toISOString().slice(0, 10),
+      totalInvested: 0, shares: 0, nidNumber: "", bloodGroup: "", jerseySize: "", profileImage: "", nominee: { name: "", relationship: "", phone: "", nidNumber: "" },
+    }]);
+    setOpen(false);
   };
 
-  const handleSave = () => {
-    if (!form.name.trim() || !form.email.trim()) return;
-    if (editId) {
-      setInvestors((prev) => prev.map((u) => u.id === editId ? { ...u, ...form } : u));
-    } else {
-      setInvestors((prev) => [...prev, { id: Date.now(), ...form, joinedDate: new Date().toISOString().slice(0, 10) } as InvestorUser]);
+  // Edit form
+  const openEdit = (u: InvestorUser) => {
+    setEditId(u.id);
+    setEditForm({ ...u });
+    setEditProfileImage(u.profileImage);
+  };
+  const handleEditSave = () => {
+    if (!editForm) return;
+    setInvestors((prev) => prev.map((u) => u.id === editId ? { ...editForm, profileImage: editProfileImage } : u));
+    setEditId(null);
+    setEditForm(null);
+  };
+  const handleEditImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setEditProfileImage(ev.target?.result as string);
+      reader.readAsDataURL(file);
     }
-    setOpen(false);
   };
 
   const handleDelete = (id: number) => {
     setInvestors((prev) => prev.filter((u) => u.id !== id));
   };
 
+  const getInitials = (name: string) => name.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase();
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Investors</h1>
-          <p className="text-sm text-muted-foreground mt-1">All platform investors & their portfolio summary</p>
+          <h1 className="text-2xl font-bold text-foreground">Users</h1>
+          <p className="text-sm text-muted-foreground mt-1">All registered users on the platform</p>
         </div>
-        <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add Investor</Button>
+        <Button size="sm" onClick={openAdd}><Plus size={16} className="mr-1.5" /> Add User</Button>
       </div>
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Investors</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{investors.length}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Registered Users</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{totalRegistered}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Invested</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestedAll)}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">No of Investors</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{totalInvestors}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Profit</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalProfitAll)}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Not Invested Yet</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{notInvestedYet}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Active Plans</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{totalActivePlans}</p>
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Invested Amount</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{formatCurrency(totalInvestedAmount)}</p>
         </div>
       </div>
 
@@ -142,30 +169,32 @@ export default function InvestorUsers() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search by name or email…" value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder="Investment type" /></SelectTrigger>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortField)}>
+          <SelectTrigger className="w-full sm:w-44">
+            <ArrowUpDown className="h-3.5 w-3.5 mr-1.5 text-muted-foreground" />
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="long-term">Long-Term</SelectItem>
-            <SelectItem value="short-term">Short-Term</SelectItem>
-            <SelectItem value="both">Both</SelectItem>
+            <SelectItem value="id">Sort by ID</SelectItem>
+            <SelectItem value="name">Sort by Name</SelectItem>
+            <SelectItem value="shares">Sort by Shares</SelectItem>
+            <SelectItem value="totalInvested">Sort by Amount</SelectItem>
+            <SelectItem value="joinedDate">Sort by Date</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
       {/* Table */}
       <div className="bg-card border border-border rounded-lg overflow-x-auto kpi-shadow">
-        <table className="w-full text-sm min-w-[900px]">
+        <table className="w-full text-sm min-w-[700px]">
           <thead>
             <tr className="border-b border-border bg-muted/50">
+              <th className="text-left px-4 py-3 font-medium text-muted-foreground">ID</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Type</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">LTI Amount</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">STI Amount</th>
-              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Profit</th>
-              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Plans</th>
+              <th className="text-right px-4 py-3 font-medium text-muted-foreground">Amount</th>
+              <th className="text-center px-4 py-3 font-medium text-muted-foreground">No of Shares</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
             </tr>
@@ -173,22 +202,20 @@ export default function InvestorUsers() {
           <tbody>
             {paginatedItems.map((user) => (
               <tr key={user.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                <td className="px-4 py-3 text-muted-foreground font-mono text-xs">#{user.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">
-                  <span className="flex items-center gap-2"><User className="h-4 w-4 text-muted-foreground shrink-0" />{user.name}</span>
+                  <span className="flex items-center gap-2">
+                    <Avatar className="h-7 w-7">
+                      <AvatarImage src={user.profileImage} />
+                      <AvatarFallback className="text-[10px]">{getInitials(user.name)}</AvatarFallback>
+                    </Avatar>
+                    {user.name}
+                  </span>
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 shrink-0" /> {user.email}</span>
-                </td>
-                <td className="px-4 py-3 text-muted-foreground">
-                  <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 shrink-0" /> {user.phone}</span>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <Badge variant="secondary" className="text-[11px]">{investmentTypeLabels[user.investmentType]}</Badge>
-                </td>
-                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.longTermInvested)}</td>
-                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.shortTermInvested)}</td>
-                <td className="px-4 py-3 text-right font-medium text-profit">{formatCurrency(user.totalProfit)}</td>
-                <td className="px-4 py-3 text-center text-foreground">{user.activePlans}</td>
+                <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
+                <td className="px-4 py-3 text-muted-foreground">{user.phone}</td>
+                <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.totalInvested)}</td>
+                <td className="px-4 py-3 text-center text-foreground">{user.shares}</td>
                 <td className="px-4 py-3 text-center">
                   <Badge variant={user.status === "active" ? "default" : "destructive"} className="text-[11px]">
                     {user.status === "active" ? "Active" : "Inactive"}
@@ -211,7 +238,7 @@ export default function InvestorUsers() {
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>Delete {user.name}?</AlertDialogTitle>
-                          <AlertDialogDescription>This will permanently remove the investor from the platform.</AlertDialogDescription>
+                          <AlertDialogDescription>This will permanently remove the user from the platform.</AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -224,152 +251,351 @@ export default function InvestorUsers() {
               </tr>
             ))}
             {paginatedItems.length === 0 && (
-              <tr><td colSpan={10} className="px-4 py-8 text-center text-muted-foreground">No investors found.</td></tr>
+              <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">No users found.</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
-      <TablePagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={totalItems}
-        onPageChange={goToPage}
-        hasNextPage={hasNextPage}
-        hasPrevPage={hasPrevPage}
-      />
+      <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={totalItems} onPageChange={goToPage} hasNextPage={hasNextPage} hasPrevPage={hasPrevPage} />
 
-      {/* Add/Edit Dialog */}
-      {/* View Detail Dialog */}
-      <Dialog open={!!viewUser} onOpenChange={(open) => !open && setViewUser(null)}>
-        <DialogContent className="sm:max-w-lg">
+      {/* View Profile Dialog - LTI review style */}
+      <Dialog open={!!viewUser} onOpenChange={(o) => !o && setViewUser(null)}>
+        <DialogContent className="sm:max-w-3xl max-h-[85vh] overflow-y-auto">
           {viewUser && (
             <>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2"><User className="h-5 w-5" /> {viewUser.name}</DialogTitle>
-                <DialogDescription>Investor profile & portfolio summary</DialogDescription>
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" /> User Profile
+                </DialogTitle>
+                <DialogDescription>Detailed user profile and investment summary</DialogDescription>
               </DialogHeader>
-              <div className="space-y-4 py-2">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center gap-2 text-sm"><Mail className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.email}</span></div>
-                  <div className="flex items-center gap-2 text-sm"><Phone className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.phone}</span></div>
-                  <div className="flex items-center gap-2 text-sm"><Briefcase className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.occupation || "—"}</span></div>
-                  <div className="flex items-center gap-2 text-sm"><Globe className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">{viewUser.country || "—"}</span></div>
-                  <div className="flex items-center gap-2 text-sm"><Calendar className="h-4 w-4 text-muted-foreground shrink-0" /><span className="text-muted-foreground">Joined {viewUser.joinedDate}</span></div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Badge variant={viewUser.status === "active" ? "default" : "destructive"} className="text-[11px]">
+
+              <div className="space-y-5 py-2">
+                {/* Profile Header */}
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={viewUser.profileImage} />
+                    <AvatarFallback className="text-lg">{getInitials(viewUser.name)}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">{viewUser.name}</h3>
+                    <p className="text-sm text-muted-foreground">ID: #{viewUser.id}</p>
+                    <Badge variant={viewUser.status === "active" ? "default" : "destructive"} className="text-[11px] mt-1">
                       {viewUser.status === "active" ? "Active" : "Inactive"}
                     </Badge>
                   </div>
                 </div>
-                <div className="border-t border-border pt-3">
-                  <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-2">Portfolio</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-[11px] text-muted-foreground">Investment Type</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{investmentTypeLabels[viewUser.investmentType]}</p>
+
+                {/* Personal Info */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Personal Information</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Email</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.email}</p>
+                      </div>
                     </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-[11px] text-muted-foreground">Active Plans</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{viewUser.activePlans}</p>
+                    <div className="flex items-center gap-2.5">
+                      <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Phone</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.phone || "Not provided"}</p>
+                      </div>
                     </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-[11px] text-muted-foreground">Long-Term Invested</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{formatCurrency(viewUser.longTermInvested)}</p>
+                    <div className="flex items-center gap-2.5">
+                      <Briefcase className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Occupation</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.occupation || "Not provided"}</p>
+                      </div>
                     </div>
-                    <div className="bg-muted/50 rounded-lg p-3">
-                      <p className="text-[11px] text-muted-foreground">Short-Term Invested</p>
-                      <p className="text-sm font-semibold text-foreground mt-0.5">{formatCurrency(viewUser.shortTermInvested)}</p>
+                    <div className="flex items-center gap-2.5">
+                      <Globe className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Country</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.country || "Not provided"}</p>
+                      </div>
                     </div>
-                    <div className="bg-muted/50 rounded-lg p-3 col-span-2">
-                      <p className="text-[11px] text-muted-foreground">Total Profit</p>
-                      <p className="text-sm font-semibold text-profit mt-0.5">{formatCurrency(viewUser.totalProfit)}</p>
+                    <div className="flex items-center gap-2.5">
+                      <CreditCard className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">NID Number</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.nidNumber || "Not provided"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Heart className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Blood Group</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.bloodGroup || "Not provided"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Shirt className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Jersey Size</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.jerseySize || "Not provided"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Joined</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.joinedDate}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Investment Details */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Investment Details</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <Hash className="h-5 w-5 text-primary mx-auto mb-1" />
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">No of Shares</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{viewUser.shares}</p>
+                    </div>
+                    <div className="bg-card border border-border rounded-lg p-3 text-center">
+                      <User className="h-5 w-5 text-profit mx-auto mb-1" />
+                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Total Invested</p>
+                      <p className="text-lg font-bold text-foreground mt-0.5">{formatCurrency(viewUser.totalInvested)}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nominee Info */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nominee Information</p>
+                  {viewUser.nominee?.name ? (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <UsersIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Name</p>
+                          <p className="text-sm font-medium text-foreground">{viewUser.nominee.name}</p>
+                        </div>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Relationship</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.nominee.relationship || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Phone</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.nominee.phone || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">NID</p>
+                        <p className="text-sm font-medium text-foreground">{viewUser.nominee.nidNumber || "N/A"}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No nominee information provided.</p>
+                  )}
+                </div>
               </div>
+
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Close</Button>
+                </DialogClose>
+              </DialogFooter>
             </>
           )}
         </DialogContent>
       </Dialog>
 
-      {/* Add/Edit Dialog */}
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* Add User Dialog (simplified) */}
+      <Dialog open={open && !editId} onOpenChange={(o) => { if (!o) setOpen(false); }}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>{editId ? "Edit Investor" : "Add Investor"}</DialogTitle>
-            <DialogDescription>{editId ? "Update investor profile and portfolio details." : "Register a new investor on the platform."}</DialogDescription>
+            <DialogTitle>Add User</DialogTitle>
+            <DialogDescription>Register a new user on the platform.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label>Full Name *</Label>
-              <Input placeholder="e.g. Alice Johnson" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input placeholder="e.g. Alice Johnson" value={addForm.name} onChange={(e) => setAddForm({ ...addForm, name: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Email *</Label>
-                <Input placeholder="alice@example.com" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <Input placeholder="alice@example.com" type="email" value={addForm.email} onChange={(e) => setAddForm({ ...addForm, email: e.target.value })} />
               </div>
               <div className="space-y-1.5">
                 <Label>Phone</Label>
-                <Input placeholder="+1 555-0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+                <Input placeholder="+1 555-0000" value={addForm.phone} onChange={(e) => setAddForm({ ...addForm, phone: e.target.value })} />
               </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Password *</Label>
+              <Input placeholder="Enter password" type="password" value={addForm.password} onChange={(e) => setAddForm({ ...addForm, password: e.target.value })} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Occupation</Label>
-                <Input placeholder="e.g. Software Engineer" value={form.occupation} onChange={(e) => setForm({ ...form, occupation: e.target.value })} />
+                <Input placeholder="e.g. Software Engineer" value={addForm.occupation} onChange={(e) => setAddForm({ ...addForm, occupation: e.target.value })} />
               </div>
               <div className="space-y-1.5">
                 <Label>Country</Label>
-                <Input placeholder="e.g. United States" value={form.country} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+                <Input placeholder="e.g. United States" value={addForm.country} onChange={(e) => setAddForm({ ...addForm, country: e.target.value })} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Investment Type</Label>
-                <Select value={form.investmentType} onValueChange={(v) => setForm({ ...form, investmentType: v as InvestmentType })}>
-                  <SelectTrigger><SelectValue placeholder="Investment Type" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="long-term">Long-Term</SelectItem>
-                    <SelectItem value="short-term">Short-Term</SelectItem>
-                    <SelectItem value="both">Both</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Status</Label>
-                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "active" | "inactive" })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-1.5">
+              <Label>Status</Label>
+              <Select value={addForm.status} onValueChange={(v) => setAddForm({ ...addForm, status: v as "active" | "inactive" })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Long-Term Invested</Label>
-                <Input type="number" placeholder="50000" value={form.longTermInvested || ""} onChange={(e) => setForm({ ...form, longTermInvested: Number(e.target.value) })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Short-Term Invested</Label>
-                <Input type="number" placeholder="25000" value={form.shortTermInvested || ""} onChange={(e) => setForm({ ...form, shortTermInvested: Number(e.target.value) })} />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Total Profit</Label>
-                <Input type="number" placeholder="4200" value={form.totalProfit || ""} onChange={(e) => setForm({ ...form, totalProfit: Number(e.target.value) })} />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Active Plans</Label>
-                <Input type="number" placeholder="2" value={form.activePlans || ""} onChange={(e) => setForm({ ...form, activePlans: Number(e.target.value) })} />
-              </div>
-            </div>
-            <Button className="w-full" onClick={handleSave}>{editId ? "Save Changes" : "Add Investor"}</Button>
+            <Button className="w-full" onClick={handleAdd}>Add User</Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Dialog (full data + nominee + profile image) */}
+      <Dialog open={!!editForm} onOpenChange={(o) => { if (!o) { setEditForm(null); setEditId(null); } }}>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          {editForm && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Edit User</DialogTitle>
+                <DialogDescription>Update user profile, investment details, and nominee information.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-5 py-2">
+                {/* Profile Image */}
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <Avatar className="h-16 w-16">
+                      <AvatarImage src={editProfileImage} />
+                      <AvatarFallback className="text-lg">{getInitials(editForm.name)}</AvatarFallback>
+                    </Avatar>
+                    <button
+                      onClick={() => editImageRef.current?.click()}
+                      className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:bg-primary/90 transition-colors"
+                    >
+                      <Camera className="h-3 w-3" />
+                    </button>
+                    <input ref={editImageRef} type="file" accept="image/*" className="hidden" onChange={handleEditImageUpload} />
+                  </div>
+                  <div className="text-sm text-muted-foreground">Click the camera icon to upload a profile image</div>
+                </div>
+
+                {/* Personal Info */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Personal Information</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Full Name *</Label>
+                      <Input value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Email *</Label>
+                      <Input type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Phone</Label>
+                      <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>NID Number</Label>
+                      <Input value={editForm.nidNumber} onChange={(e) => setEditForm({ ...editForm, nidNumber: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Occupation</Label>
+                      <Input value={editForm.occupation} onChange={(e) => setEditForm({ ...editForm, occupation: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Country</Label>
+                      <Input value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Blood Group</Label>
+                      <Select value={editForm.bloodGroup} onValueChange={(v) => setEditForm({ ...editForm, bloodGroup: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectContent>
+                          {["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"].map((g) => (
+                            <SelectItem key={g} value={g}>{g}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Jersey Size</Label>
+                      <Select value={editForm.jerseySize} onValueChange={(v) => setEditForm({ ...editForm, jerseySize: v })}>
+                        <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+                        <SelectContent>
+                          {["XS", "S", "M", "L", "XL", "XXL"].map((s) => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Status</Label>
+                      <Select value={editForm.status} onValueChange={(v) => setEditForm({ ...editForm, status: v as "active" | "inactive" })}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Investment Details */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Investment Details</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>No of Shares</Label>
+                      <Input type="number" value={editForm.shares || ""} onChange={(e) => setEditForm({ ...editForm, shares: Number(e.target.value) })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Total Invested</Label>
+                      <Input type="number" value={editForm.totalInvested || ""} onChange={(e) => setEditForm({ ...editForm, totalInvested: Number(e.target.value) })} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nominee Info */}
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Nominee Information</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label>Nominee Name</Label>
+                      <Input value={editForm.nominee.name} onChange={(e) => setEditForm({ ...editForm, nominee: { ...editForm.nominee, name: e.target.value } })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Relationship</Label>
+                      <Input value={editForm.nominee.relationship} onChange={(e) => setEditForm({ ...editForm, nominee: { ...editForm.nominee, relationship: e.target.value } })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Nominee Phone</Label>
+                      <Input value={editForm.nominee.phone} onChange={(e) => setEditForm({ ...editForm, nominee: { ...editForm.nominee, phone: e.target.value } })} />
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label>Nominee NID</Label>
+                      <Input value={editForm.nominee.nidNumber} onChange={(e) => setEditForm({ ...editForm, nominee: { ...editForm.nominee, nidNumber: e.target.value } })} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="outline">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleEditSave}>Save Changes</Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
