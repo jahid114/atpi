@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Search, Eye, DollarSign, Upload, Paperclip } from "lucide-react";
+import { Wallet as WalletIcon, Plus, ArrowUpCircle, ArrowDownCircle, CheckCircle, XCircle, Clock, Search, Eye, DollarSign, Upload, Paperclip, User, Hash, CalendarIcon, CreditCard, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -381,61 +381,131 @@ export default function Wallet() {
 
       {/* View Request Detail Dialog */}
       <Dialog open={!!viewTx} onOpenChange={(open) => !open && setViewTx(null)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Eye className="h-5 w-5 text-primary" /> Request Details
-            </DialogTitle>
-            <DialogDescription>Transaction request information</DialogDescription>
-          </DialogHeader>
-          {viewTx && (
-            <div className="space-y-4 py-2">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Investor</p>
-                  <p className="font-medium text-foreground">{viewTx.investorName}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
-                  <p className="font-medium text-foreground">{viewTx.date}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Type</p>
-                  <p className={`font-medium ${walletTxTypeConfig[viewTx.type].color}`}>{walletTxTypeConfig[viewTx.type].label}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Amount</p>
-                  <p className="font-semibold text-foreground">{fmtWallet(viewTx.amount)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Transfer Medium</p>
-                  <p className="font-medium text-foreground">{viewTx.transferMedium ? transferMediumConfig[viewTx.transferMedium] : "—"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
-                  <Badge variant={walletTxStatusConfig[viewTx.status].variant} className="text-[11px] mt-0.5">{walletTxStatusConfig[viewTx.status].label}</Badge>
-                </div>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Description</p>
-                <p className="text-sm text-foreground">{viewTx.description}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Attachment</p>
-                {viewTx.attachment ? (
-                  <div className="flex items-center gap-2 bg-muted/50 rounded-lg px-3 py-2">
-                    <Paperclip className="h-4 w-4 text-primary shrink-0" />
-                    <span className="text-sm font-medium text-foreground truncate">{viewTx.attachment}</span>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          {viewTx && (() => {
+            const typeConf = walletTxTypeConfig[viewTx.type];
+            const statusConf = walletTxStatusConfig[viewTx.status];
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-primary" /> Request Details
+                  </DialogTitle>
+                  <DialogDescription>Full details for this transaction request.</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-5 py-2">
+                  {/* Transaction Info */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Transaction Info</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Investor</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.investorName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transaction ID</p>
+                          <p className="text-sm font-mono font-medium text-foreground">#{viewTx.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.date}</p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground italic">No attachment</p>
-                )}
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-          </DialogFooter>
+
+                  {/* Financial Details */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financial Details</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <DollarSign className={`h-5 w-5 mx-auto mb-1 ${typeConf.color}`} />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</p>
+                        <p className={`text-lg font-bold mt-0.5 ${typeConf.color}`}>
+                          {viewTx.type === "top_up" ? "+" : "-"}{fmtWallet(viewTx.amount)}
+                        </p>
+                      </div>
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <FileText className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Type</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{typeConf.label}</p>
+                      </div>
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumConfig[viewTx.transferMedium] : "N/A"}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Additional Details */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Details</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Description</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.description || "No description provided"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start gap-2.5">
+                        <Paperclip className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Attachment</p>
+                          {viewTx.attachment ? (
+                            <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+                              <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                              <span className="text-sm font-medium text-foreground truncate">{viewTx.attachment}</span>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground italic">No attachment</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center gap-2 px-1">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <Badge variant={statusConf.variant} className="text-xs">{statusConf.label}</Badge>
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+                  {viewTx.status === "pending" && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => { rejectTransaction(viewTx.walletId, viewTx.id); setViewTx(null); }}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" /> Reject
+                      </Button>
+                      <Button
+                        className="bg-profit text-white hover:bg-profit/90"
+                        onClick={() => { approveTransaction(viewTx.walletId, viewTx.id); setViewTx(null); }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" /> Approve
+                      </Button>
+                    </>
+                  )}
+                </DialogFooter>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
