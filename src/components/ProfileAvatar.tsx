@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,16 @@ import { User, LogOut } from "lucide-react";
 
 export function ProfileAvatar() {
   const navigate = useNavigate();
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(
+    () => localStorage.getItem("profilePhoto")
+  );
+
+  useEffect(() => {
+    const handleStorage = () => setProfilePhoto(localStorage.getItem("profilePhoto"));
+    window.addEventListener("storage", handleStorage);
+    const interval = setInterval(handleStorage, 1000);
+    return () => { window.removeEventListener("storage", handleStorage); clearInterval(interval); };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -22,6 +33,7 @@ export function ProfileAvatar() {
       <DropdownMenuTrigger asChild>
         <button className="rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <Avatar className="h-8 w-8 border-2 border-primary/20 hover:border-primary/50 transition-colors cursor-pointer">
+            {profilePhoto && <AvatarImage src={profilePhoto} alt="Profile" className="object-cover" />}
             <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
               AU
             </AvatarFallback>
