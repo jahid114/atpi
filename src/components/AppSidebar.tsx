@@ -120,7 +120,7 @@ export function AppSidebar() {
         </button>
       </div>
 
-      <nav className="flex-1 py-3 space-y-0.5 px-2">
+      <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.path}
@@ -140,7 +140,7 @@ export function AppSidebar() {
         ))}
       </nav>
 
-      <div className="p-2 border-t border-sidebar-border">
+      <div className="p-2 border-t border-sidebar-border shrink-0">
         <LogoutButton collapsed={collapsed} />
       </div>
     </aside>
