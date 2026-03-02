@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +70,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
   const [txForm, setTxForm] = useState(emptyTxForm);
   const [txAttachment, setTxAttachment] = useState<{ name: string; url: string } | null>(null);
   const txAttachmentRef = useRef<HTMLInputElement>(null);
+  const [viewTx, setViewTx] = useState<FlatTransaction | null>(null);
 
   const approvedInvestors = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
 
@@ -248,18 +249,21 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                       </Badge>
                     </td>
                     <td className="px-4 xl:px-6 py-3 xl:py-4 text-center">
-                      {t.status === "pending" && onUpdateInvestment ? (
-                        <div className="flex items-center justify-center gap-1">
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-profit hover:text-profit" onClick={() => onUpdateInvestment(t.investorId, t.id, "approved")}>
-                            <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
-                          </Button>
-                          <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-destructive hover:text-destructive" onClick={() => onUpdateInvestment(t.investorId, t.id, "rejected")}>
-                            <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
-                          </Button>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                      <div className="flex items-center justify-center gap-1">
+                        <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setViewTx(t)}>
+                          <Eye className="h-3.5 w-3.5 mr-1" /> View
+                        </Button>
+                        {t.status === "pending" && onUpdateInvestment && (
+                          <>
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-profit hover:text-profit" onClick={() => onUpdateInvestment(t.investorId, t.id, "approved")}>
+                              <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                            </Button>
+                            <Button size="sm" variant="ghost" className="h-7 px-2 text-xs text-destructive hover:text-destructive" onClick={() => onUpdateInvestment(t.investorId, t.id, "rejected")}>
+                              <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -277,6 +281,67 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
         hasNextPage={hasNextPage}
         hasPrevPage={hasPrevPage}
       />
+
+      {/* View Transaction Detail Dialog */}
+      <Dialog open={!!viewTx} onOpenChange={(open) => !open && setViewTx(null)}>
+        <DialogContent className="sm:max-w-md">
+          {viewTx && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5 text-primary" /> Transaction Details
+                </DialogTitle>
+                <DialogDescription>Full details for this transaction</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-2">
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Investor</p>
+                    <p className="font-medium text-foreground">{viewTx.investorName}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
+                    <p className="font-medium text-foreground">{viewTx.date}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Type</p>
+                    <Badge variant="secondary" className="text-[11px] mt-0.5">{typeLabels[viewTx.type] || viewTx.type}</Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Amount</p>
+                    <p className={`font-semibold ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
+                      {viewTx.type === "withdrawal" ? "-" : "+"}{fmt(viewTx.amount)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
+                    <Badge variant={statusBadge[viewTx.status].variant} className="text-[11px] gap-1 mt-0.5">
+                      {statusBadge[viewTx.status].label}
+                    </Badge>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Transaction ID</p>
+                    <p className="font-mono text-xs text-foreground">#{viewTx.id}</p>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                {viewTx.status === "pending" && onUpdateInvestment && (
+                  <div className="flex gap-2 mr-auto">
+                    <Button size="sm" variant="outline" className="text-profit border-profit/30 hover:bg-profit/10" onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "approved"); setViewTx(null); }}>
+                      <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
+                    </Button>
+                    <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "rejected"); setViewTx(null); }}>
+                      <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
+                    </Button>
+                  </div>
+                )}
+                <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Add Transaction Dialog */}
       <Dialog open={txDialogOpen} onOpenChange={(open) => { if (!open) { setTxForm(emptyTxForm); setTxAttachment(null); } setTxDialogOpen(open); }}>
