@@ -550,20 +550,6 @@ export default function InvestorUsers() {
                   </div>
                 </div>
 
-                {/* Investment Details */}
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Investment Details</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <Label>No of Shares</Label>
-                      <Input type="number" value={editForm.shares || ""} onChange={(e) => setEditForm({ ...editForm, shares: Number(e.target.value) })} />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Total Invested</Label>
-                      <Input type="number" value={editForm.totalInvested || ""} onChange={(e) => setEditForm({ ...editForm, totalInvested: Number(e.target.value) })} />
-                    </div>
-                  </div>
-                </div>
 
                 {/* Nominee Info */}
                 <div>
