@@ -1,10 +1,8 @@
 import { useState, useMemo } from "react";
 import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Eye, EyeOff, Send, CheckCircle, FileText, Download, Filter } from "lucide-react";
+import { Eye, EyeOff, FileText, Download, Filter } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { toast } from "sonner";
 import type { Investor } from "@/types/investor";
 import { calculateInvestorShare, fmt } from "@/lib/investor-utils";
 
@@ -37,7 +35,6 @@ interface Props {
 
 export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   const [profitVisible, setProfitVisible] = useState(false);
-  const [payoutConfirmed, setPayoutConfirmed] = useState(false);
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
   const approved = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
@@ -46,65 +43,31 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
     [approved, profit, investors]
   );
 
-  const handlePayout = () => {
-    setPayoutConfirmed(true);
-    toast.success("Payout confirmed. Invoices are being generated.");
-  };
-
   const filteredInvoices = typeFilter === "all" ? staticInvoices : staticInvoices.filter((i) => i.type === typeFilter);
 
   return (
     <div className="space-y-6">
-      {/* Distribution Controls */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {/* Visibility Toggle */}
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow space-y-3">
-          <div className="flex items-center gap-3">
-            {profitVisible ? <Eye size={20} className="text-profit" /> : <EyeOff size={20} className="text-muted-foreground" />}
-            <h2 className="text-sm font-semibold text-foreground">Profit Visibility</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Toggle whether investors can see profit figures on their dashboards.
-          </p>
-          <div className="flex items-center gap-3">
-            <Switch checked={profitVisible} onCheckedChange={setProfitVisible} />
-            <span className="text-xs font-medium text-foreground">
-              {profitVisible ? "Published — Investors can see profits" : "Hidden — Profits are private"}
-            </span>
-          </div>
+      {/* Visibility Toggle */}
+      <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow space-y-3">
+        <div className="flex items-center gap-3">
+          {profitVisible ? <Eye size={20} className="text-profit" /> : <EyeOff size={20} className="text-muted-foreground" />}
+          <h2 className="text-sm font-semibold text-foreground">Profit Visibility</h2>
         </div>
-
-        {/* Payout Confirmation */}
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow space-y-3">
-          <div className="flex items-center gap-3">
-            {payoutConfirmed ? (
-              <CheckCircle size={20} className="text-profit" />
-            ) : (
-              <Send size={20} className="text-muted-foreground" />
-            )}
-            <h2 className="text-sm font-semibold text-foreground">Confirm Payout</h2>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Trigger automated invoice generation and initiate payout distribution.
-          </p>
-          <div>
-            {payoutConfirmed ? (
-              <div className="flex items-center gap-2 text-xs font-medium text-profit">
-                <CheckCircle size={14} /> Payout confirmed & invoices generated
-              </div>
-            ) : (
-              <Button size="sm" onClick={handlePayout}>
-                <Send size={14} className="mr-1.5" /> Confirm Payout
-              </Button>
-            )}
-          </div>
+        <p className="text-xs text-muted-foreground">
+          Toggle whether investors can see profit figures on their dashboards.
+        </p>
+        <div className="flex items-center gap-3">
+          <Switch checked={profitVisible} onCheckedChange={setProfitVisible} />
+          <span className="text-xs font-medium text-foreground">
+            {profitVisible ? "Published — Investors can see profits" : "Hidden — Profits are private"}
+          </span>
         </div>
       </div>
 
       {/* Distribution Summary */}
       <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
         <h2 className="text-sm font-semibold text-foreground mb-3">Distribution Summary</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total to Distribute</p>
             <p className="text-lg font-bold text-foreground mt-1">{fmt(totalToDistribute)}</p>
@@ -116,10 +79,6 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Avg. Share</p>
             <p className="text-lg font-bold text-foreground mt-1">{fmt(approved.length > 0 ? Math.round(totalToDistribute / approved.length) : 0)}</p>
-          </div>
-          <div>
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Status</p>
-            <p className="text-lg font-bold text-foreground mt-1">{payoutConfirmed ? "Completed" : "Pending"}</p>
           </div>
         </div>
       </div>

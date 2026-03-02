@@ -80,7 +80,7 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
 
         <div className="space-y-5 py-2">
           {/* Summary cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-muted/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">Approved Principal</p>
               <p className="text-lg font-bold text-foreground">{fmt(approvedPrincipal)}</p>
@@ -92,12 +92,6 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
             <div className="bg-muted/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">Status</p>
               <p className="text-lg font-bold text-foreground capitalize">{investor.status}</p>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Days Active</p>
-              <p className="text-lg font-bold text-foreground">
-                {investor.status === "approved" ? calcDaysActive(investor.investmentDate) : "—"}
-              </p>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-center">
               <p className="text-xs text-muted-foreground">Profit Received</p>

@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, Users, UserPlus, ArrowLeftRight, DollarSign } from "lucide-react";
+import { BarChart3, UserPlus, ArrowLeftRight, DollarSign } from "lucide-react";
 import type { NomineeInfo } from "@/types/investor";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
 import { LTIOverviewTab } from "@/components/long-term/LTIOverviewTab";
-import { LTIInvestorsTab } from "@/components/long-term/LTIInvestorsTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
 import { LTIProfitShareTab } from "@/components/long-term/LTIProfitShareTab";
@@ -118,12 +117,9 @@ export default function Investors() {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-xl">
           <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
             <BarChart3 className="h-4 w-4" /> Overview
-          </TabsTrigger>
-          <TabsTrigger value="investors" className="gap-1.5 text-xs sm:text-sm">
-            <Users className="h-4 w-4" /> Investors
           </TabsTrigger>
           <TabsTrigger value="requests" className="gap-1.5 text-xs sm:text-sm">
             <UserPlus className="h-4 w-4" /> Requests
@@ -137,10 +133,7 @@ export default function Investors() {
         </TabsList>
 
         <TabsContent value="overview">
-          <LTIOverviewTab investors={investors} profit={profit} selectedYear={selectedYear} />
-        </TabsContent>
-        <TabsContent value="investors">
-          <LTIInvestorsTab investors={investors} profit={profit} onRelease={handleRelease} onUpdateInvestment={handleUpdateInvestment} onWithdraw={handleWithdraw} selectedYear={selectedYear} />
+          <LTIOverviewTab investors={investors} profit={profit} onRelease={handleRelease} onUpdateInvestment={handleUpdateInvestment} onWithdraw={handleWithdraw} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="requests">
           <LTIRequestsTab investors={investors} onApprove={handleApprove} onReject={handleReject} onRegister={handleRegister} />
