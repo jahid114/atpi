@@ -106,13 +106,16 @@ export default function Investors() {
     );
   };
 
-  const handleAddTransaction = (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string) => {
+  const handleAddTransaction = (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => {
     const entry = {
       id: Date.now(),
       date,
       amount,
       type,
       status: "pending" as const,
+      transferMedium: extra?.transferMedium as any,
+      description: extra?.description,
+      attachment: extra?.attachment,
     };
     setInvestors((prev) =>
       prev.map((i) => (i.id === investorId ? { ...i, history: [...i.history, entry] } : i))

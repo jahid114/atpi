@@ -40,7 +40,7 @@ const typeLabels: Record<string, string> = {
 interface Props {
   investors: Investor[];
   onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
-  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string) => void;
+  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => void;
   selectedYear: number;
 }
 
@@ -88,7 +88,11 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
       toast.error("Please fill all required fields.");
       return;
     }
-    onAddTransaction?.(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.date);
+    onAddTransaction?.(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.date, {
+      transferMedium: txForm.transferMedium,
+      description: txForm.description || undefined,
+      attachment: txAttachment || undefined,
+    });
     const inv = investors.find((i) => i.id === Number(txForm.investorId));
     toast.success(`${txForm.type === "deposit" ? "Deposit" : "Withdrawal"} of ${fmt(Number(txForm.amount))} submitted for ${inv?.name || "investor"}.`);
     setTxForm(emptyTxForm);
@@ -323,7 +327,26 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                     <p className="text-xs text-muted-foreground uppercase tracking-wider">Transaction ID</p>
                     <p className="font-mono text-xs text-foreground">#{viewTx.id}</p>
                   </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Transfer Medium</p>
+                    <p className="font-medium text-foreground">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Description</p>
+                    <p className="font-medium text-foreground">{viewTx.description || "N/A"}</p>
+                  </div>
                 </div>
+                {viewTx.attachment && (
+                  <div>
+                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Attachment</p>
+                    <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
+                      <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <a href={viewTx.attachment.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                        {viewTx.attachment.name}
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
               <DialogFooter>
                 {viewTx.status === "pending" && onUpdateInvestment && (
