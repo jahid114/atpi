@@ -1,15 +1,20 @@
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
@@ -35,15 +40,60 @@ const typeLabels: Record<string, string> = {
 interface Props {
   investors: Investor[];
   onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
+  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string) => void;
   selectedYear: number;
 }
 
-export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear }: Props) {
+type TransferMedium = "cash" | "check" | "bank_transfer";
+const transferMediumLabels: Record<TransferMedium, string> = {
+  cash: "Cash",
+  check: "Check",
+  bank_transfer: "Bank Transfer",
+};
+
+const emptyTxForm = {
+  investorId: "",
+  type: "deposit" as "deposit" | "withdrawal",
+  amount: "",
+  date: new Date().toISOString().split("T")[0],
+  transferMedium: "cash" as TransferMedium,
+  description: "",
+};
+
+export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransaction, selectedYear }: Props) {
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [dateFrom, setDateFrom] = useState<Date | undefined>();
   const [dateTo, setDateTo] = useState<Date | undefined>();
+  const [txDialogOpen, setTxDialogOpen] = useState(false);
+  const [txForm, setTxForm] = useState(emptyTxForm);
+  const [txAttachment, setTxAttachment] = useState<{ name: string; url: string } | null>(null);
+  const txAttachmentRef = useRef<HTMLInputElement>(null);
+
+  const approvedInvestors = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
+
+  const handleTxAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => setTxAttachment({ name: file.name, url: ev.target?.result as string });
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitTransaction = () => {
+    if (!txForm.investorId || !txForm.amount || Number(txForm.amount) <= 0 || !txForm.date) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+    onAddTransaction?.(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.date);
+    const inv = investors.find((i) => i.id === Number(txForm.investorId));
+    toast.success(`${txForm.type === "deposit" ? "Deposit" : "Withdrawal"} of ${fmt(Number(txForm.amount))} submitted for ${inv?.name || "investor"}.`);
+    setTxForm(emptyTxForm);
+    setTxAttachment(null);
+    setTxDialogOpen(false);
+  };
 
   const allTransactions = useMemo<FlatTransaction[]>(() => {
     return investors
@@ -150,6 +200,9 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
           </Button>
         )}
         <div className="flex items-center gap-2 ml-auto">
+          <Button size="sm" className="h-10 px-3 text-xs" onClick={() => setTxDialogOpen(true)}>
+            <Plus className="h-4 w-4 mr-1" /> Add Transaction
+          </Button>
           <Button variant="outline" size="sm" className="h-10 px-3 text-xs" onClick={downloadStatement}>
             <Download className="h-4 w-4 mr-1" /> Download Statement
           </Button>
@@ -224,6 +277,87 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
         hasNextPage={hasNextPage}
         hasPrevPage={hasPrevPage}
       />
+
+      {/* Add Transaction Dialog */}
+      <Dialog open={txDialogOpen} onOpenChange={(open) => { if (!open) { setTxForm(emptyTxForm); setTxAttachment(null); } setTxDialogOpen(open); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Transaction</DialogTitle>
+            <DialogDescription>Submit a deposit or withdrawal for an investor.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Investor *</Label>
+              <Select value={txForm.investorId} onValueChange={(v) => setTxForm((f) => ({ ...f, investorId: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select investor" /></SelectTrigger>
+                <SelectContent>
+                  {approvedInvestors.map((inv) => (
+                    <SelectItem key={inv.id} value={String(inv.id)}>{inv.name} ({inv.email})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Type *</Label>
+                <Select value={txForm.type} onValueChange={(v) => setTxForm((f) => ({ ...f, type: v as "deposit" | "withdrawal" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="deposit">Deposit</SelectItem>
+                    <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Amount *</Label>
+                <Input type="number" placeholder="100000" value={txForm.amount} onChange={(e) => setTxForm((f) => ({ ...f, amount: e.target.value }))} />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Date *</Label>
+                <Input type="date" value={txForm.date} onChange={(e) => setTxForm((f) => ({ ...f, date: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Transfer Medium *</Label>
+                <Select value={txForm.transferMedium} onValueChange={(v) => setTxForm((f) => ({ ...f, transferMedium: v as TransferMedium }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="check">Check</SelectItem>
+                    <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Description</Label>
+              <Input placeholder="e.g. Additional capital deposit" value={txForm.description} onChange={(e) => setTxForm((f) => ({ ...f, description: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Attachment (optional)</Label>
+              <input type="file" ref={txAttachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleTxAttachment} />
+              {txAttachment ? (
+                <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
+                  <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm text-foreground truncate flex-1">{txAttachment.name}</span>
+                  <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTxAttachment(null)}>
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ) : (
+                <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => txAttachmentRef.current?.click()}>
+                  <Paperclip className="h-4 w-4" /> Upload receipt or bank slip
+                </Button>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleSubmitTransaction}>Submit Transaction</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -106,6 +106,19 @@ export default function Investors() {
     );
   };
 
+  const handleAddTransaction = (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string) => {
+    const entry = {
+      id: Date.now(),
+      date,
+      amount,
+      type,
+      status: "pending" as const,
+    };
+    setInvestors((prev) =>
+      prev.map((i) => (i.id === investorId ? { ...i, history: [...i.history, entry] } : i))
+    );
+  };
+
   return (
     <div className="space-y-6 xl:space-y-8">
       <div className="flex items-center justify-between">
@@ -139,7 +152,7 @@ export default function Investors() {
           <LTIRequestsTab investors={investors} onApprove={handleApprove} onReject={handleReject} onRegister={handleRegister} />
         </TabsContent>
         <TabsContent value="transactions">
-          <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} selectedYear={selectedYear} />
+          <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} onAddTransaction={handleAddTransaction} selectedYear={selectedYear} />
         </TabsContent>
         <TabsContent value="profit-share">
           <LTIProfitShareTab investors={investors} profit={profit} selectedYear={selectedYear} />
