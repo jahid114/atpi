@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet, User, Mail, Phone, Calendar, DollarSign, Heart, CreditCard, Shirt, Users, Hash } from "lucide-react";
+import { CheckCircle, XCircle, Clock, UserPlus, Eye, Wallet, User, Mail, Phone, Calendar, DollarSign, Heart, CreditCard, Shirt, Users, Hash, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import type { Investor, InvestorStatus, NomineeInfo } from "@/types/investor";
 import { fmt } from "@/lib/investor-utils";
 import { useWallet } from "@/contexts/WalletContext";
 import { fmtWallet } from "@/types/wallet";
+import { initialUsers, type InvestorUser } from "@/pages/InvestorUsers";
 
 interface RegisterData {
   name: string;
@@ -54,6 +55,36 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
   const [form, setForm] = useState(emptyForm);
   const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
   const [reviewInvestor, setReviewInvestor] = useState<Investor | null>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
+
+  // Users not yet registered as investors (match by email)
+  const availableUsers = useMemo(() => {
+    const investorEmails = new Set(investors.map((i) => i.email.toLowerCase()));
+    return initialUsers.filter((u) => !investorEmails.has(u.email.toLowerCase()));
+  }, [investors]);
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserId(userId);
+    if (userId === "new") {
+      setForm(emptyForm);
+      return;
+    }
+    const user = initialUsers.find((u) => String(u.id) === userId);
+    if (!user) return;
+    setForm((f) => ({
+      ...f,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      nidNumber: user.nidNumber || "",
+      bloodGroup: user.bloodGroup || "",
+      jerseySize: user.jerseySize || "",
+      nomineeName: user.nominee?.name || "",
+      nomineeRelationship: user.nominee?.relationship || "",
+      nomineePhone: user.nominee?.phone || "",
+      nomineeNid: user.nominee?.nidNumber || "",
+    }));
+  };
 
   const pendingInvestors = useMemo(() => investors.filter((i) => i.status === "pending"), [investors]);
   const rejectedInvestors = useMemo(() => investors.filter((i) => i.status === "rejected"), [investors]);
@@ -90,6 +121,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
     });
     setForm(emptyForm);
     setFundingSource("direct");
+    setSelectedUserId("");
     setRegisterOpen(false);
   };
 
@@ -181,32 +213,55 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
       )}
 
       {/* Register Dialog */}
-      <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
+      <Dialog open={registerOpen} onOpenChange={(open) => { if (!open) { setForm(emptyForm); setSelectedUserId(""); setFundingSource("direct"); } setRegisterOpen(open); }}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Register New Investor</DialogTitle>
-            <DialogDescription>Submit investor details for review. They will remain in "Pending" status until approved.</DialogDescription>
+            <DialogDescription>Select an existing user or enter details manually. They will remain in "Pending" status until approved.</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 py-2">
+            {/* Select Existing User */}
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-1.5">
+                <UserCheck className="h-3.5 w-3.5" /> Select User
+              </p>
+              <Select value={selectedUserId} onValueChange={handleSelectUser}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an existing user or add new…" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">➕ New User (enter manually)</SelectItem>
+                  {availableUsers.map((u) => (
+                    <SelectItem key={u.id} value={String(u.id)}>
+                      {u.name} — {u.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {availableUsers.length === 0 && (
+                <p className="text-xs text-muted-foreground mt-1.5">All registered users are already investors.</p>
+              )}
+            </div>
+
             {/* Personal Info */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">Personal Information</p>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-name">Full Name *</Label>
-                  <Input id="reg-name" placeholder="e.g. John Doe" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                  <Input id="reg-name" placeholder="e.g. John Doe" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-email">Email *</Label>
-                  <Input id="reg-email" type="email" placeholder="john@example.com" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                  <Input id="reg-email" type="email" placeholder="john@example.com" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-phone">Phone</Label>
-                  <Input id="reg-phone" placeholder="+1 555-0000" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
+                  <Input id="reg-phone" placeholder="+1 555-0000" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-nid">NID Number *</Label>
-                  <Input id="reg-nid" placeholder="e.g. 1234567890" value={form.nidNumber} onChange={(e) => setForm((f) => ({ ...f, nidNumber: e.target.value }))} />
+                  <Input id="reg-nid" placeholder="e.g. 1234567890" value={form.nidNumber} onChange={(e) => setForm((f) => ({ ...f, nidNumber: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="reg-blood">Blood Group</Label>

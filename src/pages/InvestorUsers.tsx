@@ -18,7 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import type { NomineeInfo } from "@/types/investor";
 
-interface InvestorUser {
+export interface InvestorUser {
   id: number;
   name: string;
   email: string;
@@ -37,7 +37,7 @@ interface InvestorUser {
   nominee: NomineeInfo;
 }
 
-const initialInvestors: InvestorUser[] = [
+export const initialUsers: InvestorUser[] = [
   { id: 1001, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", password: "••••••••", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", totalInvested: 50000, shares: 5, nidNumber: "1234567890", bloodGroup: "A+", jerseySize: "M", profileImage: "", nominee: { name: "John Johnson", relationship: "Spouse", phone: "+1 555-2001", nidNumber: "9876543210" } },
   { id: 1002, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", password: "••••••••", occupation: "Business Owner", country: "Canada", joinedDate: "2025-11-15", status: "active", totalInvested: 25000, shares: 3, nidNumber: "2345678901", bloodGroup: "B+", jerseySize: "L", profileImage: "", nominee: { name: "Mary Smith", relationship: "Spouse", phone: "+1 555-2002", nidNumber: "8765432109" } },
   { id: 1003, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", password: "••••••••", occupation: "Financial Analyst", country: "United Kingdom", joinedDate: "2025-12-01", status: "active", totalInvested: 120000, shares: 8, nidNumber: "3456789012", bloodGroup: "O+", jerseySize: "S", profileImage: "", nominee: { name: "Tom Williams", relationship: "Brother", phone: "+1 555-2003", nidNumber: "7654321098" } },
@@ -57,7 +57,7 @@ type SortField = "id" | "name" | "shares" | "totalInvested" | "joinedDate";
 const emptyAddForm = { name: "", email: "", phone: "", password: "", occupation: "", country: "", status: "active" as "active" | "inactive" };
 
 export default function InvestorUsers() {
-  const [investors, setInvestors] = useState<InvestorUser[]>(initialInvestors);
+  const [investors, setInvestors] = useState<InvestorUser[]>(initialUsers);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<SortField>("id");
   const [open, setOpen] = useState(false);
