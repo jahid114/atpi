@@ -16,27 +16,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type AdminRole = "admin" | "staff";
+
 interface AdminUser {
   id: number;
   name: string;
   email: string;
   phone: string;
+  role: AdminRole;
   joinedDate: string;
   status: "active" | "inactive";
 }
 
 const initialAdmins: AdminUser[] = [
-  { id: 1, name: "Admin User", email: "admin@investfarm.com", phone: "+1 555-0001", joinedDate: "2025-01-01", status: "active" },
-  { id: 2, name: "Sarah Chen", email: "sarah@investfarm.com", phone: "+1 555-0002", joinedDate: "2025-02-15", status: "active" },
-  { id: 3, name: "Michael Rivera", email: "michael@investfarm.com", phone: "+1 555-0003", joinedDate: "2025-03-10", status: "active" },
-  { id: 4, name: "Jessica Park", email: "jessica@investfarm.com", phone: "+1 555-0004", joinedDate: "2025-04-20", status: "active" },
-  { id: 5, name: "Omar Hassan", email: "omar@investfarm.com", phone: "+1 555-0005", joinedDate: "2025-05-08", status: "inactive" },
-  { id: 6, name: "Linda Nguyen", email: "linda@investfarm.com", phone: "+1 555-0006", joinedDate: "2025-06-12", status: "active" },
-  { id: 7, name: "Thomas Wright", email: "thomas@investfarm.com", phone: "+1 555-0007", joinedDate: "2025-07-25", status: "active" },
-  { id: 8, name: "Priya Sharma", email: "priya@investfarm.com", phone: "+1 555-0008", joinedDate: "2025-08-30", status: "active" },
+  { id: 1, name: "Admin User", email: "admin@investfarm.com", phone: "+1 555-0001", role: "admin", joinedDate: "2025-01-01", status: "active" },
+  { id: 2, name: "Sarah Chen", email: "sarah@investfarm.com", phone: "+1 555-0002", role: "admin", joinedDate: "2025-02-15", status: "active" },
+  { id: 3, name: "Michael Rivera", email: "michael@investfarm.com", phone: "+1 555-0003", role: "staff", joinedDate: "2025-03-10", status: "active" },
+  { id: 4, name: "Jessica Park", email: "jessica@investfarm.com", phone: "+1 555-0004", role: "staff", joinedDate: "2025-04-20", status: "active" },
+  { id: 5, name: "Omar Hassan", email: "omar@investfarm.com", phone: "+1 555-0005", role: "staff", joinedDate: "2025-05-08", status: "inactive" },
+  { id: 6, name: "Linda Nguyen", email: "linda@investfarm.com", phone: "+1 555-0006", role: "admin", joinedDate: "2025-06-12", status: "active" },
+  { id: 7, name: "Thomas Wright", email: "thomas@investfarm.com", phone: "+1 555-0007", role: "staff", joinedDate: "2025-07-25", status: "active" },
+  { id: 8, name: "Priya Sharma", email: "priya@investfarm.com", phone: "+1 555-0008", role: "staff", joinedDate: "2025-08-30", status: "active" },
 ];
 
-const emptyForm = { name: "", email: "", phone: "", status: "active" as "active" | "inactive" };
+const emptyForm = { name: "", email: "", phone: "", role: "staff" as AdminRole, status: "active" as "active" | "inactive" };
 
 export default function Admins() {
   const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
@@ -54,7 +57,7 @@ export default function Admins() {
   const openAdd = () => { setEditId(null); setForm(emptyForm); setOpen(true); };
   const openEdit = (u: AdminUser) => {
     setEditId(u.id);
-    setForm({ name: u.name, email: u.email, phone: u.phone, status: u.status });
+    setForm({ name: u.name, email: u.email, phone: u.phone, role: u.role, status: u.status });
     setOpen(true);
   };
 
@@ -112,6 +115,7 @@ export default function Admins() {
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Name</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Email</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Phone</th>
+              <th className="text-center px-4 py-3 font-medium text-muted-foreground">Role</th>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Joined</th>
               <th className="text-center px-4 py-3 font-medium text-muted-foreground">Status</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Actions</th>
@@ -128,6 +132,9 @@ export default function Admins() {
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">
                   <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5 shrink-0" /> {user.phone}</span>
+                </td>
+                <td className="px-4 py-3 text-center">
+                  <Badge variant="secondary" className="text-[11px] capitalize">{user.role}</Badge>
                 </td>
                 <td className="px-4 py-3 text-muted-foreground">{user.joinedDate}</td>
                 <td className="px-4 py-3 text-center">
@@ -162,7 +169,7 @@ export default function Admins() {
               </tr>
             ))}
             {paginatedItems.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No admins found.</td></tr>
+              <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">No admins found.</td></tr>
             )}
           </tbody>
         </table>
@@ -199,15 +206,27 @@ export default function Admins() {
                 <Input placeholder="+1 555-0000" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
               </div>
             </div>
-            <div className="space-y-1.5">
-              <Label>Status</Label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "active" | "inactive" })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Role</Label>
+                <Select value={form.role} onValueChange={(v) => setForm({ ...form, role: v as AdminRole })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="staff">Staff</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as "active" | "inactive" })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <Button className="w-full" onClick={handleSave}>{editId ? "Save Changes" : "Add Admin"}</Button>
           </div>
