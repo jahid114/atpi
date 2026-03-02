@@ -47,12 +47,13 @@ export function ClientOverviewTab({ selectedYear }: Props) {
   }, [clients, yearTransactions]);
 
   const byMonth = useMemo(() => {
-    const map: Record<string, { investment: number; profit: number; principal: number }> = {};
+    const map: Record<string, { investment: number; profit: number; principal: number; service_fee: number }> = {};
     yearTransactions.forEach((t) => {
       const month = t.date.slice(0, 7);
-      if (!map[month]) map[month] = { investment: 0, profit: 0, principal: 0 };
+      if (!map[month]) map[month] = { investment: 0, profit: 0, principal: 0, service_fee: 0 };
       if (t.type === "investment") map[month].investment += t.amount;
       else if (t.type === "profit_receive") map[month].profit += t.amount;
+      else if (t.type === "service_fee") map[month].service_fee += t.amount;
       else map[month].principal += t.amount;
     });
     return Object.entries(map)
