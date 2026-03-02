@@ -15,6 +15,7 @@ import ShortTermInvestment from "./pages/ShortTermInvestment";
 import Admins from "./pages/Admins";
 import InvestorUsers from "./pages/InvestorUsers";
 import Wallet from "./pages/Wallet";
+import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -51,6 +52,7 @@ const App = () => (
                         <Route path="/wallet" element={<Wallet />} />
                         <Route path="/admins" element={<Admins />} />
                         <Route path="/investor-users" element={<InvestorUsers />} />
+                        <Route path="/profile" element={<Profile />} />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </DashboardLayout>
