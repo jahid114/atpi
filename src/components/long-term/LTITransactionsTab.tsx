@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,6 +81,21 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
     setDateTo(undefined);
   }, []);
 
+  const downloadStatement = () => {
+    const headers = ["Date", "Investor", "Type", "Amount", "Status"];
+    const csvRows = [headers.join(",")];
+    filtered.forEach((t) => {
+      csvRows.push([t.date, t.investorName, typeLabels[t.type] || t.type, t.amount, t.status].join(","));
+    });
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transactions-${selectedYear}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="space-y-4">
       {/* Filters */}
@@ -134,7 +149,12 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, selectedYear
             <FilterX className="h-4 w-4 mr-1" /> Clear
           </Button>
         )}
-        <p className="text-xs text-muted-foreground ml-auto">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
+        <div className="flex items-center gap-2 ml-auto">
+          <Button variant="outline" size="sm" className="h-10 px-3 text-xs" onClick={downloadStatement}>
+            <Download className="h-4 w-4 mr-1" /> Download Statement
+          </Button>
+          <p className="text-xs text-muted-foreground">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
+        </div>
       </div>
 
       {/* Table */}
