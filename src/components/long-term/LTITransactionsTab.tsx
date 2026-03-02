@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye, User, DollarSign, Hash, CreditCard, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -288,81 +288,133 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
 
       {/* View Transaction Detail Dialog */}
       <Dialog open={!!viewTx} onOpenChange={(open) => !open && setViewTx(null)}>
-        <DialogContent className="sm:max-w-md">
-          {viewTx && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Eye className="h-5 w-5 text-primary" /> Transaction Details
-                </DialogTitle>
-                <DialogDescription>Full details for this transaction</DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-2">
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Investor</p>
-                    <p className="font-medium text-foreground">{viewTx.investorName}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Date</p>
-                    <p className="font-medium text-foreground">{viewTx.date}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Type</p>
-                    <Badge variant="secondary" className="text-[11px] mt-0.5">{typeLabels[viewTx.type] || viewTx.type}</Badge>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Amount</p>
-                    <p className={`font-semibold ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
-                      {viewTx.type === "withdrawal" ? "-" : "+"}{fmt(viewTx.amount)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Status</p>
-                    <Badge variant={statusBadge[viewTx.status].variant} className="text-[11px] gap-1 mt-0.5">
-                      {statusBadge[viewTx.status].label}
-                    </Badge>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Transaction ID</p>
-                    <p className="font-mono text-xs text-foreground">#{viewTx.id}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Transfer Medium</p>
-                    <p className="font-medium text-foreground">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider">Description</p>
-                    <p className="font-medium text-foreground">{viewTx.description || "N/A"}</p>
-                  </div>
-                </div>
-                {viewTx.attachment && (
-                  <div>
-                    <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Attachment</p>
-                    <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
-                      <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <a href={viewTx.attachment.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
-                        {viewTx.attachment.name}
-                      </a>
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+          {viewTx && (() => {
+            const sb = statusBadge[viewTx.status];
+            const SIcon = sb.icon;
+            return (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5 text-primary" /> Transaction Details
+                  </DialogTitle>
+                  <DialogDescription>Full details for this transaction.</DialogDescription>
+                </DialogHeader>
+
+                <div className="space-y-5 py-2">
+                  {/* Investor & Transaction Info */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Transaction Info</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <User className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Investor</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.investorName}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <Hash className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transaction ID</p>
+                          <p className="text-sm font-mono font-medium text-foreground">#{viewTx.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2.5">
+                        <CalendarIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Date</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.date}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                )}
-              </div>
-              <DialogFooter>
-                {viewTx.status === "pending" && onUpdateInvestment && (
-                  <div className="flex gap-2 mr-auto">
-                    <Button size="sm" variant="outline" className="text-profit border-profit/30 hover:bg-profit/10" onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "approved"); setViewTx(null); }}>
-                      <CheckCircle className="h-3.5 w-3.5 mr-1" /> Approve
-                    </Button>
-                    <Button size="sm" variant="outline" className="text-destructive border-destructive/30 hover:bg-destructive/10" onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "rejected"); setViewTx(null); }}>
-                      <XCircle className="h-3.5 w-3.5 mr-1" /> Reject
-                    </Button>
+
+                  {/* Financial Details */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financial Details</p>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <DollarSign className={`h-5 w-5 mx-auto mb-1 ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`} />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</p>
+                        <p className={`text-lg font-bold mt-0.5 ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
+                          {viewTx.type === "withdrawal" ? "-" : "+"}{fmt(viewTx.amount)}
+                        </p>
+                      </div>
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <FileText className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Type</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{typeLabels[viewTx.type] || viewTx.type}</p>
+                      </div>
+                      <div className="bg-card border border-border rounded-lg p-3 text-center">
+                        <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                      </div>
+                    </div>
                   </div>
-                )}
-                <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
-              </DialogFooter>
-            </>
-          )}
+
+                  {/* Additional Details */}
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Additional Details</p>
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="flex items-start gap-2.5">
+                        <FileText className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Description</p>
+                          <p className="text-sm font-medium text-foreground">{viewTx.description || "No description provided"}</p>
+                        </div>
+                      </div>
+                      {viewTx.attachment && (
+                        <div className="flex items-start gap-2.5">
+                          <Paperclip className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Attachment</p>
+                            <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+                              <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                              <a href={viewTx.attachment.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                                {viewTx.attachment.name}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex items-center gap-2 px-1">
+                    <SIcon className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-muted-foreground">Status:</span>
+                    <Badge variant={sb.variant} className="text-xs gap-1">
+                      <SIcon className="h-3 w-3" /> {sb.label}
+                    </Badge>
+                  </div>
+                </div>
+
+                <DialogFooter className="gap-2 sm:gap-0">
+                  <DialogClose asChild><Button variant="outline">Close</Button></DialogClose>
+                  {viewTx.status === "pending" && onUpdateInvestment && (
+                    <>
+                      <Button
+                        variant="outline"
+                        className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+                        onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "rejected"); setViewTx(null); }}
+                      >
+                        <XCircle className="h-4 w-4 mr-1" /> Reject
+                      </Button>
+                      <Button
+                        className="bg-profit text-white hover:bg-profit/90"
+                        onClick={() => { onUpdateInvestment(viewTx.investorId, viewTx.id, "approved"); setViewTx(null); }}
+                      >
+                        <CheckCircle className="h-4 w-4 mr-1" /> Approve
+                      </Button>
+                    </>
+                  )}
+                </DialogFooter>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
