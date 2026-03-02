@@ -1,9 +1,9 @@
 import { useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ArrowUpCircle, ArrowDownCircle, WalletIcon, TrendingUp, TrendingDown, Activity } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, WalletIcon, TrendingUp, TrendingDown } from "lucide-react";
 import type { InvestorWallet } from "@/types/wallet";
-import { fmtWallet, walletTxTypeConfig, walletTxStatusConfig } from "@/types/wallet";
+import { fmtWallet, walletTxTypeConfig, walletTxStatusConfig, transferMediumConfig } from "@/types/wallet";
 
 interface WalletDetailDialogProps {
   wallet: InvestorWallet | null;
@@ -12,19 +12,6 @@ interface WalletDetailDialogProps {
 }
 
 export default function WalletDetailDialog({ wallet, open, onOpenChange }: WalletDetailDialogProps) {
-  const analytics = useMemo(() => {
-    if (!wallet) return { topUps: [], investments: [], pending: [], rejected: [], ltiSpent: 0, stiSpent: 0 };
-    const txs = wallet.transactions;
-    const approved = txs.filter((t) => t.status === "approved");
-    const topUps = approved.filter((t) => t.type === "top_up");
-    const investments = approved.filter((t) => t.type !== "top_up");
-    const pending = txs.filter((t) => t.status === "pending");
-    const rejected = txs.filter((t) => t.status === "rejected");
-    const ltiSpent = investments.filter((t) => t.type === "invest_lti").reduce((s, t) => s + t.amount, 0);
-    const stiSpent = investments.filter((t) => t.type === "invest_sti").reduce((s, t) => s + t.amount, 0);
-    return { topUps, investments, pending, rejected, ltiSpent, stiSpent };
-  }, [wallet]);
-
   const sortedTxs = useMemo(() => wallet ? [...wallet.transactions].sort((a, b) => b.date.localeCompare(a.date)) : [], [wallet]);
 
   if (!wallet) return null;
@@ -36,47 +23,27 @@ export default function WalletDetailDialog({ wallet, open, onOpenChange }: Walle
             <WalletIcon className="h-5 w-5 text-primary" />
             {wallet.investorName}
           </DialogTitle>
-          <DialogDescription>{wallet.email}</DialogDescription>
+          <DialogDescription>{wallet.email} · {wallet.phone}</DialogDescription>
         </DialogHeader>
 
-        {/* Analytics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+        {/* Summary Cards */}
+        <div className="grid grid-cols-3 gap-3 mt-2">
           <div className="bg-muted/50 rounded-lg p-3 text-center">
-            <TrendingUp className="h-4 w-4 mx-auto text-profit mb-1" />
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Balance</p>
-            <p className="text-lg font-bold text-profit">{fmtWallet(wallet.balance)}</p>
-          </div>
-          <div className="bg-muted/50 rounded-lg p-3 text-center">
-            <ArrowUpCircle className="h-4 w-4 mx-auto text-primary mb-1" />
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Top-Ups</p>
+            <ArrowUpCircle className="h-4 w-4 mx-auto text-profit mb-1" />
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Total Top-Ups</p>
             <p className="text-lg font-bold text-foreground">{fmtWallet(wallet.totalTopUps)}</p>
           </div>
           <div className="bg-muted/50 rounded-lg p-3 text-center">
             <TrendingDown className="h-4 w-4 mx-auto text-destructive mb-1" />
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Spent</p>
-            <p className="text-lg font-bold text-foreground">{fmtWallet(wallet.totalSpent)}</p>
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Withdrawals</p>
+            <p className="text-lg font-bold text-foreground">{fmtWallet(wallet.totalWithdrawals)}</p>
           </div>
           <div className="bg-muted/50 rounded-lg p-3 text-center">
-            <Activity className="h-4 w-4 mx-auto text-muted-foreground mb-1" />
-            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Pending</p>
-            <p className="text-lg font-bold text-foreground">{analytics.pending.length}</p>
+            <TrendingUp className="h-4 w-4 mx-auto text-primary mb-1" />
+            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Balance</p>
+            <p className="text-lg font-bold text-profit">{fmtWallet(wallet.balance)}</p>
           </div>
         </div>
-
-        {/* Investment Breakdown */}
-        {(analytics.ltiSpent > 0 || analytics.stiSpent > 0) && (
-          <div className="bg-muted/30 border border-border rounded-lg p-4 space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Investment Breakdown</p>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Long-Term (LTI)</span>
-              <span className="font-medium text-foreground">{fmtWallet(analytics.ltiSpent)}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Short-Term (STI)</span>
-              <span className="font-medium text-foreground">{fmtWallet(analytics.stiSpent)}</span>
-            </div>
-          </div>
-        )}
 
         {/* Transaction History */}
         <div className="space-y-2">
@@ -96,7 +63,10 @@ export default function WalletDetailDialog({ wallet, open, onOpenChange }: Walle
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{tx.description}</p>
-                        <p className="text-xs text-muted-foreground">{tx.date} · {typeConf.label}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {tx.date} · {typeConf.label}
+                          {tx.transferMedium && ` · ${transferMediumConfig[tx.transferMedium]}`}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
