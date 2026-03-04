@@ -57,7 +57,7 @@ function SidebarNav({ onNavigate }: {onNavigate?: () => void;}) {
         className={({ isActive }) =>
         `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
         isActive ?
-        "bg-sidebar-active text-sidebar-active-foreground font-medium" :
+        "bg-primary text-primary-foreground font-medium" :
         "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
 
         }>
@@ -129,13 +129,13 @@ export function AppSidebar() {
           className={({ isActive }) =>
           `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
           isActive ?
-          "bg-sidebar-active text-sidebar-active-foreground font-medium" :
+          "bg-primary text-primary-foreground font-medium" :
           "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
 
           }>
           
             <item.icon size={18} className="shrink-0" />
-            {!collapsed && <span className="truncate text-muted-foreground">{item.title}</span>}
+            {!collapsed && <span className={`truncate ${false ? "" : ""}`}>{item.title}</span>}
           </NavLink>
         )}
       </nav>
