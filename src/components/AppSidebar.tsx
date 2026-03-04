@@ -10,24 +10,24 @@ import {
   ChevronLeft,
   ChevronRight,
   Menu,
-  LogOut,
-} from "lucide-react";
+  LogOut } from
+"lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 
 const navItems = [
-  { title: "Overview", path: "/", icon: LayoutDashboard },
-  { title: "Expense Ledger", path: "/expenses", icon: Receipt },
-  { title: "Client Tracker", path: "/clients", icon: TrendingUp },
-  { title: "Long-Term Investment", path: "/long-term-investment", icon: Users },
-  { title: "Short-Term Investment", path: "/short-term-investment", icon: TrendingUp },
-  { title: "Wallet", path: "/wallet", icon: Wallet },
-  { title: "Admins", path: "/admins", icon: Shield },
-  { title: "Users", path: "/investor-users", icon: UsersRound },
-];
+{ title: "Overview", path: "/", icon: LayoutDashboard },
+{ title: "Expense Ledger", path: "/expenses", icon: Receipt },
+{ title: "Client Tracker", path: "/clients", icon: TrendingUp },
+{ title: "Long-Term Investment", path: "/long-term-investment", icon: Users },
+{ title: "Short-Term Investment", path: "/short-term-investment", icon: TrendingUp },
+{ title: "Wallet", path: "/wallet", icon: Wallet },
+{ title: "Admins", path: "/admins", icon: Shield },
+{ title: "Users", path: "/investor-users", icon: UsersRound }];
 
-function LogoutButton({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
+
+function LogoutButton({ collapsed = false, onNavigate }: {collapsed?: boolean;onNavigate?: () => void;}) {
   const navigate = useNavigate();
   const handleLogout = () => {
     localStorage.removeItem("isLoggedIn");
@@ -37,42 +37,42 @@ function LogoutButton({ collapsed = false, onNavigate }: { collapsed?: boolean; 
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-sidebar-muted hover:text-destructive hover:bg-sidebar-hover w-full"
-    >
+      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-sidebar-muted hover:text-destructive hover:bg-sidebar-hover w-full">
+      
       <LogOut size={18} className="shrink-0" />
       {!collapsed && <span className="truncate">Logout</span>}
-    </button>
-  );
+    </button>);
+
 }
 
-function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+function SidebarNav({ onNavigate }: {onNavigate?: () => void;}) {
   return (
     <nav className="flex-1 py-3 space-y-0.5 px-2">
-      {navItems.map((item) => (
-        <NavLink
-          key={item.path}
-          to={item.path}
-          end={item.path === "/"}
-          onClick={onNavigate}
-          className={({ isActive }) =>
-            `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-              isActive
-                ? "bg-sidebar-active text-sidebar-active-foreground font-medium"
-                : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"
-            }`
-          }
-        >
+      {navItems.map((item) =>
+      <NavLink
+        key={item.path}
+        to={item.path}
+        end={item.path === "/"}
+        onClick={onNavigate}
+        className={({ isActive }) =>
+        `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+        isActive ?
+        "bg-sidebar-active text-sidebar-active-foreground font-medium" :
+        "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
+
+        }>
+        
           <item.icon size={18} className="shrink-0" />
           <span className="truncate">{item.title}</span>
         </NavLink>
-      ))}
-    </nav>
-  );
+      )}
+    </nav>);
+
 }
 
 export function MobileSidebarTrigger() {
   const [open, setOpen] = useState(false);
-  
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
@@ -89,8 +89,8 @@ export function MobileSidebarTrigger() {
           <LogoutButton onNavigate={() => setOpen(false)} />
         </div>
       </SheetContent>
-    </Sheet>
-  );
+    </Sheet>);
+
 }
 
 export function AppSidebar() {
@@ -103,46 +103,46 @@ export function AppSidebar() {
   return (
     <aside
       className={`hidden md:flex flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-200 ${
-        collapsed ? "w-16" : "w-60"
-      }`}
-    >
-      <div className="flex items-center h-14 px-4 border-b border-sidebar-border">
-        {!collapsed && (
-          <span className="text-sm font-bold tracking-tight truncate">
+      collapsed ? "w-16" : "w-60"}`
+      }>
+      
+      <div className="flex items-center h-14 px-4 border-b border-sidebar-border bg-primary-foreground text-primary">
+        {!collapsed &&
+        <span className="text-sm font-bold tracking-tight truncate">
             InvestFarm
           </span>
-        )}
+        }
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto p-1 rounded hover:bg-sidebar-hover text-sidebar-muted transition-colors"
-        >
+          className="ml-auto p-1 rounded hover:bg-sidebar-hover text-sidebar-muted transition-colors">
+          
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
 
-      <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            end={item.path === "/"}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
-                isActive
-                  ? "bg-sidebar-active text-sidebar-active-foreground font-medium"
-                  : "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"
-              }`
-            }
-          >
+      <nav className="flex-1 py-3 space-y-0.5 px-2 overflow-y-auto bg-primary-foreground text-muted-foreground">
+        {navItems.map((item) =>
+        <NavLink
+          key={item.path}
+          to={item.path}
+          end={item.path === "/"}
+          className={({ isActive }) =>
+          `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
+          isActive ?
+          "bg-sidebar-active text-sidebar-active-foreground font-medium" :
+          "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
+
+          }>
+          
             <item.icon size={18} className="shrink-0" />
-            {!collapsed && <span className="truncate">{item.title}</span>}
+            {!collapsed && <span className="truncate text-muted-foreground">{item.title}</span>}
           </NavLink>
-        ))}
+        )}
       </nav>
 
       <div className="p-2 border-t border-sidebar-border shrink-0">
         <LogoutButton collapsed={collapsed} />
       </div>
-    </aside>
-  );
+    </aside>);
+
 }
