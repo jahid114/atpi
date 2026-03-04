@@ -58,7 +58,7 @@ function SidebarNav({ onNavigate }: {onNavigate?: () => void;}) {
         `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
         isActive ?
         "bg-primary text-primary-foreground font-medium" :
-        "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
+        "text-sidebar-muted hover:text-primary-foreground hover:bg-primary/80"}`
 
         }>
         
@@ -130,7 +130,7 @@ export function AppSidebar() {
           `flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors ${
           isActive ?
           "bg-primary text-primary-foreground font-medium" :
-          "text-sidebar-muted hover:text-sidebar-foreground hover:bg-sidebar-hover"}`
+          "text-sidebar-muted hover:text-primary-foreground hover:bg-primary/80"}`
 
           }>
           
