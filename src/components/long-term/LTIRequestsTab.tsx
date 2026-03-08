@@ -34,6 +34,7 @@ interface RegisterData {
   nidNumber: string;
   jerseySize: string;
   nominee: NomineeInfo;
+  fundingSource: "direct" | "wallet";
 }
 
 interface Props {
