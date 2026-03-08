@@ -281,9 +281,9 @@ export default function InvestorUsers() {
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">{viewUser.name}</h3>
                     <p className="text-sm text-muted-foreground">ID: #{viewUser.id}</p>
-                    <Badge variant={viewUser.status === "active" ? "default" : "destructive"} className="text-[11px] mt-1">
+                    <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium mt-1 ${viewUser.status === "active" ? "bg-profit/10 text-profit" : "bg-destructive/10 text-destructive"}`}>
                       {viewUser.status === "active" ? "Active" : "Inactive"}
-                    </Badge>
+                    </span>
                   </div>
                 </div>
 
