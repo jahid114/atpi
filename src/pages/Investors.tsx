@@ -17,6 +17,7 @@ import { YearSelector } from "@/components/YearSelector";
 export default function Investors() {
   const { netProfit: profit } = useFinancial();
   const { addNotification } = useNotifications();
+  const { investFromWallet } = useWallet();
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
