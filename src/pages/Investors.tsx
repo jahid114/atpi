@@ -73,6 +73,14 @@ export default function Investors() {
 
   const handleApprove = (id: number) => {
     const inv = investors.find((i) => i.id === id);
+    if (!inv) return;
+
+    // Deduct from wallet on approval if funded from wallet
+    if (inv.fundingSource === "wallet") {
+      const success = investFromWallet(inv.name, inv.email, inv.invested, "invest_lti", "Long-term investment from wallet");
+      if (!success) return;
+    }
+
     setInvestors((prev) =>
       prev.map((i) =>
         i.id === id
