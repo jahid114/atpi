@@ -114,7 +114,7 @@ export function AppSidebar() {
         }
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto p-1 rounded hover:bg-sidebar-hover text-sidebar-muted transition-colors">
+          className="ml-auto p-1 rounded hover:bg-primary/80 hover:text-primary-foreground text-sidebar-muted transition-colors">
           
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
