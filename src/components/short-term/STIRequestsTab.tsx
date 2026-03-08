@@ -40,10 +40,14 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
     }
     const amount = Number(form.amount);
     if (fundingSource === "wallet") {
+      if (walletBalance < amount) {
+        toast.error("Insufficient wallet balance.");
+        return;
+      }
       const success = investFromWallet(form.investorName, form.email, amount, "invest_sti", `Investment in ${project.name}`);
       if (!success) return;
     }
-    onAddInvestor({ investorName: form.investorName, email: form.email, amount });
+    onAddInvestor({ investorName: form.investorName, email: form.email, amount, fundingSource });
     setForm({ investorName: "", email: "", amount: "" });
     setFundingSource("direct");
     setAddOpen(false);
