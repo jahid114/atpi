@@ -7,6 +7,7 @@ import type { NomineeInfo } from "@/types/investor";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { LTIOverviewTab } from "@/components/long-term/LTIOverviewTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";

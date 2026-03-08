@@ -110,9 +110,9 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
       return;
     }
     const amount = Number(form.invested);
-    if (fundingSource === "wallet") {
-      const success = investFromWallet(form.name, form.email, amount, "invest_lti", "Long-term investment from wallet");
-      if (!success) return;
+    if (fundingSource === "wallet" && walletBalance < amount) {
+      toast.error("Insufficient wallet balance.");
+      return;
     }
     onRegister({
       name: form.name,
@@ -130,6 +130,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
         phone: form.nomineePhone,
         nidNumber: form.nomineeNid,
       },
+      fundingSource,
     });
     setForm(emptyForm);
     setFundingSource("direct");
