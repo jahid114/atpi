@@ -139,7 +139,7 @@ export default function ShortTermInvestment() {
     }
   };
 
-  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number }) => {
+  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number; fundingSource: "direct" | "wallet" }) => {
     const newEntry: STInvestorEntry = {
       id: Date.now(),
       investorName: data.investorName,
@@ -147,6 +147,7 @@ export default function ShortTermInvestment() {
       amount: data.amount,
       date: new Date().toISOString().split("T")[0],
       status: "pending",
+      fundingSource: data.fundingSource,
     };
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
@@ -160,6 +161,27 @@ export default function ShortTermInvestment() {
       link: "/short-term-investment",
     });
     toast.success("Investor added for review.");
+  };
+
+  const handleDistribute = () => {
+    if (!detailProject) return;
+    distributionData.forEach((inv) => {
+      returnToWallet(inv.investorName, inv.email, inv.total, `Return from "${detailProject.name}" — Principal: $${inv.amount.toLocaleString()} + Profit: $${inv.profit.toLocaleString()}`);
+    });
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === detailProject.id ? { ...p, status: "completed", distributed: true } : p
+      )
+    );
+    addNotification({
+      type: "sti",
+      action: "approved",
+      title: "STI Project Completed",
+      message: `"${detailProject.name}" completed — funds distributed to ${distributionData.length} investor wallets`,
+      link: "/short-term-investment",
+    });
+    setDistributeOpen(false);
+    toast.success(`Funds distributed to ${distributionData.length} investor wallets.`);
   };
 
   const handleUpdateStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
