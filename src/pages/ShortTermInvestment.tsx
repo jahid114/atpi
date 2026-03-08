@@ -2,7 +2,7 @@ import { useState, useRef, useMemo } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus, CheckCircle2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
