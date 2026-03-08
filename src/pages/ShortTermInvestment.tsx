@@ -446,6 +446,22 @@ export default function ShortTermInvestment() {
                 </div>
               </div>
 
+              {/* Complete & Distribute button */}
+              {detailProject.status === "active" && !detailProject.distributed && distributionData.length > 0 && (
+                <div className="px-4 py-2 border-b border-border bg-muted/30 shrink-0">
+                  <Button size="sm" className="w-full gap-2" onClick={() => setDistributeOpen(true)}>
+                    <CheckCircle2 className="h-4 w-4" /> Complete & Distribute to Wallets
+                  </Button>
+                </div>
+              )}
+              {detailProject.distributed && (
+                <div className="px-4 py-2 border-b border-border bg-profit/10 shrink-0">
+                  <p className="text-xs text-profit font-medium text-center flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Funds distributed to investor wallets
+                  </p>
+                </div>
+              )}
+
               {/* Tabs */}
               <Tabs defaultValue="overview" className="flex-1 flex flex-col">
                 <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-4 h-11 shrink-0">
