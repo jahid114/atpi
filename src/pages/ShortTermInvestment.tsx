@@ -1,6 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus } from "lucide-react";
+import { useWallet } from "@/contexts/WalletContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
