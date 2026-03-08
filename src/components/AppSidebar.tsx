@@ -37,7 +37,7 @@ function LogoutButton({ collapsed = false, onNavigate }: {collapsed?: boolean;on
   return (
     <button
       onClick={handleLogout}
-      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-sidebar-muted hover:text-destructive hover:bg-sidebar-hover w-full">
+      className="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors text-sidebar-muted hover:text-primary-foreground hover:bg-primary/80 w-full">
       
       <LogOut size={18} className="shrink-0" />
       {!collapsed && <span className="truncate">Logout</span>}
