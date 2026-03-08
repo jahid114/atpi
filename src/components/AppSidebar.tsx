@@ -140,7 +140,7 @@ export function AppSidebar() {
         )}
       </nav>
 
-      <div className="p-2 border-t border-sidebar-border shrink-0">
+      <div className="p-2 border-t border-sidebar-border shrink-0 bg-primary-foreground mt-auto">
         <LogoutButton collapsed={collapsed} />
       </div>
     </aside>);
