@@ -18,7 +18,7 @@ import { fmtWallet } from "@/types/wallet";
 
 interface Props {
   project: ShortTermProject;
-  onAddInvestor: (data: { investorName: string; email: string; amount: number }) => void;
+  onAddInvestor: (data: { investorName: string; email: string; amount: number; fundingSource: "direct" | "wallet" }) => void;
   onUpdateStatus: (entryId: number, status: InvestorEntryStatus) => void;
 }
 
