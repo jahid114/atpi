@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { useNotifications } from "@/contexts/NotificationContext";
-import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus } from "lucide-react";
+import { useWallet } from "@/contexts/WalletContext";
+import { Plus, Calendar, TrendingUp, Users, Maximize2, Minimize2, Pencil, Trash2, ImagePlus, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -74,6 +75,7 @@ const initialProjects: ShortTermProject[] = [
 
 export default function ShortTermInvestment() {
   const { addNotification } = useNotifications();
+  const { returnToWallet } = useWallet();
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
@@ -82,10 +84,21 @@ export default function ShortTermInvestment() {
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "", image: "" });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [distributeOpen, setDistributeOpen] = useState(false);
   const createImageRef = useRef<HTMLInputElement>(null);
   const editImageRef = useRef<HTMLInputElement>(null);
 
   const detailProject = detailProjectId ? projects.find((p) => p.id === detailProjectId) || null : null;
+
+  // Calculate distribution data for the detail project
+  const distributionData = useMemo(() => {
+    if (!detailProject) return [];
+    const approvedInvestors = detailProject.investors.filter((inv) => inv.status === "approved");
+    return approvedInvestors.map((inv) => {
+      const profit = Math.round(inv.amount * (detailProject.expectedReturn / 100));
+      return { ...inv, profit, total: inv.amount + profit };
+    });
+  }, [detailProject]);
 
   const handleCreateProject = () => {
     if (!projectForm.name || !projectForm.targetAmount || !projectForm.startDate || !projectForm.endDate) {
@@ -126,7 +139,7 @@ export default function ShortTermInvestment() {
     }
   };
 
-  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number }) => {
+  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number; fundingSource: "direct" | "wallet" }) => {
     const newEntry: STInvestorEntry = {
       id: Date.now(),
       investorName: data.investorName,
@@ -134,6 +147,7 @@ export default function ShortTermInvestment() {
       amount: data.amount,
       date: new Date().toISOString().split("T")[0],
       status: "pending",
+      fundingSource: data.fundingSource,
     };
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
@@ -147,6 +161,27 @@ export default function ShortTermInvestment() {
       link: "/short-term-investment",
     });
     toast.success("Investor added for review.");
+  };
+
+  const handleDistribute = () => {
+    if (!detailProject) return;
+    distributionData.forEach((inv) => {
+      returnToWallet(inv.investorName, inv.email, inv.total, `Return from "${detailProject.name}" — Principal: $${inv.amount.toLocaleString()} + Profit: $${inv.profit.toLocaleString()}`);
+    });
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.id === detailProject.id ? { ...p, status: "completed", distributed: true } : p
+      )
+    );
+    addNotification({
+      type: "sti",
+      action: "approved",
+      title: "STI Project Completed",
+      message: `"${detailProject.name}" completed — funds distributed to ${distributionData.length} investor wallets`,
+      link: "/short-term-investment",
+    });
+    setDistributeOpen(false);
+    toast.success(`Funds distributed to ${distributionData.length} investor wallets.`);
   };
 
   const handleUpdateStatus = (projectId: number, entryId: number, status: InvestorEntryStatus) => {
@@ -411,6 +446,22 @@ export default function ShortTermInvestment() {
                 </div>
               </div>
 
+              {/* Complete & Distribute button */}
+              {detailProject.status === "active" && !detailProject.distributed && distributionData.length > 0 && (
+                <div className="px-4 py-2 border-b border-border bg-muted/30 shrink-0">
+                  <Button size="sm" className="w-full gap-2" onClick={() => setDistributeOpen(true)}>
+                    <CheckCircle2 className="h-4 w-4" /> Complete & Distribute to Wallets
+                  </Button>
+                </div>
+              )}
+              {detailProject.distributed && (
+                <div className="px-4 py-2 border-b border-border bg-profit/10 shrink-0">
+                  <p className="text-xs text-profit font-medium text-center flex items-center justify-center gap-1.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Funds distributed to investor wallets
+                  </p>
+                </div>
+              )}
+
               {/* Tabs */}
               <Tabs defaultValue="overview" className="flex-1 flex flex-col">
                 <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-4 h-11 shrink-0">
@@ -527,6 +578,64 @@ export default function ShortTermInvestment() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Distribution Confirmation Dialog */}
+      <Dialog open={distributeOpen} onOpenChange={setDistributeOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Complete & Distribute Funds</DialogTitle>
+            <DialogDescription>
+              Review the distribution for "{detailProject?.name}". Each investor will receive their principal + {detailProject?.expectedReturn}% profit to their wallet.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Summary */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Investors</p>
+                <p className="text-lg font-bold text-foreground">{distributionData.length}</p>
+              </div>
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Total Principal</p>
+                <p className="text-lg font-bold text-foreground">{fmt(distributionData.reduce((s, d) => s + d.amount, 0))}</p>
+              </div>
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Total Distribution</p>
+                <p className="text-lg font-bold text-profit">{fmt(distributionData.reduce((s, d) => s + d.total, 0))}</p>
+              </div>
+            </div>
+
+            {/* Investor breakdown */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className="px-3 py-2 border-b border-border bg-muted/50">
+                <p className="text-sm font-semibold text-foreground">Distribution Breakdown</p>
+              </div>
+              <div className="divide-y divide-border max-h-60 overflow-y-auto">
+                {distributionData.map((inv) => (
+                  <div key={inv.id} className="px-3 py-2.5 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{inv.investorName}</p>
+                      <p className="text-xs text-muted-foreground">{inv.email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-foreground">{fmt(inv.total)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {fmt(inv.amount)} + <span className="text-profit">{fmt(inv.profit)}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleDistribute} className="gap-2">
+              <CheckCircle2 className="h-4 w-4" /> Confirm Distribution
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

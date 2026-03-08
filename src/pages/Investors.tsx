@@ -7,6 +7,7 @@ import type { NomineeInfo } from "@/types/investor";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
+import { useWallet } from "@/contexts/WalletContext";
 import { LTIOverviewTab } from "@/components/long-term/LTIOverviewTab";
 import { LTIRequestsTab } from "@/components/long-term/LTIRequestsTab";
 import { LTITransactionsTab } from "@/components/long-term/LTITransactionsTab";
@@ -16,6 +17,7 @@ import { YearSelector } from "@/components/YearSelector";
 export default function Investors() {
   const { netProfit: profit } = useFinancial();
   const { addNotification } = useNotifications();
+  const { investFromWallet } = useWallet();
   const [investors, setInvestors] = useState<Investor[]>(initialInvestors);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -40,7 +42,7 @@ export default function Investors() {
     toast.success(`Released ${fmt(Math.round(share))} to ${inv.name}.`);
   };
 
-  const handleRegister = (data: { name: string; email: string; phone: string; invested: number; investmentDate: string; shares: number; bloodGroup: string; nidNumber: string; jerseySize: string; nominee: NomineeInfo }) => {
+  const handleRegister = (data: { name: string; email: string; phone: string; invested: number; investmentDate: string; shares: number; bloodGroup: string; nidNumber: string; jerseySize: string; nominee: NomineeInfo; fundingSource: "direct" | "wallet" }) => {
     const entryId = Date.now();
     const newInvestor: Investor = {
       id: entryId,
@@ -55,6 +57,7 @@ export default function Investors() {
       nidNumber: data.nidNumber,
       jerseySize: data.jerseySize,
       nominee: data.nominee,
+      fundingSource: data.fundingSource,
       history: [{ id: entryId + 1, date: data.investmentDate, amount: data.invested, type: "deposit", status: "pending" }],
     };
     setInvestors((prev) => [...prev, newInvestor]);
@@ -70,6 +73,14 @@ export default function Investors() {
 
   const handleApprove = (id: number) => {
     const inv = investors.find((i) => i.id === id);
+    if (!inv) return;
+
+    // Deduct from wallet on approval if funded from wallet
+    if (inv.fundingSource === "wallet") {
+      const success = investFromWallet(inv.name, inv.email, inv.invested, "invest_lti", "Long-term investment from wallet");
+      if (!success) return;
+    }
+
     setInvestors((prev) =>
       prev.map((i) =>
         i.id === id

@@ -8,6 +8,7 @@ interface WalletContextType {
   approveTransaction: (walletId: number, txId: number) => void;
   rejectTransaction: (walletId: number, txId: number) => void;
   investFromWallet: (investorName: string, email: string, amount: number, type: "invest_lti" | "invest_sti", description: string) => boolean;
+  returnToWallet: (investorName: string, email: string, amount: number, description: string) => void;
   getWalletBalance: (email: string) => number;
   pendingCount: number;
 }
@@ -179,8 +180,44 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return true;
   }, [wallets]);
 
+  const returnToWallet = useCallback((investorName: string, email: string, amount: number, description: string) => {
+    setWallets((prev) => {
+      const existing = prev.find((w) => w.email === email);
+      const tx: WalletTransaction = {
+        id: Date.now(),
+        investorName,
+        email,
+        type: "top_up",
+        amount,
+        date: new Date().toISOString().split("T")[0],
+        status: "approved",
+        description,
+      };
+      if (existing) {
+        return prev.map((w) =>
+          w.email === email
+            ? { ...w, balance: w.balance + amount, totalTopUps: w.totalTopUps + amount, transactions: [...w.transactions, tx] }
+            : w
+        );
+      }
+      // Create new wallet if investor doesn't have one
+      const newWallet: InvestorWallet = {
+        id: Date.now(),
+        investorName,
+        email,
+        phone: "",
+        balance: amount,
+        totalTopUps: amount,
+        totalWithdrawals: 0,
+        totalSpent: 0,
+        transactions: [tx],
+      };
+      return [...prev, newWallet];
+    });
+  }, []);
+
   return (
-    <WalletContext.Provider value={{ wallets, requestTransaction, approveTransaction, rejectTransaction, investFromWallet, getWalletBalance, pendingCount }}>
+    <WalletContext.Provider value={{ wallets, requestTransaction, approveTransaction, rejectTransaction, investFromWallet, returnToWallet, getWalletBalance, pendingCount }}>
       {children}
     </WalletContext.Provider>
   );
