@@ -75,6 +75,7 @@ const initialProjects: ShortTermProject[] = [
 
 export default function ShortTermInvestment() {
   const { addNotification } = useNotifications();
+  const { returnToWallet } = useWallet();
   const [projects, setProjects] = useState<ShortTermProject[]>(initialProjects);
   const [createOpen, setCreateOpen] = useState(false);
   const [detailProjectId, setDetailProjectId] = useState<number | null>(null);
@@ -83,10 +84,21 @@ export default function ShortTermInvestment() {
   const [editOpen, setEditOpen] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", description: "", targetAmount: "", startDate: "", endDate: "", expectedReturn: "", image: "" });
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [distributeOpen, setDistributeOpen] = useState(false);
   const createImageRef = useRef<HTMLInputElement>(null);
   const editImageRef = useRef<HTMLInputElement>(null);
 
   const detailProject = detailProjectId ? projects.find((p) => p.id === detailProjectId) || null : null;
+
+  // Calculate distribution data for the detail project
+  const distributionData = useMemo(() => {
+    if (!detailProject) return [];
+    const approvedInvestors = detailProject.investors.filter((inv) => inv.status === "approved");
+    return approvedInvestors.map((inv) => {
+      const profit = Math.round(inv.amount * (detailProject.expectedReturn / 100));
+      return { ...inv, profit, total: inv.amount + profit };
+    });
+  }, [detailProject]);
 
   const handleCreateProject = () => {
     if (!projectForm.name || !projectForm.targetAmount || !projectForm.startDate || !projectForm.endDate) {
