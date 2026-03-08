@@ -51,13 +51,13 @@ const FinancialContext = createContext<FinancialContextType | null>(null);
 const initialClients: Client[] = [
   { id: 1, name: "Apex Ventures", address: "123 Tech Ave, Silicon Valley", phone: "+1-555-0101", nid: "NID-001", expectedRoi: 12, description: "Tech growth fund", status: "active", createdAt: "2025-06-01" },
   { id: 2, name: "BlueStone Capital", address: "456 Stone Rd, New York", phone: "+1-555-0102", nid: "NID-002", expectedRoi: 10, description: "Real estate fund", status: "active", createdAt: "2025-07-15" },
-  { id: 3, name: "Crestline Holdings", address: "789 Crest Blvd, Chicago", phone: "+1-555-0103", nid: "NID-003", expectedRoi: 8, description: "Diversified portfolio", status: "completed", createdAt: "2025-04-10" },
+  { id: 3, name: "Crestline Holdings", address: "789 Crest Blvd, Chicago", phone: "+1-555-0103", nid: "NID-003", expectedRoi: 8, description: "Diversified portfolio", status: "inactive", createdAt: "2025-04-10" },
   { id: 4, name: "Delta Equity Group", address: "321 Delta Dr, Boston", phone: "+1-555-0104", nid: "NID-004", expectedRoi: 15, description: "Private equity", status: "active", createdAt: "2025-09-01" },
-  { id: 5, name: "Evergreen Fund", address: "654 Green Way, Portland", phone: "+1-555-0105", nid: "NID-005", expectedRoi: 9, description: "Sustainable investments", status: "completed", createdAt: "2025-05-20" },
+  { id: 5, name: "Evergreen Fund", address: "654 Green Way, Portland", phone: "+1-555-0105", nid: "NID-005", expectedRoi: 9, description: "Sustainable investments", status: "inactive", createdAt: "2025-05-20" },
   { id: 6, name: "Falcon Capital", address: "987 Falcon St, Austin", phone: "+1-555-0106", nid: "NID-006", expectedRoi: 14, description: "Venture capital fund", status: "active", createdAt: "2025-10-15" },
   { id: 7, name: "Golden Bridge Partners", address: "147 Bridge Ave, Seattle", phone: "+1-555-0107", nid: "NID-007", expectedRoi: 11, description: "Infrastructure investments", status: "active", createdAt: "2025-11-01" },
   { id: 8, name: "Horizon Wealth", address: "258 Horizon Pl, Miami", phone: "+1-555-0108", nid: "NID-008", expectedRoi: 10, description: "Wealth management fund", status: "active", createdAt: "2025-12-05" },
-  { id: 9, name: "Ironclad Investments", address: "369 Iron Rd, Denver", phone: "+1-555-0109", nid: "NID-009", expectedRoi: 7, description: "Fixed income portfolio", status: "completed", createdAt: "2025-03-18" },
+  { id: 9, name: "Ironclad Investments", address: "369 Iron Rd, Denver", phone: "+1-555-0109", nid: "NID-009", expectedRoi: 7, description: "Fixed income portfolio", status: "inactive", createdAt: "2025-03-18" },
   { id: 10, name: "Jupiter Growth", address: "741 Jupiter Ln, Dallas", phone: "+1-555-0110", nid: "NID-010", expectedRoi: 18, description: "High-growth equity fund", status: "active", createdAt: "2026-01-10" },
   { id: 11, name: "Keystone Ventures", address: "852 Key Ave, Phoenix", phone: "+1-555-0111", nid: "NID-011", expectedRoi: 13, description: "Early-stage startups", status: "inactive", createdAt: "2025-08-22" },
 ];
