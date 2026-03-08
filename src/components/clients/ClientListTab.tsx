@@ -147,10 +147,9 @@ export function ClientListTab({ selectedYear }: Props) {
   const statusBadge = (status: Client["status"]) => {
     const styles = {
       active: "bg-profit/10 text-profit",
-      completed: "bg-primary/10 text-primary",
-      inactive: "bg-muted text-muted-foreground",
+      inactive: "bg-destructive/10 text-destructive",
     };
-    return <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}>{status}</span>;
+    return <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${styles[status]}`}>{status === "active" ? "Active" : "Inactive"}</span>;
   };
 
   return (
