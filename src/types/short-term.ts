@@ -28,9 +28,9 @@ export interface ShortTermProject {
 export const fmt = (n: number) => "$" + n.toLocaleString("en-US");
 
 export const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive"; className?: string }> = {
-  active: { label: "Active", variant: "secondary", className: "bg-profit/10 text-profit border-profit/20" },
-  completed: { label: "Completed", variant: "secondary" },
-  cancelled: { label: "Cancelled", variant: "destructive" },
+  active: { label: "Active", variant: "default", className: "bg-profit text-white border-profit" },
+  completed: { label: "Completed", variant: "secondary", className: "bg-primary text-primary-foreground border-primary" },
+  cancelled: { label: "Cancelled", variant: "destructive", className: "bg-destructive text-destructive-foreground border-destructive" },
 };
 
 export const entryStatusConfig: Record<InvestorEntryStatus, { label: string; icon: React.ElementType; variant: "default" | "secondary" | "destructive" }> = {
