@@ -578,6 +578,64 @@ export default function ShortTermInvestment() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Distribution Confirmation Dialog */}
+      <Dialog open={distributeOpen} onOpenChange={setDistributeOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Complete & Distribute Funds</DialogTitle>
+            <DialogDescription>
+              Review the distribution for "{detailProject?.name}". Each investor will receive their principal + {detailProject?.expectedReturn}% profit to their wallet.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {/* Summary */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Investors</p>
+                <p className="text-lg font-bold text-foreground">{distributionData.length}</p>
+              </div>
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Total Principal</p>
+                <p className="text-lg font-bold text-foreground">{fmt(distributionData.reduce((s, d) => s + d.amount, 0))}</p>
+              </div>
+              <div className="bg-muted/50 border border-border rounded-lg p-3 text-center">
+                <p className="text-xs text-muted-foreground">Total Distribution</p>
+                <p className="text-lg font-bold text-profit">{fmt(distributionData.reduce((s, d) => s + d.total, 0))}</p>
+              </div>
+            </div>
+
+            {/* Investor breakdown */}
+            <div className="border border-border rounded-lg overflow-hidden">
+              <div className="px-3 py-2 border-b border-border bg-muted/50">
+                <p className="text-sm font-semibold text-foreground">Distribution Breakdown</p>
+              </div>
+              <div className="divide-y divide-border max-h-60 overflow-y-auto">
+                {distributionData.map((inv) => (
+                  <div key={inv.id} className="px-3 py-2.5 flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{inv.investorName}</p>
+                      <p className="text-xs text-muted-foreground">{inv.email}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-foreground">{fmt(inv.total)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {fmt(inv.amount)} + <span className="text-profit">{fmt(inv.profit)}</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleDistribute} className="gap-2">
+              <CheckCircle2 className="h-4 w-4" /> Confirm Distribution
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
