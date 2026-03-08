@@ -35,4 +35,5 @@ export interface Investor {
   nidNumber?: string;
   jerseySize?: string;
   nominee?: NomineeInfo;
+  fundingSource?: "direct" | "wallet";
 }

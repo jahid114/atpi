@@ -8,6 +8,7 @@ interface WalletContextType {
   approveTransaction: (walletId: number, txId: number) => void;
   rejectTransaction: (walletId: number, txId: number) => void;
   investFromWallet: (investorName: string, email: string, amount: number, type: "invest_lti" | "invest_sti", description: string) => boolean;
+  returnToWallet: (investorName: string, email: string, amount: number, description: string) => void;
   getWalletBalance: (email: string) => number;
   pendingCount: number;
 }

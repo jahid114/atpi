@@ -8,6 +8,7 @@ export interface STInvestorEntry {
   amount: number;
   date: string;
   status: InvestorEntryStatus;
+  fundingSource?: "direct" | "wallet";
 }
 
 export interface ShortTermProject {
@@ -21,6 +22,7 @@ export interface ShortTermProject {
   status: ProjectStatus;
   image: string;
   investors: STInvestorEntry[];
+  distributed?: boolean;
 }
 
 export const fmt = (n: number) => "$" + n.toLocaleString("en-US");
