@@ -9,7 +9,7 @@ export interface Client {
   attachment?: string;
   expectedRoi?: number;
   description?: string;
-  status: "active" | "completed" | "inactive";
+  status: "active" | "inactive";
   createdAt: string;
 }
 
