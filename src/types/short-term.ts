@@ -27,8 +27,8 @@ export interface ShortTermProject {
 
 export const fmt = (n: number) => "$" + n.toLocaleString("en-US");
 
-export const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive" }> = {
-  active: { label: "Active", variant: "default" },
+export const statusConfig: Record<ProjectStatus, { label: string; variant: "default" | "secondary" | "destructive"; className?: string }> = {
+  active: { label: "Active", variant: "secondary", className: "bg-profit/10 text-profit border-profit/20" },
   completed: { label: "Completed", variant: "secondary" },
   cancelled: { label: "Cancelled", variant: "destructive" },
 };

@@ -59,7 +59,7 @@ export function STIOverviewTab({ project }: Props) {
       <div className="bg-card border border-border rounded-lg p-4 space-y-3">
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-foreground">Funding Progress</p>
-          <Badge variant={statusConfig[project.status].variant} className="text-[11px]">
+          <Badge variant={statusConfig[project.status].variant} className={`text-[11px] ${statusConfig[project.status].className || ""}`}>
             {statusConfig[project.status].label}
           </Badge>
         </div>

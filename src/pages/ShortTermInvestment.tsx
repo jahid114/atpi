@@ -303,7 +303,7 @@ export default function ShortTermInvestment() {
             >
               <div className="relative h-40 overflow-hidden bg-muted">
                 <img src={project.image} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <Badge variant={sc.variant} className="absolute top-3 right-3 text-[11px]">{sc.label}</Badge>
+                <Badge variant={sc.variant} className={`absolute top-3 right-3 text-[11px] ${sc.className || ""}`}>{sc.label}</Badge>
               </div>
               <div className="p-4 space-y-3">
                 <div>
