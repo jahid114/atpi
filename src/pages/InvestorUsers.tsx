@@ -217,9 +217,9 @@ export default function InvestorUsers() {
                 <td className="px-4 py-3 text-right font-medium text-foreground">{formatCurrency(user.totalInvested)}</td>
                 <td className="px-4 py-3 text-center text-foreground">{user.shares}</td>
                 <td className="px-4 py-3 text-center">
-                  <Badge variant={user.status === "active" ? "default" : "destructive"} className="text-[11px]">
+                  <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-medium ${user.status === "active" ? "bg-profit/10 text-profit" : "bg-destructive/10 text-destructive"}`}>
                     {user.status === "active" ? "Active" : "Inactive"}
-                  </Badge>
+                  </span>
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
