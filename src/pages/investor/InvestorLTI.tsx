@@ -240,18 +240,25 @@ export default function InvestorLTI() {
   // ---- APPROVED STATE (full dashboard) ----
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div>
-        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
-        <p className="text-sm text-muted-foreground mt-1">Your investment portfolio · Pro-rata profit sharing</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
+          <p className="text-sm text-muted-foreground mt-1">Your investment portfolio · Pro-rata profit sharing</p>
+        </div>
+        <div className="flex gap-3">
+          <Button onClick={() => setBuyDialogOpen(true)} className="gap-2">
+            <ShoppingCart className="h-4 w-4" /> Buy More Shares
+          </Button>
+          <Button variant="outline" onClick={() => setWithdrawDialogOpen(true)} className="gap-2">
+            <ArrowDownCircle className="h-4 w-4" /> Withdraw to Wallet
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-xl">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
           <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
             <BarChart3 className="h-4 w-4" /> Overview
-          </TabsTrigger>
-          <TabsTrigger value="buy" className="gap-1.5 text-xs sm:text-sm">
-            <ShoppingCart className="h-4 w-4" /> Buy Shares
           </TabsTrigger>
           <TabsTrigger value="transactions" className="gap-1.5 text-xs sm:text-sm">
             <ArrowLeftRight className="h-4 w-4" /> Transactions
