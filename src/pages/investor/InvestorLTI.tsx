@@ -301,68 +301,6 @@ export default function InvestorLTI() {
               </Card>
             </div>
 
-            <div className="flex gap-3">
-              <Button onClick={() => setBuyDialogOpen(true)} className="gap-2">
-                <ShoppingCart className="h-4 w-4" /> Buy More Shares
-              </Button>
-              <Button variant="outline" onClick={() => setWithdrawDialogOpen(true)} className="gap-2">
-                <ArrowDownCircle className="h-4 w-4" /> Withdraw to Wallet
-              </Button>
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* BUY SHARES TAB */}
-        <TabsContent value="buy">
-          <div className="space-y-6">
-            <Card className="max-w-md">
-              <CardHeader>
-                <CardTitle className="text-base">Purchase Additional Shares</CardTitle>
-                <p className="text-sm text-muted-foreground">Each share costs {fmt(SHARE_PRICE)}. Funds will be deducted from your wallet upon admin approval.</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-muted/50 rounded-lg p-4 space-y-2 text-sm">
-                  <div className="flex justify-between"><span className="text-muted-foreground">Current Shares</span><span className="font-semibold text-foreground">{investor?.shares}</span></div>
-                  <div className="flex justify-between"><span className="text-muted-foreground">Share Price</span><span className="font-semibold text-foreground">{fmt(SHARE_PRICE)}</span></div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Number of Shares</Label>
-                  <Input type="number" min={1} placeholder="Enter number of shares" value={buyShares} onChange={(e) => setBuyShares(e.target.value)} />
-                  {buyShares && parseInt(buyShares) > 0 && (
-                    <p className="text-sm text-muted-foreground">Total: <span className="font-semibold text-foreground">{fmt(parseInt(buyShares) * SHARE_PRICE)}</span></p>
-                  )}
-                </div>
-                <Button onClick={handleBuySharesSubmit} className="w-full gap-2">
-                  <ShoppingCart className="h-4 w-4" /> Submit Purchase Request
-                </Button>
-              </CardContent>
-            </Card>
-
-            {investor && investor.history.filter((h) => h.type === "deposit" && h.status === "pending").length > 0 && (
-              <Card>
-                <CardHeader><CardTitle className="text-base">Pending Purchase Requests</CardTitle></CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead className="text-right">Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {investor.history.filter((h) => h.type === "deposit" && h.status === "pending").map((h) => (
-                        <TableRow key={h.id}>
-                          <TableCell>{h.date}</TableCell>
-                          <TableCell className="text-right font-medium">{fmt(h.amount)}</TableCell>
-                          <TableCell><Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" /> Pending</Badge></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </TabsContent>
 
