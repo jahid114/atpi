@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import InvestorWallet from "./pages/investor/InvestorWallet";
+import InvestorLTI from "./pages/investor/InvestorLTI";
 
 const queryClient = new QueryClient();
 
