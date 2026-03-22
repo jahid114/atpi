@@ -57,6 +57,7 @@ const App = () => (
                     <InvestorDashboardLayout>
                       <Routes>
                         <Route path="/wallet" element={<InvestorWallet />} />
+                        <Route path="/lti" element={<InvestorLTI />} />
                         <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
                       </Routes>
                     </InvestorDashboardLayout>
