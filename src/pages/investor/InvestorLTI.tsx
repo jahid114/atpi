@@ -17,12 +17,11 @@ import {
   CheckCircle, Clock, XCircle, ArrowDownCircle, UserPlus, Layers
 } from "lucide-react";
 import type { Investor, InvestmentEntry, InvestmentStatus, NomineeInfo } from "@/types/investor";
-import { calculateInvestorShare, fmt, initialInvestors } from "@/lib/investor-utils";
+import { calculateInvestorShare, fmt } from "@/lib/investor-utils";
+import { useLTI } from "@/contexts/LTIContext";
 
 const SHARE_PRICE = 10000;
-const NET_PROFIT = 580000; // Mock profit figure matching admin side
 
-// Mock: current logged-in investor (not yet registered)
 const CURRENT_USER = {
   name: "Alice Johnson",
   email: "alice@example.com",
@@ -44,10 +43,14 @@ const txTypeLabels: Record<string, string> = {
 };
 
 export default function InvestorLTI() {
-  // Simulate: investor might already exist
-  const existingInvestor = initialInvestors.find((i) => i.email === CURRENT_USER.email);
+  const { investors, profit, handleSelfRegister, handleBuyShares, handleWithdraw: ctxWithdraw } = useLTI();
 
-  const [investor, setInvestor] = useState<Investor | null>(existingInvestor || null);
+  // Find investor from shared context by email
+  const investor = useMemo(
+    () => investors.find((i) => i.email === CURRENT_USER.email) || null,
+    [investors]
+  );
+
   const [regDialogOpen, setRegDialogOpen] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
@@ -76,8 +79,8 @@ export default function InvestorLTI() {
 
   const profitShare = useMemo(() => {
     if (!investor || !isApproved) return 0;
-    return Math.round(calculateInvestorShare(investor, NET_PROFIT, initialInvestors));
-  }, [investor, isApproved]);
+    return Math.round(calculateInvestorShare(investor, profit, investors));
+  }, [investor, isApproved, profit, investors]);
 
   const totalPayouts = useMemo(() => {
     if (!investor) return 0;
@@ -117,28 +120,17 @@ export default function InvestorLTI() {
       fundingSource: "wallet",
       history: [{ id: Date.now() + 1, date: new Date().toISOString().split("T")[0], amount: shares * SHARE_PRICE, type: "deposit", status: "pending" }],
     };
-    setInvestor(newInvestor);
+    handleSelfRegister(newInvestor);
     setRegDialogOpen(false);
     toast.success("Registration submitted! Awaiting admin approval.");
   };
 
-  const handleBuyShares = () => {
+  const handleBuySharesSubmit = () => {
     const shares = parseInt(buyShares);
     if (!shares || shares < 1) { toast.error("Enter at least 1 share."); return; }
     if (!investor) return;
 
-    const entry: InvestmentEntry = {
-      id: Date.now(),
-      date: new Date().toISOString().split("T")[0],
-      amount: shares * SHARE_PRICE,
-      type: "deposit",
-      status: "pending",
-    };
-    setInvestor((prev) => prev ? {
-      ...prev,
-      shares: (prev.shares || 0) + shares,
-      history: [...prev.history, entry],
-    } : prev);
+    handleBuyShares(investor.id, shares, shares * SHARE_PRICE);
     setBuyDialogOpen(false);
     setBuyShares("");
     toast.success(`Request to buy ${shares} share(s) submitted. Awaiting approval.`);
@@ -150,14 +142,7 @@ export default function InvestorLTI() {
     if (!investor) return;
     if (amount > investor.invested) { toast.error("Amount exceeds your invested principal."); return; }
 
-    const entry: InvestmentEntry = {
-      id: Date.now(),
-      date: new Date().toISOString().split("T")[0],
-      amount,
-      type: "withdrawal",
-      status: "pending",
-    };
-    setInvestor((prev) => prev ? { ...prev, history: [...prev.history, entry] } : prev);
+    ctxWithdraw(investor.id, amount);
     setWithdrawDialogOpen(false);
     setWithdrawAmount("");
     toast.success("Withdrawal request submitted. Funds will be returned to your wallet upon approval.");
@@ -197,7 +182,6 @@ export default function InvestorLTI() {
           </CardContent>
         </Card>
 
-        {/* Registration Dialog */}
         <RegistrationDialog
           open={regDialogOpen}
           onOpenChange={setRegDialogOpen}
@@ -287,7 +271,6 @@ export default function InvestorLTI() {
               <KpiCard title="Total Payouts" value={fmt(totalPayouts)} icon={<CheckCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-slate))]" />
             </div>
 
-            {/* Investment Summary */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card>
                 <CardHeader><CardTitle className="text-base">Investment Details</CardTitle></CardHeader>
@@ -311,7 +294,6 @@ export default function InvestorLTI() {
               </Card>
             </div>
 
-            {/* Quick Actions */}
             <div className="flex gap-3">
               <Button onClick={() => setBuyDialogOpen(true)} className="gap-2">
                 <ShoppingCart className="h-4 w-4" /> Buy More Shares
@@ -343,13 +325,12 @@ export default function InvestorLTI() {
                     <p className="text-sm text-muted-foreground">Total: <span className="font-semibold text-foreground">{fmt(parseInt(buyShares) * SHARE_PRICE)}</span></p>
                   )}
                 </div>
-                <Button onClick={handleBuyShares} className="w-full gap-2">
+                <Button onClick={handleBuySharesSubmit} className="w-full gap-2">
                   <ShoppingCart className="h-4 w-4" /> Submit Purchase Request
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Pending purchases */}
             {investor && investor.history.filter((h) => h.type === "deposit" && h.status === "pending").length > 0 && (
               <Card>
                 <CardHeader><CardTitle className="text-base">Pending Purchase Requests</CardTitle></CardHeader>
@@ -474,7 +455,6 @@ export default function InvestorLTI() {
               </Card>
             </div>
 
-            {/* Payout History */}
             <Card>
               <CardHeader><CardTitle className="text-base">Payout History</CardTitle></CardHeader>
               <CardContent>
@@ -536,7 +516,7 @@ export default function InvestorLTI() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setBuyDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleBuyShares}>Submit Request</Button>
+            <Button onClick={handleBuySharesSubmit}>Submit Request</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -590,7 +570,6 @@ function RegistrationDialog({
           <DialogTitle>Register as LTI Investor</DialogTitle>
         </DialogHeader>
         <div className="space-y-5">
-          {/* Share Purchase */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3">Investment</h3>
             <div className="space-y-3">
@@ -604,7 +583,6 @@ function RegistrationDialog({
             </div>
           </div>
 
-          {/* Personal Info */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3">Personal Information</h3>
             <div className="grid grid-cols-2 gap-3">
@@ -637,7 +615,6 @@ function RegistrationDialog({
             </div>
           </div>
 
-          {/* Nominee */}
           <div>
             <h3 className="text-sm font-semibold text-foreground mb-3">Nominee Information</h3>
             <div className="grid grid-cols-2 gap-3">
