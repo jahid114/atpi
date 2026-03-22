@@ -8,15 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { KpiCard } from "@/components/KpiCard";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
-import { Wallet, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, TrendingUp, TrendingDown } from "lucide-react";
+import { Wallet, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, TrendingUp } from "lucide-react";
 import type { WalletTransaction, WalletTransactionStatus, TransferMedium } from "@/types/wallet";
 import { walletTxTypeConfig, walletTxStatusConfig, transferMediumConfig, fmtWallet } from "@/types/wallet";
 
-// Simulated investor wallet data (in real app, comes from context filtered by logged-in user)
 const myWallet = {
   id: 1,
   investorName: "Alice Johnson",
@@ -27,11 +25,11 @@ const myWallet = {
   totalWithdrawals: 0,
   totalSpent: 50000,
   transactions: [
-    { id: 101, investorName: "Alice Johnson", email: "alice@example.com", type: "top_up" as const, amount: 75000, date: "2026-01-10", status: "approved" as const, description: "Initial wallet funding", transferMedium: "bank_transfer" as TransferMedium },
-    { id: 102, investorName: "Alice Johnson", email: "alice@example.com", type: "invest_lti" as const, amount: 30000, date: "2026-01-15", status: "approved" as const, description: "Long-term investment from wallet" },
-    { id: 103, investorName: "Alice Johnson", email: "alice@example.com", type: "invest_sti" as const, amount: 20000, date: "2026-02-01", status: "approved" as const, description: "Commercial Property Flip investment" },
-    { id: 104, investorName: "Alice Johnson", email: "alice@example.com", type: "top_up" as const, amount: 10000, date: "2026-03-01", status: "pending" as const, description: "Wallet top-up request", transferMedium: "cash" as TransferMedium },
-  ],
+    { id: 101, investorName: "Alice Johnson", email: "alice@example.com", type: "top_up", amount: 75000, date: "2026-01-10", status: "approved", description: "Initial wallet funding", transferMedium: "bank_transfer" },
+    { id: 102, investorName: "Alice Johnson", email: "alice@example.com", type: "invest_lti", amount: 30000, date: "2026-01-15", status: "approved", description: "Long-term investment from wallet" },
+    { id: 103, investorName: "Alice Johnson", email: "alice@example.com", type: "invest_sti", amount: 20000, date: "2026-02-01", status: "approved", description: "Commercial Property Flip investment" },
+    { id: 104, investorName: "Alice Johnson", email: "alice@example.com", type: "top_up", amount: 10000, date: "2026-03-01", status: "pending", description: "Wallet top-up request", transferMedium: "cash" },
+  ] as WalletTransaction[],
 };
 
 export default function InvestorWallet() {
@@ -51,7 +49,7 @@ export default function InvestorWallet() {
     return txs;
   }, [wallet.transactions, statusFilter]);
 
-  const pagination = usePagination(filteredTransactions, 8);
+  const pagination = usePagination(filteredTransactions, { pageSize: 8 });
 
   const pendingCount = wallet.transactions.filter((t) => t.status === "pending").length;
 
@@ -106,25 +104,18 @@ export default function InvestorWallet() {
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard title="Available Balance" value={fmtWallet(wallet.balance)} icon={Wallet} accentColor="hsl(var(--kpi-emerald))" />
-        <KpiCard title="Total Top-Ups" value={fmtWallet(wallet.totalTopUps)} icon={ArrowUpCircle} accentColor="hsl(var(--kpi-blue))" />
-        <KpiCard title="Total Invested" value={fmtWallet(wallet.totalSpent)} icon={TrendingUp} accentColor="hsl(var(--kpi-amber))" />
-        <KpiCard title="Pending Requests" value={String(pendingCount)} icon={Clock} accentColor="hsl(var(--kpi-slate))" />
+        <KpiCard title="Available Balance" value={fmtWallet(wallet.balance)} icon={<Wallet className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-emerald))]" />
+        <KpiCard title="Total Top-Ups" value={fmtWallet(wallet.totalTopUps)} icon={<ArrowUpCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-blue))]" />
+        <KpiCard title="Total Invested" value={fmtWallet(wallet.totalSpent)} icon={<TrendingUp className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-amber))]" />
+        <KpiCard title="Pending Requests" value={String(pendingCount)} icon={<Clock className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-slate))]" />
       </div>
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Button
-          onClick={() => { setTxType("top_up"); setTxDialogOpen(true); }}
-          className="gap-2"
-        >
+        <Button onClick={() => { setTxType("top_up"); setTxDialogOpen(true); }} className="gap-2">
           <ArrowUpCircle className="h-4 w-4" /> Top Up
         </Button>
-        <Button
-          variant="outline"
-          onClick={() => { setTxType("withdraw"); setTxDialogOpen(true); }}
-          className="gap-2"
-        >
+        <Button variant="outline" onClick={() => { setTxType("withdraw"); setTxDialogOpen(true); }} className="gap-2">
           <ArrowDownCircle className="h-4 w-4" /> Withdraw
         </Button>
       </div>
@@ -133,7 +124,7 @@ export default function InvestorWallet() {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Transaction History</CardTitle>
-          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+          <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
             <SelectTrigger className="w-36">
               <SelectValue />
             </SelectTrigger>
@@ -159,14 +150,14 @@ export default function InvestorWallet() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pagination.currentItems.length === 0 ? (
+                {pagination.paginatedItems.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                       No transactions found.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  pagination.currentItems.map((tx) => {
+                  pagination.paginatedItems.map((tx) => {
                     const typeConf = walletTxTypeConfig[tx.type];
                     const statusConf = walletTxStatusConfig[tx.status];
                     const isInflow = tx.type === "top_up";
@@ -201,8 +192,8 @@ export default function InvestorWallet() {
             totalPages={pagination.totalPages}
             onPageChange={pagination.goToPage}
             totalItems={filteredTransactions.length}
-            startItem={pagination.startItem}
-            endItem={pagination.endItem}
+            hasNextPage={pagination.hasNextPage}
+            hasPrevPage={pagination.hasPrevPage}
           />
         </CardContent>
       </Card>
@@ -221,19 +212,12 @@ export default function InvestorWallet() {
             )}
             <div className="space-y-2">
               <Label>Amount</Label>
-              <Input
-                type="number"
-                placeholder="Enter amount"
-                value={txAmount}
-                onChange={(e) => setTxAmount(e.target.value)}
-              />
+              <Input type="number" placeholder="Enter amount" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} />
             </div>
             <div className="space-y-2">
               <Label>Transfer Medium</Label>
               <Select value={txMedium} onValueChange={(v) => setTxMedium(v as TransferMedium)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="cash">Cash</SelectItem>
                   <SelectItem value="check">Check</SelectItem>
@@ -243,11 +227,7 @@ export default function InvestorWallet() {
             </div>
             <div className="space-y-2">
               <Label>Description (optional)</Label>
-              <Input
-                placeholder="Add a note..."
-                value={txDescription}
-                onChange={(e) => setTxDescription(e.target.value)}
-              />
+              <Input placeholder="Add a note..." value={txDescription} onChange={(e) => setTxDescription(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
