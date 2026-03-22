@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 import InvestorWallet from "./pages/investor/InvestorWallet";
 import InvestorLTI from "./pages/investor/InvestorLTI";
 import InvestorSTI from "./pages/investor/InvestorSTI";
+import InvestorProfile from "./pages/investor/InvestorProfile";
 
 const queryClient = new QueryClient();
 
