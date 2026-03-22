@@ -146,10 +146,10 @@ const InvestorProfile = () => {
 
       {/* Investment Summary KPIs */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Wallet Balance" value={fmt(investmentSummary.walletBalance)} icon={Wallet} />
-        <KpiCard title="Total Invested" value={fmt(investmentSummary.totalInvested)} icon={DollarSign} />
-        <KpiCard title="LTI Shares" value={String(investmentSummary.ltiShares)} icon={TrendingUp} />
-        <KpiCard title="Total Profit" value={fmt(investmentSummary.totalProfit)} icon={BarChart3} />
+        <KpiCard title="Wallet Balance" value={fmt(investmentSummary.walletBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="text-blue-500" />
+        <KpiCard title="Total Invested" value={fmt(investmentSummary.totalInvested)} icon={<DollarSign className="h-5 w-5" />} accentColor="text-primary" />
+        <KpiCard title="LTI Shares" value={String(investmentSummary.ltiShares)} icon={<TrendingUp className="h-5 w-5" />} accentColor="text-emerald-500" />
+        <KpiCard title="Total Profit" value={fmt(investmentSummary.totalProfit)} icon={<BarChart3 className="h-5 w-5" />} accentColor="text-amber-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
