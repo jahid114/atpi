@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { Phone, Lock, Eye, EyeOff, Shield, User } from "lucide-react";
+
+type UserRole = "admin" | "investor";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [role, setRole] = useState<UserRole>("admin");
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,9 +31,15 @@ const Login = () => {
       return;
     }
 
-    // UI-only: accept any credentials
+    // UI-only: store role and auth state
     localStorage.setItem("isLoggedIn", "true");
-    navigate("/");
+    localStorage.setItem("userRole", role);
+
+    if (role === "investor") {
+      navigate("/investor/wallet");
+    } else {
+      navigate("/");
+    }
   };
 
   return (
@@ -38,10 +47,41 @@ const Login = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center space-y-2">
           <CardTitle className="text-2xl font-bold tracking-tight">Welcome Back</CardTitle>
-          <CardDescription>Sign in with your phone number</CardDescription>
+          <CardDescription>Sign in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-5">
+            {/* Role selector */}
+            <div className="space-y-2">
+              <Label>Sign in as</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRole("admin")}
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                    role === "admin"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <Shield className="h-4 w-4" />
+                  Admin
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole("investor")}
+                  className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                    role === "investor"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <User className="h-4 w-4" />
+                  Investor
+                </button>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <div className="relative">
@@ -53,7 +93,6 @@ const Login = () => {
                   value={phone}
                   onChange={(e) => {
                     const val = e.target.value;
-                    // Ensure +88 prefix stays and only digits after it
                     if (!val.startsWith("+88")) return;
                     const afterPrefix = val.slice(3);
                     if (afterPrefix && !/^\d*$/.test(afterPrefix)) return;
