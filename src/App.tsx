@@ -21,6 +21,7 @@ import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import InvestorWallet from "./pages/investor/InvestorWallet";
 import InvestorLTI from "./pages/investor/InvestorLTI";
+import InvestorSTI from "./pages/investor/InvestorSTI";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
                       <Routes>
                         <Route path="/wallet" element={<InvestorWallet />} />
                         <Route path="/lti" element={<InvestorLTI />} />
+                        <Route path="/sti" element={<InvestorSTI />} />
                         <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
                       </Routes>
                     </InvestorDashboardLayout>
