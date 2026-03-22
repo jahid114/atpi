@@ -12,6 +12,7 @@ export function InvestorDashboardLayout({ children }: { children: ReactNode }) {
           <MobileInvestorSidebarTrigger />
           <span className="ml-3 text-sm font-bold tracking-tight text-foreground">InvestFarm</span>
           <div className="ml-auto flex items-center gap-2">
+            <NotificationBell />
             <ProfileAvatar />
           </div>
         </header>
