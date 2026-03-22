@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { InvestorSidebar, MobileInvestorSidebarTrigger } from "./InvestorSidebar";
 import { ProfileAvatar } from "./ProfileAvatar";
+import { NotificationBell } from "./NotificationBell";
 
 export function InvestorDashboardLayout({ children }: { children: ReactNode }) {
   return (
