@@ -97,27 +97,19 @@ export default function InvestorWallet() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div>
-        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">My Wallet</h1>
-        <p className="text-sm text-muted-foreground mt-1">Manage your funds, top up, and withdraw</p>
-      </div>
-
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard title="Available Balance" value={fmtWallet(wallet.balance)} icon={<Wallet className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-emerald))]" />
-        <KpiCard title="Total Top-Ups" value={fmtWallet(wallet.totalTopUps)} icon={<ArrowUpCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-blue))]" />
-        <KpiCard title="Total Invested" value={fmtWallet(wallet.totalSpent)} icon={<TrendingUp className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-amber))]" />
-        <KpiCard title="Pending Requests" value={String(pendingCount)} icon={<Clock className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-slate))]" />
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button onClick={() => { setTxType("top_up"); setTxDialogOpen(true); }} className="gap-2">
-          <ArrowUpCircle className="h-4 w-4" /> Top Up
-        </Button>
-        <Button variant="outline" onClick={() => { setTxType("withdraw"); setTxDialogOpen(true); }} className="gap-2">
-          <ArrowDownCircle className="h-4 w-4" /> Withdraw
-        </Button>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">My Wallet</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage your funds, top up, and withdraw</p>
+        </div>
+        <div className="flex gap-3">
+          <Button onClick={() => { setTxType("top_up"); setTxDialogOpen(true); }} className="gap-2">
+            <ArrowUpCircle className="h-4 w-4" /> Top Up
+          </Button>
+          <Button variant="outline" onClick={() => { setTxType("withdraw"); setTxDialogOpen(true); }} className="gap-2">
+            <ArrowDownCircle className="h-4 w-4" /> Withdraw
+          </Button>
+        </div>
       </div>
 
       {/* Transaction History */}
