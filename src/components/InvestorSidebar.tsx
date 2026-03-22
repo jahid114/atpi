@@ -16,6 +16,7 @@ const investorNavItems = [
   { title: "My Wallet", path: "/investor/wallet", icon: Wallet },
   { title: "Long-Term Investment", path: "/investor/lti", icon: TrendingUp },
   { title: "Short-Term Investment", path: "/investor/sti", icon: BarChart3 },
+  { title: "My Profile", path: "/investor/profile", icon: User },
 ];
 
 function LogoutButton({ collapsed = false, onNavigate }: { collapsed?: boolean; onNavigate?: () => void }) {
