@@ -17,6 +17,7 @@ export function InvestorDashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
         <header className="hidden md:flex items-center justify-end h-14 px-6 border-b border-border bg-background sticky top-0 z-30 gap-2">
+          <NotificationBell />
           <ProfileAvatar />
         </header>
         <main className="flex-1 overflow-auto">

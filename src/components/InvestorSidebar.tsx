@@ -7,6 +7,7 @@ import {
   ChevronRight,
   Menu,
   LogOut,
+  User,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
