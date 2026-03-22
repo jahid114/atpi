@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { DashboardLayout } from "./components/DashboardLayout";
+import { InvestorDashboardLayout } from "./components/InvestorDashboardLayout";
 import { FinancialProvider } from "./contexts/FinancialContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
@@ -18,12 +19,20 @@ import Wallet from "./pages/Wallet";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import InvestorWallet from "./pages/investor/InvestorWallet";
 
 const queryClient = new QueryClient();
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode; requiredRole?: "admin" | "investor" }) => {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  const userRole = localStorage.getItem("userRole") || "admin";
+
   if (!isLoggedIn) return <Navigate to="/login" replace />;
+
+  if (requiredRole && userRole !== requiredRole) {
+    return <Navigate to={userRole === "investor" ? "/investor/wallet" : "/"} replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -38,10 +47,27 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/login" element={<Login />} />
+
+              {/* Investor routes */}
+              <Route
+                path="/investor/*"
+                element={
+                  <ProtectedRoute requiredRole="investor">
+                    <InvestorDashboardLayout>
+                      <Routes>
+                        <Route path="/wallet" element={<InvestorWallet />} />
+                        <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
+                      </Routes>
+                    </InvestorDashboardLayout>
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin routes */}
               <Route
                 path="/*"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute requiredRole="admin">
                     <DashboardLayout>
                       <Routes>
                         <Route path="/" element={<Overview />} />
