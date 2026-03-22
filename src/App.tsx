@@ -8,6 +8,7 @@ import { InvestorDashboardLayout } from "./components/InvestorDashboardLayout";
 import { FinancialProvider } from "./contexts/FinancialContext";
 import { WalletProvider } from "./contexts/WalletContext";
 import { NotificationProvider } from "./contexts/NotificationContext";
+import { LTIProvider } from "./contexts/LTIContext";
 import Overview from "./pages/Overview";
 import Expenses from "./pages/Expenses";
 import Clients from "./pages/Clients";
@@ -45,54 +46,56 @@ const App = () => (
       <FinancialProvider>
         <WalletProvider>
           <NotificationProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
+            <LTIProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<Login />} />
 
-              {/* Investor routes */}
-              <Route
-                path="/investor/*"
-                element={
-                  <ProtectedRoute requiredRole="investor">
-                    <InvestorDashboardLayout>
-                      <Routes>
-                        <Route path="/wallet" element={<InvestorWallet />} />
-                        <Route path="/lti" element={<InvestorLTI />} />
-                        <Route path="/sti" element={<InvestorSTI />} />
-                        <Route path="/profile" element={<InvestorProfile />} />
-                        <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
-                      </Routes>
-                    </InvestorDashboardLayout>
-                  </ProtectedRoute>
-                }
-              />
+                {/* Investor routes */}
+                <Route
+                  path="/investor/*"
+                  element={
+                    <ProtectedRoute requiredRole="investor">
+                      <InvestorDashboardLayout>
+                        <Routes>
+                          <Route path="/wallet" element={<InvestorWallet />} />
+                          <Route path="/lti" element={<InvestorLTI />} />
+                          <Route path="/sti" element={<InvestorSTI />} />
+                          <Route path="/profile" element={<InvestorProfile />} />
+                          <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
+                        </Routes>
+                      </InvestorDashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
 
-              {/* Admin routes */}
-              <Route
-                path="/*"
-                element={
-                  <ProtectedRoute requiredRole="admin">
-                    <DashboardLayout>
-                      <Routes>
-                        <Route path="/" element={<Overview />} />
-                        <Route path="/expenses" element={<Expenses />} />
-                        <Route path="/clients" element={<Clients />} />
-                        <Route path="/long-term-investment" element={<Investors />} />
-                        <Route path="/short-term-investment" element={<ShortTermInvestment />} />
-                        <Route path="/wallet" element={<Wallet />} />
-                        <Route path="/admins" element={<Admins />} />
-                        <Route path="/investor-users" element={<InvestorUsers />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="*" element={<NotFound />} />
-                      </Routes>
-                    </DashboardLayout>
-                  </ProtectedRoute>
-                }
-              />
-            </Routes>
-          </BrowserRouter>
+                {/* Admin routes */}
+                <Route
+                  path="/*"
+                  element={
+                    <ProtectedRoute requiredRole="admin">
+                      <DashboardLayout>
+                        <Routes>
+                          <Route path="/" element={<Overview />} />
+                          <Route path="/expenses" element={<Expenses />} />
+                          <Route path="/clients" element={<Clients />} />
+                          <Route path="/long-term-investment" element={<Investors />} />
+                          <Route path="/short-term-investment" element={<ShortTermInvestment />} />
+                          <Route path="/wallet" element={<Wallet />} />
+                          <Route path="/admins" element={<Admins />} />
+                          <Route path="/investor-users" element={<InvestorUsers />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="*" element={<NotFound />} />
+                        </Routes>
+                      </DashboardLayout>
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+            </LTIProvider>
           </NotificationProvider>
         </WalletProvider>
       </FinancialProvider>
