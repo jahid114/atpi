@@ -469,7 +469,14 @@ export default function ShortTermInvestment() {
                 <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-4 h-11 shrink-0">
                   <TabsTrigger value="overview" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Overview</TabsTrigger>
                   <TabsTrigger value="investors" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Investors</TabsTrigger>
-                  <TabsTrigger value="requests" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Requests</TabsTrigger>
+                  <TabsTrigger value="requests" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none gap-1.5">
+                    Requests
+                    {detailProject && detailProject.investors.filter(i => i.status === "pending").length > 0 && (
+                      <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                        {detailProject.investors.filter(i => i.status === "pending").length}
+                      </span>
+                    )}
+                  </TabsTrigger>
                   <TabsTrigger value="transactions" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Transactions</TabsTrigger>
                 </TabsList>
 
