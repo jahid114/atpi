@@ -490,7 +490,6 @@ export default function ShortTermInvestment() {
                   <TabsContent value="transactions" className="mt-0">
                     <STITransactionsTab
                       project={detailProject}
-                      onUpdateStatus={(entryId, status) => handleUpdateStatus(detailProject.id, entryId, status)}
                     />
                   </TabsContent>
                 </div>

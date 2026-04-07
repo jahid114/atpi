@@ -148,6 +148,7 @@ export default function InvestorSTI() {
       id: Date.now(),
       investorName: CURRENT_USER.name,
       email: CURRENT_USER.email,
+      phone: "+8801711111111",
       amount,
       date: new Date().toISOString().split("T")[0],
       status: "pending",
