@@ -38,11 +38,11 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectCommercial,
     investors: [
-      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", amount: 100000, date: "2026-01-20", status: "approved" },
-      { id: 102, investorName: "Bob Smith", email: "bob@example.com", amount: 75000, date: "2026-01-22", status: "approved" },
-      { id: 103, investorName: "David Lee", email: "david@example.com", amount: 50000, date: "2026-02-01", status: "pending" },
-      { id: 104, investorName: "Frank Müller", email: "frank@example.com", amount: 60000, date: "2026-02-05", status: "approved" },
-      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", amount: 45000, date: "2026-02-08", status: "approved" },
+      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", phone: "+8801711111111", amount: 100000, date: "2026-01-20", status: "approved" },
+      { id: 102, investorName: "Bob Smith", email: "bob@example.com", phone: "+8801722222222", amount: 75000, date: "2026-01-22", status: "approved" },
+      { id: 103, investorName: "David Lee", email: "david@example.com", phone: "+8801733333333", amount: 50000, date: "2026-02-01", status: "pending" },
+      { id: 104, investorName: "Frank Müller", email: "frank@example.com", phone: "+8801744444444", amount: 60000, date: "2026-02-05", status: "approved" },
+      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", phone: "+8801755555555", amount: 45000, date: "2026-02-08", status: "approved" },
     ],
   },
   {
@@ -56,8 +56,8 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectEquipment,
     investors: [
-      { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
-      { id: 202, investorName: "Liam Foster", email: "liam@example.com", amount: 40000, date: "2026-02-08", status: "approved" },
+      { id: 201, investorName: "Carol Williams", email: "carol@example.com", phone: "+8801799999999", amount: 80000, date: "2026-02-05", status: "approved" },
+      { id: 202, investorName: "Liam Foster", email: "liam@example.com", phone: "+8801700000001", amount: 40000, date: "2026-02-08", status: "approved" },
     ],
   },
   {
@@ -72,8 +72,8 @@ const initialProjects: ShortTermProject[] = [
     image: projectCommercial,
     distributed: true,
     investors: [
-      { id: 301, investorName: "Alice Johnson", email: "alice@example.com", amount: 50000, date: "2025-09-10", status: "approved" },
-      { id: 302, investorName: "Bob Smith", email: "bob@example.com", amount: 100000, date: "2025-09-12", status: "approved" },
+      { id: 301, investorName: "Alice Johnson", email: "alice@example.com", phone: "+8801711111111", amount: 50000, date: "2025-09-10", status: "approved" },
+      { id: 302, investorName: "Bob Smith", email: "bob@example.com", phone: "+8801722222222", amount: 100000, date: "2025-09-12", status: "approved" },
     ],
   },
 ];
@@ -148,6 +148,7 @@ export default function InvestorSTI() {
       id: Date.now(),
       investorName: CURRENT_USER.name,
       email: CURRENT_USER.email,
+      phone: "+8801711111111",
       amount,
       date: new Date().toISOString().split("T")[0],
       status: "pending",

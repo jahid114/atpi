@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Eye, Search } from "lucide-react";
+import { Search, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TablePagination } from "@/components/TablePagination";
@@ -9,15 +9,20 @@ import { fmt } from "@/types/short-term";
 
 interface Props {
   project: ShortTermProject;
+  onInvestMore?: (investorId: number) => void;
 }
 
-export function STIInvestorsTab({ project }: Props) {
+export function STIInvestorsTab({ project, onInvestMore }: Props) {
   const [search, setSearch] = useState("");
 
   const approved = useMemo(() => {
     return project.investors
       .filter((inv) => inv.status === "approved")
-      .filter((inv) => inv.investorName.toLowerCase().includes(search.toLowerCase()) || inv.email.toLowerCase().includes(search.toLowerCase()));
+      .filter((inv) =>
+        inv.investorName.toLowerCase().includes(search.toLowerCase()) ||
+        inv.phone.toLowerCase().includes(search.toLowerCase()) ||
+        inv.email.toLowerCase().includes(search.toLowerCase())
+      );
   }, [project.investors, search]);
 
   const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(approved);
@@ -39,8 +44,10 @@ export function STIInvestorsTab({ project }: Props) {
           <thead>
             <tr className="border-b border-border bg-muted/50">
               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Investor</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Phone</th>
               <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Date</th>
+              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -50,19 +57,32 @@ export function STIInvestorsTab({ project }: Props) {
                   <p className="font-medium text-foreground">{inv.investorName}</p>
                   <p className="text-xs text-muted-foreground">{inv.email}</p>
                 </td>
+                <td className="px-3 py-2 text-muted-foreground text-sm">{inv.phone}</td>
                 <td className="px-3 py-2 text-right font-medium text-foreground">{fmt(inv.amount)}</td>
                 <td className="px-3 py-2 text-muted-foreground text-xs">{inv.date}</td>
+                <td className="px-3 py-2 text-center">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-7 px-2 text-xs gap-1 text-primary hover:text-primary"
+                    onClick={() => onInvestMore?.(inv.id)}
+                  >
+                    <PlusCircle className="h-3.5 w-3.5" /> Invest More
+                  </Button>
+                </td>
               </tr>
             ))}
             {paginatedItems.length === 0 && (
-              <tr><td colSpan={3} className="px-3 py-6 text-center text-muted-foreground">No approved investors yet.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No approved investors yet.</td></tr>
             )}
           </tbody>
           {approved.length > 0 && (
             <tfoot>
               <tr className="border-t border-border bg-muted/30">
                 <td className="px-3 py-2 font-semibold text-foreground">Total</td>
+                <td />
                 <td className="px-3 py-2 text-right font-bold text-profit">{fmt(totalFunded)}</td>
+                <td />
                 <td />
               </tr>
             </tfoot>

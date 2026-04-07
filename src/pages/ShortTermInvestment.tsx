@@ -42,14 +42,14 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectCommercial,
     investors: [
-      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", amount: 100000, date: "2026-01-20", status: "approved" },
-      { id: 102, investorName: "Bob Smith", email: "bob@example.com", amount: 75000, date: "2026-01-22", status: "approved" },
-      { id: 103, investorName: "David Lee", email: "david@example.com", amount: 50000, date: "2026-02-01", status: "pending" },
-      { id: 104, investorName: "Frank Müller", email: "frank@example.com", amount: 60000, date: "2026-02-05", status: "approved" },
-      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", amount: 45000, date: "2026-02-08", status: "approved" },
-      { id: 106, investorName: "Hassan Ali", email: "hassan@example.com", amount: 80000, date: "2026-02-10", status: "pending" },
-      { id: 107, investorName: "Isabella Costa", email: "isabella@example.com", amount: 35000, date: "2026-02-12", status: "approved" },
-      { id: 108, investorName: "Jack O'Brien", email: "jack@example.com", amount: 55000, date: "2026-02-14", status: "rejected" },
+      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", phone: "+8801711111111", amount: 100000, date: "2026-01-20", status: "approved" },
+      { id: 102, investorName: "Bob Smith", email: "bob@example.com", phone: "+8801722222222", amount: 75000, date: "2026-01-22", status: "approved" },
+      { id: 103, investorName: "David Lee", email: "david@example.com", phone: "+8801733333333", amount: 50000, date: "2026-02-01", status: "pending" },
+      { id: 104, investorName: "Frank Müller", email: "frank@example.com", phone: "+8801744444444", amount: 60000, date: "2026-02-05", status: "approved" },
+      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", phone: "+8801755555555", amount: 45000, date: "2026-02-08", status: "approved" },
+      { id: 106, investorName: "Hassan Ali", email: "hassan@example.com", phone: "+8801766666666", amount: 80000, date: "2026-02-10", status: "pending" },
+      { id: 107, investorName: "Isabella Costa", email: "isabella@example.com", phone: "+8801777777777", amount: 35000, date: "2026-02-12", status: "approved" },
+      { id: 108, investorName: "Jack O'Brien", email: "jack@example.com", phone: "+8801788888888", amount: 55000, date: "2026-02-14", status: "rejected" },
     ],
   },
   {
@@ -63,12 +63,12 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectEquipment,
     investors: [
-      { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
-      { id: 202, investorName: "Liam Foster", email: "liam@example.com", amount: 40000, date: "2026-02-08", status: "approved" },
-      { id: 203, investorName: "Keiko Yamamoto", email: "keiko@example.com", amount: 25000, date: "2026-02-10", status: "pending" },
-      { id: 204, investorName: "Eva Martinez", email: "eva@example.com", amount: 30000, date: "2026-02-12", status: "approved" },
-      { id: 205, investorName: "Raj Patel", email: "raj@example.com", amount: 50000, date: "2026-02-15", status: "approved" },
-      { id: 206, investorName: "Sophie Laurent", email: "sophie@example.com", amount: 20000, date: "2026-02-18", status: "rejected" },
+      { id: 201, investorName: "Carol Williams", email: "carol@example.com", phone: "+8801799999999", amount: 80000, date: "2026-02-05", status: "approved" },
+      { id: 202, investorName: "Liam Foster", email: "liam@example.com", phone: "+8801700000001", amount: 40000, date: "2026-02-08", status: "approved" },
+      { id: 203, investorName: "Keiko Yamamoto", email: "keiko@example.com", phone: "+8801700000002", amount: 25000, date: "2026-02-10", status: "pending" },
+      { id: 204, investorName: "Eva Martinez", email: "eva@example.com", phone: "+8801700000003", amount: 30000, date: "2026-02-12", status: "approved" },
+      { id: 205, investorName: "Raj Patel", email: "raj@example.com", phone: "+8801700000004", amount: 50000, date: "2026-02-15", status: "approved" },
+      { id: 206, investorName: "Sophie Laurent", email: "sophie@example.com", phone: "+8801700000005", amount: 20000, date: "2026-02-18", status: "rejected" },
     ],
   },
 ];
@@ -139,15 +139,17 @@ export default function ShortTermInvestment() {
     }
   };
 
-  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number; fundingSource: "direct" | "wallet" }) => {
+  const handleAddInvestor = (projectId: number, data: { investorName: string; phone: string; email: string; amount: number; fundingSource: "direct" | "wallet"; date: string; attachment?: { name: string; url: string } }) => {
     const newEntry: STInvestorEntry = {
       id: Date.now(),
       investorName: data.investorName,
       email: data.email,
+      phone: data.phone,
       amount: data.amount,
-      date: new Date().toISOString().split("T")[0],
+      date: data.date || new Date().toISOString().split("T")[0],
       status: "pending",
       fundingSource: data.fundingSource,
+      attachment: data.attachment,
     };
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
@@ -467,7 +469,14 @@ export default function ShortTermInvestment() {
                 <TabsList className="w-full justify-start rounded-none border-b border-border bg-transparent px-4 h-11 shrink-0">
                   <TabsTrigger value="overview" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Overview</TabsTrigger>
                   <TabsTrigger value="investors" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Investors</TabsTrigger>
-                  <TabsTrigger value="requests" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Requests</TabsTrigger>
+                  <TabsTrigger value="requests" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none gap-1.5">
+                    Requests
+                    {detailProject && detailProject.investors.filter(i => i.status === "pending").length > 0 && (
+                      <span className="inline-flex items-center justify-center h-5 min-w-5 px-1.5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-semibold">
+                        {detailProject.investors.filter(i => i.status === "pending").length}
+                      </span>
+                    )}
+                  </TabsTrigger>
                   <TabsTrigger value="transactions" className="text-xs data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none">Transactions</TabsTrigger>
                 </TabsList>
 
@@ -488,7 +497,6 @@ export default function ShortTermInvestment() {
                   <TabsContent value="transactions" className="mt-0">
                     <STITransactionsTab
                       project={detailProject}
-                      onUpdateStatus={(entryId, status) => handleUpdateStatus(detailProject.id, entryId, status)}
                     />
                   </TabsContent>
                 </div>
