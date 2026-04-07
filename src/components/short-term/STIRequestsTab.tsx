@@ -222,11 +222,11 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
             </div>
             <div className="space-y-1.5">
               <Label>Investor Name *</Label>
-              <Input placeholder="e.g. John Doe" value={form.investorName} onChange={(e) => setForm((f) => ({ ...f, investorName: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
+              <Input placeholder="Auto-filled from selection" value={form.investorName} readOnly className="bg-muted/50" />
             </div>
             <div className="space-y-1.5">
               <Label>Phone Number *</Label>
-              <Input type="tel" placeholder="e.g. +8801700000000" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
+              <Input type="tel" placeholder="Auto-filled from selection" value={form.phone} readOnly className="bg-muted/50" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
