@@ -1,4 +1,4 @@
-import { Calendar, TrendingUp, Users, DollarSign, Download } from "lucide-react";
+import { Calendar, TrendingUp, Users, DollarSign, Download, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +9,7 @@ import { generateSTIReport } from "@/lib/sti-pdf";
 
 interface Props {
   project: ShortTermProject;
+  onDistribute?: () => void;
 }
 
 export function STIOverviewTab({ project }: Props) {
