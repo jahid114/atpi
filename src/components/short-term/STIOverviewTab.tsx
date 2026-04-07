@@ -1,4 +1,4 @@
-import { Calendar, TrendingUp, Users, DollarSign, Download } from "lucide-react";
+import { Calendar, TrendingUp, Users, DollarSign, Download, CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -9,9 +9,10 @@ import { generateSTIReport } from "@/lib/sti-pdf";
 
 interface Props {
   project: ShortTermProject;
+  onDistribute?: () => void;
 }
 
-export function STIOverviewTab({ project }: Props) {
+export function STIOverviewTab({ project, onDistribute }: Props) {
   const approved = project.investors.filter((inv) => inv.status === "approved");
   const pending = project.investors.filter((inv) => inv.status === "pending");
   const funded = approved.reduce((s, inv) => s + inv.amount, 0);
@@ -30,12 +31,20 @@ export function STIOverviewTab({ project }: Props) {
     toast.success("Report PDF downloaded.");
   };
 
-  return (
+    const isEndDatePassed = new Date(project.endDate) <= new Date();
+    const canDistribute = project.status === "active" && !project.distributed && approved.length > 0;
+
+    return (
     <div className="space-y-5">
-      {/* Download Report */}
-      <div className="flex justify-end">
+      {/* Action buttons */}
+      <div className="flex justify-end gap-2">
+        {canDistribute && (
+          <Button size="sm" onClick={onDistribute} disabled={!isEndDatePassed} className="gap-2">
+            <CheckCircle2 className="h-4 w-4" /> Complete & Distribute
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={handleDownloadReport} className="gap-2">
-          <Download className="h-4 w-4" /> Download Overall Report
+          <Download className="h-4 w-4" /> Download Report
         </Button>
       </div>
 
