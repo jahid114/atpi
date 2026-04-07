@@ -63,12 +63,12 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectEquipment,
     investors: [
-      { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
-      { id: 202, investorName: "Liam Foster", email: "liam@example.com", amount: 40000, date: "2026-02-08", status: "approved" },
-      { id: 203, investorName: "Keiko Yamamoto", email: "keiko@example.com", amount: 25000, date: "2026-02-10", status: "pending" },
-      { id: 204, investorName: "Eva Martinez", email: "eva@example.com", amount: 30000, date: "2026-02-12", status: "approved" },
-      { id: 205, investorName: "Raj Patel", email: "raj@example.com", amount: 50000, date: "2026-02-15", status: "approved" },
-      { id: 206, investorName: "Sophie Laurent", email: "sophie@example.com", amount: 20000, date: "2026-02-18", status: "rejected" },
+      { id: 201, investorName: "Carol Williams", email: "carol@example.com", phone: "+8801799999999", amount: 80000, date: "2026-02-05", status: "approved" },
+      { id: 202, investorName: "Liam Foster", email: "liam@example.com", phone: "+8801700000001", amount: 40000, date: "2026-02-08", status: "approved" },
+      { id: 203, investorName: "Keiko Yamamoto", email: "keiko@example.com", phone: "+8801700000002", amount: 25000, date: "2026-02-10", status: "pending" },
+      { id: 204, investorName: "Eva Martinez", email: "eva@example.com", phone: "+8801700000003", amount: 30000, date: "2026-02-12", status: "approved" },
+      { id: 205, investorName: "Raj Patel", email: "raj@example.com", phone: "+8801700000004", amount: 50000, date: "2026-02-15", status: "approved" },
+      { id: 206, investorName: "Sophie Laurent", email: "sophie@example.com", phone: "+8801700000005", amount: 20000, date: "2026-02-18", status: "rejected" },
     ],
   },
 ];
