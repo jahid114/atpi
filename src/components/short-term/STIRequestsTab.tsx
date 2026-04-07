@@ -97,6 +97,7 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
     setForm({ investorName: "", phone: "", email: "", amount: "", date: "" });
     setFundingSource("direct");
     setAttachment(null);
+    setSelectedUserId("");
     setAddOpen(false);
   };
 
