@@ -13,6 +13,7 @@ import { usePagination } from "@/hooks/use-pagination";
 import { toast } from "sonner";
 import type { ShortTermProject, InvestorEntryStatus } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
+import { generateSTIInvoice } from "@/lib/sti-pdf";
 
 interface Props {
   project: ShortTermProject;
