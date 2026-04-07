@@ -5,6 +5,7 @@ import { Progress } from "@/components/ui/progress";
 import type { ShortTermProject } from "@/types/short-term";
 import { fmt, statusConfig } from "@/types/short-term";
 import { toast } from "sonner";
+import { generateSTIReport } from "@/lib/sti-pdf";
 
 interface Props {
   project: ShortTermProject;
