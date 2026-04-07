@@ -38,11 +38,11 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectCommercial,
     investors: [
-      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", amount: 100000, date: "2026-01-20", status: "approved" },
-      { id: 102, investorName: "Bob Smith", email: "bob@example.com", amount: 75000, date: "2026-01-22", status: "approved" },
-      { id: 103, investorName: "David Lee", email: "david@example.com", amount: 50000, date: "2026-02-01", status: "pending" },
-      { id: 104, investorName: "Frank Müller", email: "frank@example.com", amount: 60000, date: "2026-02-05", status: "approved" },
-      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", amount: 45000, date: "2026-02-08", status: "approved" },
+      { id: 101, investorName: "Alice Johnson", email: "alice@example.com", phone: "+8801711111111", amount: 100000, date: "2026-01-20", status: "approved" },
+      { id: 102, investorName: "Bob Smith", email: "bob@example.com", phone: "+8801722222222", amount: 75000, date: "2026-01-22", status: "approved" },
+      { id: 103, investorName: "David Lee", email: "david@example.com", phone: "+8801733333333", amount: 50000, date: "2026-02-01", status: "pending" },
+      { id: 104, investorName: "Frank Müller", email: "frank@example.com", phone: "+8801744444444", amount: 60000, date: "2026-02-05", status: "approved" },
+      { id: 105, investorName: "Grace Tanaka", email: "grace@example.com", phone: "+8801755555555", amount: 45000, date: "2026-02-08", status: "approved" },
     ],
   },
   {
