@@ -166,7 +166,7 @@ export function STIInvestorsTab({ project, onAddInvestor }: Props) {
 
       {/* Invest More Dialog */}
       <Dialog open={investMoreOpen} onOpenChange={setInvestMoreOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Invest More</DialogTitle>
             <DialogDescription>Add additional investment for this investor.</DialogDescription>
