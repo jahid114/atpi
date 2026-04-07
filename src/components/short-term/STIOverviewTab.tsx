@@ -12,7 +12,7 @@ interface Props {
   onDistribute?: () => void;
 }
 
-export function STIOverviewTab({ project }: Props) {
+export function STIOverviewTab({ project, onDistribute }: Props) {
   const approved = project.investors.filter((inv) => inv.status === "approved");
   const pending = project.investors.filter((inv) => inv.status === "pending");
   const funded = approved.reduce((s, inv) => s + inv.amount, 0);
