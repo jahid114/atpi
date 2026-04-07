@@ -159,60 +159,6 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
         )}
       </div>
 
-      {/* Rejected Table */}
-      <div className="border border-border rounded-lg overflow-hidden">
-        <div className="px-3 py-2 border-b border-border bg-muted/50">
-          <p className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-            <XCircle className="h-4 w-4 text-destructive" /> Rejected
-            {rejected.length > 0 && (
-              <Badge variant="destructive" className="text-[10px] h-5 min-w-5 px-1.5">{rejected.length}</Badge>
-            )}
-          </p>
-        </div>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border bg-muted/30">
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Investor</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Phone</th>
-              <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Date</th>
-              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rejectedPagination.paginatedItems.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No rejected requests.</td></tr>
-            ) : (
-              rejectedPagination.paginatedItems.map((inv) => (
-                <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors opacity-70">
-                  <td className="px-3 py-2">
-                    <p className="font-medium text-foreground text-sm">{inv.investorName}</p>
-                    <p className="text-xs text-muted-foreground">{inv.email}</p>
-                  </td>
-                  <td className="px-3 py-2 text-sm text-muted-foreground">{inv.phone}</td>
-                  <td className="px-3 py-2 text-right font-medium text-foreground">{fmt(inv.amount)}</td>
-                  <td className="px-3 py-2 text-xs text-muted-foreground">{inv.date}</td>
-                  <td className="px-3 py-2 text-center">
-                    <Badge variant="destructive" className="text-[11px]">Rejected</Badge>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-        {rejected.length > 5 && (
-          <div className="p-2 border-t border-border">
-            <TablePagination
-              currentPage={rejectedPagination.currentPage}
-              totalPages={rejectedPagination.totalPages}
-              totalItems={rejectedPagination.totalItems}
-              onPageChange={rejectedPagination.goToPage}
-              hasNextPage={rejectedPagination.hasNextPage}
-              hasPrevPage={rejectedPagination.hasPrevPage}
-            />
-          </div>
-        )}
-      </div>
 
       {/* Confirmation Modal */}
       <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
