@@ -31,12 +31,20 @@ export function STIOverviewTab({ project, onDistribute }: Props) {
     toast.success("Report PDF downloaded.");
   };
 
-  return (
+    const isEndDatePassed = new Date(project.endDate) <= new Date();
+    const canDistribute = project.status === "active" && !project.distributed && approved.length > 0;
+
+    return (
     <div className="space-y-5">
-      {/* Download Report */}
-      <div className="flex justify-end">
+      {/* Action buttons */}
+      <div className="flex justify-end gap-2">
+        {canDistribute && (
+          <Button size="sm" onClick={onDistribute} disabled={!isEndDatePassed} className="gap-2">
+            <CheckCircle2 className="h-4 w-4" /> Complete & Distribute
+          </Button>
+        )}
         <Button variant="outline" size="sm" onClick={handleDownloadReport} className="gap-2">
-          <Download className="h-4 w-4" /> Download Overall Report
+          <Download className="h-4 w-4" /> Download Report
         </Button>
       </div>
 
