@@ -139,15 +139,17 @@ export default function ShortTermInvestment() {
     }
   };
 
-  const handleAddInvestor = (projectId: number, data: { investorName: string; email: string; amount: number; fundingSource: "direct" | "wallet" }) => {
+  const handleAddInvestor = (projectId: number, data: { investorName: string; phone: string; email: string; amount: number; fundingSource: "direct" | "wallet"; date: string; attachment?: { name: string; url: string } }) => {
     const newEntry: STInvestorEntry = {
       id: Date.now(),
       investorName: data.investorName,
       email: data.email,
+      phone: data.phone,
       amount: data.amount,
-      date: new Date().toISOString().split("T")[0],
+      date: data.date || new Date().toISOString().split("T")[0],
       status: "pending",
       fundingSource: data.fundingSource,
+      attachment: data.attachment,
     };
     setProjects((prev) =>
       prev.map((p) => (p.id === projectId ? { ...p, investors: [...p.investors, newEntry] } : p))
