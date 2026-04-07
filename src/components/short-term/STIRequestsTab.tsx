@@ -49,10 +49,6 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
 
   const handleSelectUser = (userId: string) => {
     setSelectedUserId(userId);
-    if (userId === "new") {
-      setForm({ investorName: "", phone: "", email: "", amount: "", date: "" });
-      return;
-    }
     const user = initialUsers.find((u) => String(u.id) === userId);
     if (!user) return;
     setForm((f) => ({ ...f, investorName: user.name, phone: user.phone, email: user.email }));
