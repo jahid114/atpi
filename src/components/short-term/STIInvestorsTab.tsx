@@ -1,19 +1,36 @@
-import { useMemo, useState } from "react";
-import { Search, PlusCircle } from "lucide-react";
+import { useMemo, useState, useRef } from "react";
+import { Search, PlusCircle, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
-import type { ShortTermProject } from "@/types/short-term";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
+} from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { useWallet } from "@/contexts/WalletContext";
+import { fmtWallet } from "@/types/wallet";
+import type { ShortTermProject, STInvestorEntry } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
 
 interface Props {
   project: ShortTermProject;
-  onInvestMore?: (investorId: number) => void;
+  onAddInvestor?: (data: { investorName: string; phone: string; email: string; amount: number; fundingSource: "direct" | "wallet"; date: string; attachment?: { name: string; url: string } }) => void;
 }
 
-export function STIInvestorsTab({ project, onInvestMore }: Props) {
+export function STIInvestorsTab({ project, onAddInvestor }: Props) {
+  const { investFromWallet, getWalletBalance } = useWallet();
   const [search, setSearch] = useState("");
+  const [investMoreOpen, setInvestMoreOpen] = useState(false);
+  const [selectedInvestor, setSelectedInvestor] = useState<STInvestorEntry | null>(null);
+  const [form, setForm] = useState({ amount: "", date: "" });
+  const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
+  const [attachment, setAttachment] = useState<{ name: string; url: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const approved = useMemo(() => {
     return project.investors
@@ -28,6 +45,54 @@ export function STIInvestorsTab({ project, onInvestMore }: Props) {
   const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(approved);
 
   const totalFunded = approved.reduce((s, inv) => s + inv.amount, 0);
+
+  const walletBalance = selectedInvestor ? getWalletBalance(selectedInvestor.email) : 0;
+
+  const openInvestMore = (inv: STInvestorEntry) => {
+    setSelectedInvestor(inv);
+    setForm({ amount: "", date: "" });
+    setFundingSource("direct");
+    setAttachment(null);
+    setInvestMoreOpen(true);
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setAttachment({ name: file.name, url: ev.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!selectedInvestor || !form.amount) {
+      toast.error("Please fill all required fields.");
+      return;
+    }
+    const amount = Number(form.amount);
+    if (fundingSource === "wallet") {
+      if (walletBalance < amount) {
+        toast.error("Insufficient wallet balance.");
+        return;
+      }
+      const success = investFromWallet(selectedInvestor.investorName, selectedInvestor.email, amount, "invest_sti", `Additional investment in ${project.name}`);
+      if (!success) return;
+    }
+    onAddInvestor?.({
+      investorName: selectedInvestor.investorName,
+      phone: selectedInvestor.phone,
+      email: selectedInvestor.email,
+      amount,
+      fundingSource,
+      date: form.date || new Date().toISOString().split("T")[0],
+      attachment: fundingSource === "direct" ? attachment || undefined : undefined,
+    });
+    setInvestMoreOpen(false);
+    setSelectedInvestor(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -65,7 +130,7 @@ export function STIInvestorsTab({ project, onInvestMore }: Props) {
                     size="sm"
                     variant="ghost"
                     className="h-7 px-2 text-xs gap-1 text-primary hover:text-primary"
-                    onClick={() => onInvestMore?.(inv.id)}
+                    onClick={() => openInvestMore(inv)}
                   >
                     <PlusCircle className="h-3.5 w-3.5" /> Invest More
                   </Button>
@@ -98,6 +163,77 @@ export function STIInvestorsTab({ project, onInvestMore }: Props) {
         hasNextPage={hasNextPage}
         hasPrevPage={hasPrevPage}
       />
+
+      {/* Invest More Dialog */}
+      <Dialog open={investMoreOpen} onOpenChange={setInvestMoreOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Invest More</DialogTitle>
+            <DialogDescription>Add additional investment for this investor.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Investor Name</Label>
+              <Input value={selectedInvestor?.investorName || ""} readOnly className="bg-muted/50" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Phone Number</Label>
+              <Input value={selectedInvestor?.phone || ""} readOnly className="bg-muted/50" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Amount *</Label>
+                <Input type="number" placeholder="50000" value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Date</Label>
+                <Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Funding Source</Label>
+              <Select value={fundingSource} onValueChange={(v) => setFundingSource(v as "direct" | "wallet")}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="direct">Direct Investment</SelectItem>
+                  <SelectItem value="wallet">From Wallet {walletBalance > 0 ? `(${fmtWallet(walletBalance)} available)` : "(No balance)"}</SelectItem>
+                </SelectContent>
+              </Select>
+              {fundingSource === "wallet" && walletBalance > 0 && Number(form.amount) > walletBalance && (
+                <p className="text-xs text-destructive">Amount exceeds wallet balance of {fmtWallet(walletBalance)}</p>
+              )}
+            </div>
+            {fundingSource === "direct" && (
+              <div className="space-y-1.5">
+                <Label>Attachment</Label>
+                <div
+                  onClick={() => fileRef.current?.click()}
+                  className="border-2 border-dashed border-border rounded-lg p-3 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+                >
+                  {attachment ? (
+                    <div className="flex items-center justify-center gap-2 text-sm text-foreground">
+                      <Paperclip className="h-4 w-4" />
+                      {attachment.name}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center gap-1 text-muted-foreground">
+                      <Paperclip className="h-5 w-5" />
+                      <p className="text-xs">Click to attach a file</p>
+                    </div>
+                  )}
+                </div>
+                <input ref={fileRef} type="file" className="hidden" onChange={handleFileUpload} />
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={handleSubmit}>Submit</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

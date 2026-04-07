@@ -477,7 +477,7 @@ export default function ShortTermInvestment() {
                     <STIOverviewTab project={detailProject} onDistribute={() => setDistributeOpen(true)} />
                   </TabsContent>
                   <TabsContent value="investors" className="mt-0">
-                    <STIInvestorsTab project={detailProject} />
+                    <STIInvestorsTab project={detailProject} onAddInvestor={(data) => handleAddInvestor(detailProject.id, data)} />
                   </TabsContent>
                   <TabsContent value="requests" className="mt-0">
                     <STIRequestsTab
