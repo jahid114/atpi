@@ -45,6 +45,19 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
   const pendingPagination = usePagination(pending);
   const rejectedPagination = usePagination(rejected);
 
+  const availableUsers = useMemo(() => initialUsers, []);
+
+  const handleSelectUser = (userId: string) => {
+    setSelectedUserId(userId);
+    if (userId === "new") {
+      setForm({ investorName: "", phone: "", email: "", amount: "", date: "" });
+      return;
+    }
+    const user = initialUsers.find((u) => String(u.id) === userId);
+    if (!user) return;
+    setForm((f) => ({ ...f, investorName: user.name, phone: user.phone, email: user.email }));
+  };
+
   const walletBalance = form.email ? getWalletBalance(form.email) : 0;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
