@@ -208,8 +208,22 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
+              <Label>Select Investor</Label>
+              <Select value={selectedUserId} onValueChange={handleSelectUser}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose an existing investor or add new" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="new">+ Add New Investor</SelectItem>
+                  {availableUsers.map((u) => (
+                    <SelectItem key={u.id} value={String(u.id)}>{u.name} — {u.phone}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
               <Label>Investor Name *</Label>
-              <Input placeholder="e.g. John Doe" value={form.investorName} onChange={(e) => setForm((f) => ({ ...f, investorName: e.target.value }))} />
+              <Input placeholder="e.g. John Doe" value={form.investorName} onChange={(e) => setForm((f) => ({ ...f, investorName: e.target.value }))} readOnly={selectedUserId !== "" && selectedUserId !== "new"} className={selectedUserId !== "" && selectedUserId !== "new" ? "bg-muted/50" : ""} />
             </div>
             <div className="space-y-1.5">
               <Label>Phone Number *</Label>
