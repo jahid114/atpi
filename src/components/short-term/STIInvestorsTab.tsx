@@ -104,32 +104,32 @@ export function STIInvestorsTab({ project, onAddInvestor }: Props) {
         <p className="text-xs text-muted-foreground whitespace-nowrap">{approved.length} investor{approved.length !== 1 ? "s" : ""}</p>
       </div>
 
-      <div className="border border-border rounded-lg overflow-hidden">
-        <table className="w-full text-sm">
+      <div className="border border-border rounded-lg overflow-x-auto">
+        <table className="w-full text-sm table-fixed min-w-[520px]">
           <thead>
             <tr className="border-b border-border bg-muted/50">
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Investor</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Phone</th>
-              <th className="text-right px-3 py-2 font-medium text-muted-foreground">Amount</th>
-              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Date</th>
-              <th className="text-center px-3 py-2 font-medium text-muted-foreground">Action</th>
+              <th className="text-left px-2 py-2 font-medium text-muted-foreground w-[30%]">Investor</th>
+              <th className="text-left px-2 py-2 font-medium text-muted-foreground w-[20%]">Phone</th>
+              <th className="text-right px-2 py-2 font-medium text-muted-foreground w-[18%]">Amount</th>
+              <th className="text-left px-2 py-2 font-medium text-muted-foreground w-[14%]">Date</th>
+              <th className="text-center px-2 py-2 font-medium text-muted-foreground w-[18%]">Action</th>
             </tr>
           </thead>
           <tbody>
             {paginatedItems.map((inv) => (
               <tr key={inv.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                <td className="px-3 py-2">
-                  <p className="font-medium text-foreground">{inv.investorName}</p>
-                  <p className="text-xs text-muted-foreground">{inv.email}</p>
+                <td className="px-2 py-2">
+                  <p className="font-medium text-foreground truncate">{inv.investorName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{inv.email}</p>
                 </td>
-                <td className="px-3 py-2 text-muted-foreground text-sm">{inv.phone}</td>
-                <td className="px-3 py-2 text-right font-medium text-foreground">{fmt(inv.amount)}</td>
-                <td className="px-3 py-2 text-muted-foreground text-xs">{inv.date}</td>
-                <td className="px-3 py-2 text-center">
+                <td className="px-2 py-2 text-muted-foreground text-xs truncate">{inv.phone}</td>
+                <td className="px-2 py-2 text-right font-medium text-foreground text-xs">{fmt(inv.amount)}</td>
+                <td className="px-2 py-2 text-muted-foreground text-xs">{inv.date}</td>
+                <td className="px-2 py-2 text-center">
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-7 px-2 text-xs gap-1 text-primary hover:text-primary"
+                    className="h-7 px-1.5 text-xs gap-1 text-primary hover:text-primary"
                     onClick={() => openInvestMore(inv)}
                   >
                     <PlusCircle className="h-3.5 w-3.5" /> Invest More
@@ -138,15 +138,15 @@ export function STIInvestorsTab({ project, onAddInvestor }: Props) {
               </tr>
             ))}
             {paginatedItems.length === 0 && (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-muted-foreground">No approved investors yet.</td></tr>
+              <tr><td colSpan={5} className="px-2 py-6 text-center text-muted-foreground">No approved investors yet.</td></tr>
             )}
           </tbody>
           {approved.length > 0 && (
             <tfoot>
               <tr className="border-t border-border bg-muted/30">
-                <td className="px-3 py-2 font-semibold text-foreground">Total</td>
+                <td className="px-2 py-2 font-semibold text-foreground">Total</td>
                 <td />
-                <td className="px-3 py-2 text-right font-bold text-profit">{fmt(totalFunded)}</td>
+                <td className="px-2 py-2 text-right font-bold text-profit text-xs">{fmt(totalFunded)}</td>
                 <td />
                 <td />
               </tr>
@@ -166,7 +166,7 @@ export function STIInvestorsTab({ project, onAddInvestor }: Props) {
 
       {/* Invest More Dialog */}
       <Dialog open={investMoreOpen} onOpenChange={setInvestMoreOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>Invest More</DialogTitle>
             <DialogDescription>Add additional investment for this investor.</DialogDescription>
