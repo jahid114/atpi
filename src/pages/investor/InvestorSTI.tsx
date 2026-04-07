@@ -56,8 +56,8 @@ const initialProjects: ShortTermProject[] = [
     status: "active",
     image: projectEquipment,
     investors: [
-      { id: 201, investorName: "Carol Williams", email: "carol@example.com", amount: 80000, date: "2026-02-05", status: "approved" },
-      { id: 202, investorName: "Liam Foster", email: "liam@example.com", amount: 40000, date: "2026-02-08", status: "approved" },
+      { id: 201, investorName: "Carol Williams", email: "carol@example.com", phone: "+8801799999999", amount: 80000, date: "2026-02-05", status: "approved" },
+      { id: 202, investorName: "Liam Foster", email: "liam@example.com", phone: "+8801700000001", amount: 40000, date: "2026-02-08", status: "approved" },
     ],
   },
   {
