@@ -20,6 +20,7 @@ import type { ShortTermProject, InvestorEntryStatus } from "@/types/short-term";
 import { fmt } from "@/types/short-term";
 import { useWallet } from "@/contexts/WalletContext";
 import { fmtWallet } from "@/types/wallet";
+import { initialUsers } from "@/pages/InvestorUsers";
 
 interface Props {
   project: ShortTermProject;
@@ -34,6 +35,7 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
   const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
   const [attachment, setAttachment] = useState<{ name: string; url: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string>("");
 
   const [confirmAction, setConfirmAction] = useState<{ entryId: number; status: InvestorEntryStatus; name: string } | null>(null);
 
