@@ -211,10 +211,9 @@ export function STIRequestsTab({ project, onAddInvestor, onUpdateStatus }: Props
               <Label>Select Investor</Label>
               <Select value={selectedUserId} onValueChange={handleSelectUser}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose an existing investor or add new" />
+                  <SelectValue placeholder="Choose an investor" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="new">+ Add New Investor</SelectItem>
                   {availableUsers.map((u) => (
                     <SelectItem key={u.id} value={String(u.id)}>{u.name} — {u.phone}</SelectItem>
                   ))}
