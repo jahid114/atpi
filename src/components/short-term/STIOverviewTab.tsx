@@ -26,42 +26,8 @@ export function STIOverviewTab({ project }: Props) {
   const elapsed = Math.max(0, Math.min(totalDays, Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))));
 
   const handleDownloadReport = () => {
-    const lines: string[] = [];
-    lines.push(`Project Report: ${project.name}`);
-    lines.push(`Generated: ${new Date().toLocaleDateString()}`);
-    lines.push("");
-    lines.push(`Status: ${statusConfig[project.status].label}`);
-    lines.push(`Target Amount: ${fmt(project.targetAmount)}`);
-    lines.push(`Funded: ${fmt(funded)} (${progress.toFixed(1)}%)`);
-    lines.push(`Remaining: ${fmt(remaining)}`);
-    lines.push(`Expected Return: ${project.expectedReturn}%`);
-    lines.push(`Start Date: ${project.startDate}`);
-    lines.push(`End Date: ${project.endDate}`);
-    lines.push(`Total Investors: ${project.investors.length}`);
-    lines.push(`Approved: ${approved.length} | Pending: ${pending.length}`);
-    lines.push("");
-    lines.push("--- Approved Investors ---");
-    lines.push("Name, Phone, Amount, Date");
-    approved.forEach((inv) => {
-      lines.push(`${inv.investorName}, ${inv.phone}, ${fmt(inv.amount)}, ${inv.date}`);
-    });
-    if (pending.length > 0) {
-      lines.push("");
-      lines.push("--- Pending Investors ---");
-      lines.push("Name, Phone, Amount, Date");
-      pending.forEach((inv) => {
-        lines.push(`${inv.investorName}, ${inv.phone}, ${fmt(inv.amount)}, ${inv.date}`);
-      });
-    }
-
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${project.name.replace(/\s+/g, "_")}_report.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Report downloaded.");
+    generateSTIReport(project);
+    toast.success("Report PDF downloaded.");
   };
 
   return (

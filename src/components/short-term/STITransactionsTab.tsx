@@ -57,32 +57,8 @@ export function STITransactionsTab({ project }: Props) {
   }, []);
 
   const handleGenerateInvoice = (t: typeof project.investors[0]) => {
-    const lines = [
-      "INVOICE",
-      "========",
-      `Project: ${project.name}`,
-      `Date: ${t.date}`,
-      "",
-      `Investor: ${t.investorName}`,
-      `Phone: ${t.phone}`,
-      `Email: ${t.email}`,
-      `Amount: ${fmt(t.amount)}`,
-      `Status: ${t.status}`,
-      `Funding Source: ${t.fundingSource || "direct"}`,
-      "",
-      `Expected Return: ${project.expectedReturn}%`,
-      `Expected Profit: ${fmt(Math.round(t.amount * (project.expectedReturn / 100)))}`,
-      "",
-      `Generated: ${new Date().toLocaleString()}`,
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `invoice_${t.investorName.replace(/\s+/g, "_")}_${t.date}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("Invoice generated.");
+    generateSTIInvoice(project, t);
+    toast.success("Invoice PDF generated.");
   };
 
   return (
