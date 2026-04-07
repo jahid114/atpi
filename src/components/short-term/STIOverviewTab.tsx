@@ -1,8 +1,10 @@
-import { Calendar, TrendingUp, Users, DollarSign } from "lucide-react";
+import { Calendar, TrendingUp, Users, DollarSign, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import type { ShortTermProject } from "@/types/short-term";
 import { fmt, statusConfig } from "@/types/short-term";
+import { toast } from "sonner";
 
 interface Props {
   project: ShortTermProject;
@@ -22,8 +24,54 @@ export function STIOverviewTab({ project }: Props) {
   const totalDays = Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)));
   const elapsed = Math.max(0, Math.min(totalDays, Math.ceil((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24))));
 
+  const handleDownloadReport = () => {
+    const lines: string[] = [];
+    lines.push(`Project Report: ${project.name}`);
+    lines.push(`Generated: ${new Date().toLocaleDateString()}`);
+    lines.push("");
+    lines.push(`Status: ${statusConfig[project.status].label}`);
+    lines.push(`Target Amount: ${fmt(project.targetAmount)}`);
+    lines.push(`Funded: ${fmt(funded)} (${progress.toFixed(1)}%)`);
+    lines.push(`Remaining: ${fmt(remaining)}`);
+    lines.push(`Expected Return: ${project.expectedReturn}%`);
+    lines.push(`Start Date: ${project.startDate}`);
+    lines.push(`End Date: ${project.endDate}`);
+    lines.push(`Total Investors: ${project.investors.length}`);
+    lines.push(`Approved: ${approved.length} | Pending: ${pending.length}`);
+    lines.push("");
+    lines.push("--- Approved Investors ---");
+    lines.push("Name, Phone, Amount, Date");
+    approved.forEach((inv) => {
+      lines.push(`${inv.investorName}, ${inv.phone}, ${fmt(inv.amount)}, ${inv.date}`);
+    });
+    if (pending.length > 0) {
+      lines.push("");
+      lines.push("--- Pending Investors ---");
+      lines.push("Name, Phone, Amount, Date");
+      pending.forEach((inv) => {
+        lines.push(`${inv.investorName}, ${inv.phone}, ${fmt(inv.amount)}, ${inv.date}`);
+      });
+    }
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${project.name.replace(/\s+/g, "_")}_report.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success("Report downloaded.");
+  };
+
   return (
     <div className="space-y-5">
+      {/* Download Report */}
+      <div className="flex justify-end">
+        <Button variant="outline" size="sm" onClick={handleDownloadReport} className="gap-2">
+          <Download className="h-4 w-4" /> Download Overall Report
+        </Button>
+      </div>
+
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-1">

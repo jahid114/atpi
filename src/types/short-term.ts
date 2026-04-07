@@ -5,10 +5,12 @@ export interface STInvestorEntry {
   id: number;
   investorName: string;
   email: string;
+  phone: string;
   amount: number;
   date: string;
   status: InvestorEntryStatus;
   fundingSource?: "direct" | "wallet";
+  attachment?: { name: string; url: string };
 }
 
 export interface ShortTermProject {
