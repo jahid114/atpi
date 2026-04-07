@@ -474,7 +474,7 @@ export default function ShortTermInvestment() {
 
                 <div className="flex-1 overflow-y-auto p-4">
                   <TabsContent value="overview" className="mt-0">
-                    <STIOverviewTab project={detailProject} />
+                    <STIOverviewTab project={detailProject} onDistribute={() => setDistributeOpen(true)} />
                   </TabsContent>
                   <TabsContent value="investors" className="mt-0">
                     <STIInvestorsTab project={detailProject} />
