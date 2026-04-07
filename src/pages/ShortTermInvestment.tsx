@@ -407,7 +407,7 @@ export default function ShortTermInvestment() {
         <SheetContent
           side="right"
           className={`p-0 overflow-y-auto transition-all duration-300 ${
-            expanded ? "sm:max-w-full w-full" : "sm:max-w-xl w-full"
+            expanded ? "sm:max-w-full w-full" : "sm:max-w-2xl w-full"
           }`}
         >
           {detailProject && (
