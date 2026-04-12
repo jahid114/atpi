@@ -395,6 +395,10 @@ export default function InvestorUsers() {
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">NID</p>
                         <p className="text-sm font-medium text-foreground">{viewUser.nominee.nidNumber || "N/A"}</p>
                       </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No nominee information provided.</p>
+                  )}
                 </div>
 
                 {/* Payment Accounts */}
@@ -408,10 +412,6 @@ export default function InvestorUsers() {
                     />
                   </div>
                 )}
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No nominee information provided.</p>
-                  )}
-                </div>
               </div>
 
               <DialogFooter>
