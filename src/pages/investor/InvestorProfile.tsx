@@ -10,11 +10,17 @@ import { KpiCard } from "@/components/KpiCard";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, Camera, Save, KeyRound, Eye, EyeOff,
   Wallet, TrendingUp, BarChart3, DollarSign, Heart, Shield,
 } from "lucide-react";
+import { AccountCards } from "@/components/AccountCards";
+import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
+import { mobileBankingProviders } from "@/types/accounts";
 
 interface ProfileData {
   name: string;
@@ -60,6 +66,22 @@ const InvestorProfile = () => {
   });
 
   const [editProfile, setEditProfile] = useState<ProfileData>(profile);
+
+  // Bank & Mobile Banking Accounts
+  const [bankAccount, setBankAccount] = useState<BankAccount | null>({
+    id: 1, bankName: "Dutch-Bangla Bank", accountName: "Investor User", accountNumber: "1234567890123", branchName: "Gulshan Branch", routingNumber: "090261392",
+  });
+  const [mobileAccounts, setMobileAccounts] = useState<MobileBankingAccount[]>([
+    { id: 1, provider: "bKash", accountNumber: "01712345678", accountName: "Investor User" },
+  ]);
+
+  // Add Bank Dialog
+  const [addBankOpen, setAddBankOpen] = useState(false);
+  const [bankForm, setBankForm] = useState({ bankName: "", accountName: "", accountNumber: "", branchName: "", routingNumber: "" });
+
+  // Add Mobile Dialog
+  const [addMobileOpen, setAddMobileOpen] = useState(false);
+  const [mobileForm, setMobileForm] = useState({ provider: "bKash" as MobileBankingAccount["provider"], accountNumber: "", accountName: "" });
 
   // Mock investment summary
   const investmentSummary = {
@@ -116,6 +138,32 @@ const InvestorProfile = () => {
     setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
     setPasswordErrors({});
     toast({ title: "Password changed successfully" });
+  };
+
+  const handleAddBank = () => {
+    if (!bankForm.bankName.trim() || !bankForm.accountNumber.trim() || !bankForm.accountName.trim()) return;
+    setBankAccount({
+      id: Date.now(),
+      bankName: bankForm.bankName,
+      accountName: bankForm.accountName,
+      accountNumber: bankForm.accountNumber,
+      branchName: bankForm.branchName,
+      routingNumber: bankForm.routingNumber,
+    });
+    setBankForm({ bankName: "", accountName: "", accountNumber: "", branchName: "", routingNumber: "" });
+    setAddBankOpen(false);
+    toast({ title: "Bank account added" });
+  };
+
+  const handleAddMobile = () => {
+    if (!mobileForm.accountNumber.trim() || !mobileForm.accountName.trim()) return;
+    setMobileAccounts((prev) => [
+      ...prev,
+      { id: Date.now(), provider: mobileForm.provider, accountNumber: mobileForm.accountNumber, accountName: mobileForm.accountName },
+    ]);
+    setMobileForm({ provider: "bKash", accountNumber: "", accountName: "" });
+    setAddMobileOpen(false);
+    toast({ title: "Mobile banking account added" });
   };
 
   const fmt = (n: number) => "৳" + n.toLocaleString();
@@ -275,6 +323,94 @@ const InvestorProfile = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Bank & Mobile Banking Accounts Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Payment Accounts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AccountCards
+            bankAccount={bankAccount}
+            mobileAccounts={mobileAccounts}
+            onAddBank={() => setAddBankOpen(true)}
+            onAddMobile={() => setAddMobileOpen(true)}
+            onRemoveBank={() => { setBankAccount(null); toast({ title: "Bank account removed" }); }}
+            onRemoveMobile={(id) => { setMobileAccounts((prev) => prev.filter((a) => a.id !== id)); toast({ title: "Mobile account removed" }); }}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Add Bank Account Dialog */}
+      <Dialog open={addBankOpen} onOpenChange={setAddBankOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Bank Account</DialogTitle>
+            <DialogDescription>Enter your bank account details for top-up and withdrawal.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Bank Name *</Label>
+              <Input placeholder="e.g. Dutch-Bangla Bank" value={bankForm.bankName} onChange={(e) => setBankForm({ ...bankForm, bankName: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Account Holder Name *</Label>
+              <Input placeholder="Full name" value={bankForm.accountName} onChange={(e) => setBankForm({ ...bankForm, accountName: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Account Number *</Label>
+              <Input placeholder="Account number" value={bankForm.accountNumber} onChange={(e) => setBankForm({ ...bankForm, accountNumber: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Branch Name</Label>
+              <Input placeholder="e.g. Gulshan Branch" value={bankForm.branchName} onChange={(e) => setBankForm({ ...bankForm, branchName: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Routing Number</Label>
+              <Input placeholder="Routing number" value={bankForm.routingNumber} onChange={(e) => setBankForm({ ...bankForm, routingNumber: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddBankOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddBank}>Add Account</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add Mobile Banking Dialog */}
+      <Dialog open={addMobileOpen} onOpenChange={setAddMobileOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Mobile Banking Account</DialogTitle>
+            <DialogDescription>Enter your mobile banking details.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Provider *</Label>
+              <Select value={mobileForm.provider} onValueChange={(v) => setMobileForm({ ...mobileForm, provider: v as MobileBankingAccount["provider"] })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {mobileBankingProviders.map((p) => (
+                    <SelectItem key={p} value={p}>{p}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Account Number *</Label>
+              <Input placeholder="e.g. 01712345678" value={mobileForm.accountNumber} onChange={(e) => setMobileForm({ ...mobileForm, accountNumber: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Account Name *</Label>
+              <Input placeholder="Account holder name" value={mobileForm.accountName} onChange={(e) => setMobileForm({ ...mobileForm, accountName: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddMobileOpen(false)}>Cancel</Button>
+            <Button onClick={handleAddMobile}>Add Account</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Change Password Dialog */}
       <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>

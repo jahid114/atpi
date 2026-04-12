@@ -8,12 +8,13 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { KpiCard } from "@/components/KpiCard";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
-import { Wallet, ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, TrendingUp } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle } from "lucide-react";
 import type { WalletTransaction, WalletTransactionStatus, TransferMedium } from "@/types/wallet";
 import { walletTxTypeConfig, walletTxStatusConfig, transferMediumConfig, fmtWallet } from "@/types/wallet";
+import { AccountCards } from "@/components/AccountCards";
+import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
 
 const myWallet = {
   id: 1,
@@ -31,6 +32,14 @@ const myWallet = {
     { id: 104, investorName: "Alice Johnson", email: "alice@example.com", type: "top_up", amount: 10000, date: "2026-03-01", status: "pending", description: "Wallet top-up request", transferMedium: "cash" },
   ] as WalletTransaction[],
 };
+
+// Mock linked accounts (shared with profile in real app)
+const mockBankAccount: BankAccount = {
+  id: 1, bankName: "Dutch-Bangla Bank", accountName: "Alice Johnson", accountNumber: "1234567890123", branchName: "Gulshan Branch", routingNumber: "090261392",
+};
+const mockMobileAccounts: MobileBankingAccount[] = [
+  { id: 1, provider: "bKash", accountNumber: "01711111111", accountName: "Alice Johnson" },
+];
 
 export default function InvestorWallet() {
   const [wallet, setWallet] = useState(myWallet);
@@ -50,8 +59,6 @@ export default function InvestorWallet() {
   }, [wallet.transactions, statusFilter]);
 
   const pagination = usePagination(filteredTransactions, { pageSize: 8 });
-
-  const pendingCount = wallet.transactions.filter((t) => t.status === "pending").length;
 
   const handleSubmitTransaction = () => {
     const amount = parseFloat(txAmount);
@@ -111,6 +118,20 @@ export default function InvestorWallet() {
           </Button>
         </div>
       </div>
+
+      {/* Linked Payment Accounts */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Linked Accounts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AccountCards
+            bankAccount={mockBankAccount}
+            mobileAccounts={mockMobileAccounts}
+            readOnly
+          />
+        </CardContent>
+      </Card>
 
       {/* Transaction History */}
       <Card>

@@ -1,5 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { User, Mail, Phone, Search, Plus, Pencil, Trash2, Calendar, Eye, Briefcase, Globe, CreditCard, Heart, Shirt, Users as UsersIcon, Hash, ArrowUpDown, Camera } from "lucide-react";
+import { AccountCards } from "@/components/AccountCards";
+import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { Badge } from "@/components/ui/badge";
@@ -35,10 +37,12 @@ export interface InvestorUser {
   jerseySize: string;
   profileImage: string;
   nominee: NomineeInfo;
+  bankAccount?: BankAccount | null;
+  mobileAccounts?: MobileBankingAccount[];
 }
 
 export const initialUsers: InvestorUser[] = [
-  { id: 1001, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", password: "••••••••", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", totalInvested: 50000, shares: 5, nidNumber: "1234567890", bloodGroup: "A+", jerseySize: "M", profileImage: "", nominee: { name: "John Johnson", relationship: "Spouse", phone: "+1 555-2001", nidNumber: "9876543210" } },
+  { id: 1001, name: "Alice Johnson", email: "alice@example.com", phone: "+1 555-1001", password: "••••••••", occupation: "Software Engineer", country: "United States", joinedDate: "2025-10-01", status: "active", totalInvested: 50000, shares: 5, nidNumber: "1234567890", bloodGroup: "A+", jerseySize: "M", profileImage: "", nominee: { name: "John Johnson", relationship: "Spouse", phone: "+1 555-2001", nidNumber: "9876543210" }, bankAccount: { id: 1, bankName: "Dutch-Bangla Bank", accountName: "Alice Johnson", accountNumber: "1234567890123", branchName: "Gulshan Branch", routingNumber: "090261392" }, mobileAccounts: [{ id: 1, provider: "bKash", accountNumber: "01711111111", accountName: "Alice Johnson" }] },
   { id: 1002, name: "Bob Smith", email: "bob@example.com", phone: "+1 555-1002", password: "••••••••", occupation: "Business Owner", country: "Canada", joinedDate: "2025-11-15", status: "active", totalInvested: 25000, shares: 3, nidNumber: "2345678901", bloodGroup: "B+", jerseySize: "L", profileImage: "", nominee: { name: "Mary Smith", relationship: "Spouse", phone: "+1 555-2002", nidNumber: "8765432109" } },
   { id: 1003, name: "Carol Williams", email: "carol@example.com", phone: "+1 555-1003", password: "••••••••", occupation: "Financial Analyst", country: "United Kingdom", joinedDate: "2025-12-01", status: "active", totalInvested: 120000, shares: 8, nidNumber: "3456789012", bloodGroup: "O+", jerseySize: "S", profileImage: "", nominee: { name: "Tom Williams", relationship: "Brother", phone: "+1 555-2003", nidNumber: "7654321098" } },
   { id: 1004, name: "David Lee", email: "david@example.com", phone: "+1 555-1004", password: "••••••••", occupation: "Real Estate Agent", country: "Australia", joinedDate: "2026-01-10", status: "active", totalInvested: 75000, shares: 6, nidNumber: "4567890123", bloodGroup: "AB+", jerseySize: "XL", profileImage: "", nominee: { name: "Lisa Lee", relationship: "Spouse", phone: "+1 555-2004", nidNumber: "6543210987" } },
@@ -396,6 +400,18 @@ export default function InvestorUsers() {
                     <p className="text-sm text-muted-foreground">No nominee information provided.</p>
                   )}
                 </div>
+
+                {/* Payment Accounts */}
+                {(viewUser.bankAccount || (viewUser.mobileAccounts && viewUser.mobileAccounts.length > 0)) && (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment Accounts</p>
+                    <AccountCards
+                      bankAccount={viewUser.bankAccount || null}
+                      mobileAccounts={viewUser.mobileAccounts || []}
+                      readOnly
+                    />
+                  </div>
+                )}
               </div>
 
               <DialogFooter>
