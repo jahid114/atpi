@@ -395,7 +395,19 @@ export default function InvestorUsers() {
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">NID</p>
                         <p className="text-sm font-medium text-foreground">{viewUser.nominee.nidNumber || "N/A"}</p>
                       </div>
-                    </div>
+                </div>
+
+                {/* Payment Accounts */}
+                {(viewUser.bankAccount || (viewUser.mobileAccounts && viewUser.mobileAccounts.length > 0)) && (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Payment Accounts</p>
+                    <AccountCards
+                      bankAccount={viewUser.bankAccount || null}
+                      mobileAccounts={viewUser.mobileAccounts || []}
+                      readOnly
+                    />
+                  </div>
+                )}
                   ) : (
                     <p className="text-sm text-muted-foreground">No nominee information provided.</p>
                   )}
