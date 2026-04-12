@@ -1,5 +1,7 @@
 import { useState, useMemo, useRef } from "react";
 import { User, Mail, Phone, Search, Plus, Pencil, Trash2, Calendar, Eye, Briefcase, Globe, CreditCard, Heart, Shirt, Users as UsersIcon, Hash, ArrowUpDown, Camera } from "lucide-react";
+import { AccountCards } from "@/components/AccountCards";
+import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { Badge } from "@/components/ui/badge";
