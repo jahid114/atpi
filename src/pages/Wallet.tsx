@@ -105,7 +105,7 @@ export default function Wallet() {
     <div className="space-y-6 xl:space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Wallet Management</h1>
+          <h1 className="text-2xl font-bold text-foreground">Wallet Management</h1>
           <p className="text-sm text-muted-foreground mt-1">Investor top-ups, withdrawals & wallet balances</p>
         </div>
         <Button onClick={() => setTxDialogOpen(true)}>
@@ -115,21 +115,21 @@ export default function Wallet() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Wallets</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{wallets.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{wallets.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Top-Ups</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmtWallet(totalTopUps)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmtWallet(totalTopUps)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Withdrawals</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmtWallet(totalWithdrawals)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmtWallet(totalWithdrawals)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Balance</p>
-          <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">{fmtWallet(totalBalance)}</p>
+          <p className="text-2xl font-bold text-profit mt-1">{fmtWallet(totalBalance)}</p>
         </div>
       </div>
 

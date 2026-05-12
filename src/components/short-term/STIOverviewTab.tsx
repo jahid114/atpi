@@ -49,30 +49,30 @@ export function STIOverviewTab({ project, onDistribute }: Props) {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <DollarSign className="h-3.5 w-3.5" /> Target Amount
-          </div>
-          <p className="text-lg font-bold text-foreground">{fmt(project.targetAmount)}</p>
+          </p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(project.targetAmount)}</p>
         </div>
-        <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <DollarSign className="h-3.5 w-3.5" /> Funded
-          </div>
-          <p className="text-lg font-bold text-profit">{fmt(funded)}</p>
+          </p>
+          <p className="text-2xl font-bold text-profit mt-1">{fmt(funded)}</p>
         </div>
-        <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <TrendingUp className="h-3.5 w-3.5" /> Expected Return
-          </div>
-          <p className="text-lg font-bold text-foreground">{project.expectedReturn}%</p>
+          </p>
+          <p className="text-2xl font-bold text-foreground mt-1">{project.expectedReturn}%</p>
         </div>
-        <div className="bg-muted/50 border border-border rounded-lg p-4 space-y-1">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
             <Users className="h-3.5 w-3.5" /> Total Investors
-          </div>
-          <p className="text-lg font-bold text-foreground">{project.investors.length}</p>
+          </p>
+          <p className="text-2xl font-bold text-foreground mt-1">{project.investors.length}</p>
           {pending.length > 0 && (
             <p className="text-xs text-muted-foreground">{pending.length} pending</p>
           )}

@@ -46,41 +46,41 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
     <div className="space-y-6 xl:space-y-8">
       {/* KPI row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 xl:gap-5">
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">No of Investors</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{approved.length}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">No of Investors</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{approved.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">No of Shares</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{totalShares}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">No of Shares</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{totalShares}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Total Share Value</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(shareValue)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Share Value</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(shareValue)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Total Invested</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Invested</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Investmentable Amount</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(investmentableAmount)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Investmentable Amount</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(investmentableAmount)}</p>
         </div>
       </div>
 
       {/* Profit Breakdown */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xl:gap-5">
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Profit from Client</p>
-          <p className="text-xl xl:text-2xl font-bold text-profit mt-1">{fmt(grossProfit)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Profit from Client</p>
+          <p className="text-2xl font-bold text-profit mt-1">{fmt(grossProfit)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Total Expense</p>
-          <p className="text-xl xl:text-2xl font-bold text-destructive mt-1">{fmt(totalExpenses)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Expense</p>
+          <p className="text-2xl font-bold text-destructive mt-1">{fmt(totalExpenses)}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Net Profit</p>
-          <p className={`text-xl xl:text-2xl font-bold mt-1 ${profit >= 0 ? "text-profit" : "text-destructive"}`}>{fmt(profit)}</p>
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Net Profit</p>
+          <p className={`text-2xl font-bold mt-1 ${profit >= 0 ? "text-profit" : "text-destructive"}`}>{fmt(profit)}</p>
         </div>
       </div>
 

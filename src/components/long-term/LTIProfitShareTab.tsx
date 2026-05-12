@@ -211,28 +211,28 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   return (
     <div className="space-y-6">
       {/* Distribution Summary */}
-      <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+      <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-foreground">Distribution Summary · {selectedYear}</h2>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Profit Pool</p>
-            <p className="text-lg font-bold text-foreground mt-1">{fmt(profit)}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{fmt(profit)}</p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Pending</p>
-            <p className="text-lg font-bold text-warning mt-1">{fmt(totalPendingAmount)}</p>
+            <p className="text-2xl font-bold text-warning mt-1">{fmt(totalPendingAmount)}</p>
             <p className="text-xs text-muted-foreground">{pendingRows.length} investor{pendingRows.length !== 1 ? "s" : ""}</p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Distributed</p>
-            <p className="text-lg font-bold text-profit mt-1">{fmt(totalDistributedAmount)}</p>
+            <p className="text-2xl font-bold text-profit mt-1">{fmt(totalDistributedAmount)}</p>
             <p className="text-xs text-muted-foreground">{distributedRows.length} investor{distributedRows.length !== 1 ? "s" : ""}</p>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Eligible Total</p>
-            <p className="text-lg font-bold text-foreground mt-1">{approved.length}</p>
+            <p className="text-2xl font-bold text-foreground mt-1">{approved.length}</p>
           </div>
         </div>
       </div>

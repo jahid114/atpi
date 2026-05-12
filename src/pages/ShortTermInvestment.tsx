@@ -275,17 +275,17 @@ export default function ShortTermInvestment() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xl:gap-6">
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Projects</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{projects.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{projects.length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Active Projects</p>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{projects.filter((p) => p.status === "active").length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{projects.filter((p) => p.status === "active").length}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Total Funded</p>
-          <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">
+          <p className="text-2xl font-bold text-profit mt-1">
             {fmt(projects.reduce((s, p) => s + p.investors.filter((inv) => inv.status === "approved").reduce((a, inv) => a + inv.amount, 0), 0))}
           </p>
         </div>
