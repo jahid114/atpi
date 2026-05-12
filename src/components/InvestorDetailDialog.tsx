@@ -1,19 +1,12 @@
-import { useState } from "react";
-import { CheckCircle, XCircle, Clock, LogOut } from "lucide-react";
+import { CheckCircle, XCircle, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
 import { calcDaysActive, calculateProRata, fmt, YEAR_TOTAL_DAYS, TODAY } from "@/lib/investor-utils";
 
@@ -22,7 +15,7 @@ interface InvestorDetailDialogProps {
   allInvestors: Investor[];
   profit: number;
   onClose: () => void;
-  onWithdraw: (investorId: number, amount: number) => void;
+  onWithdraw?: (investorId: number, amount: number) => void;
 }
 
 const typeConfig: Record<string, { label: string; colorClass: string }> = {
@@ -37,10 +30,7 @@ const statusBadge: Record<InvestmentStatus, { label: string; icon: React.Element
   rejected: { label: "Rejected", icon: XCircle, variant: "destructive" },
 };
 
-export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, onWithdraw }: InvestorDetailDialogProps) {
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-
+export function InvestorDetailDialog({ investor, allInvestors, profit, onClose }: InvestorDetailDialogProps) {
   if (!investor) return null;
 
   const deposits = investor.history.filter((h) => h.type === "deposit");
@@ -50,29 +40,19 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
   const approvedWithdrawals = withdrawals.filter((w) => w.status === "approved").reduce((s, w) => s + w.amount, 0);
   const currentBalance = approvedPrincipal - approvedWithdrawals;
   const totalProfitReceived = payouts.filter((p) => p.status === "approved").reduce((s, p) => s + p.amount, 0);
-
-  const handleWithdrawSubmit = () => {
-    const amount = Number(withdrawAmount);
-    if (!amount || amount <= 0) {
-      toast.error("Please enter a valid amount.");
-      return;
-    }
-    if (amount > currentBalance) {
-      toast.error(`Amount exceeds current balance of ${fmt(currentBalance)}.`);
-      return;
-    }
-    onWithdraw(investor.id, amount);
-    setWithdrawAmount("");
-    setWithdrawOpen(false);
-    toast.success(`Withdrawal of ${fmt(amount)} submitted for ${investor.name}.`);
-  };
+  const statusChip = statusBadge[investor.status as InvestmentStatus] || statusBadge.pending;
+  const StatusIcon = statusChip.icon;
 
   return (
-    <>
     <Dialog open={!!investor} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{investor.name}</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            {investor.name}
+            <Badge variant={statusChip.variant} className="text-[11px] gap-1">
+              <StatusIcon className="h-3 w-3" /> {statusChip.label}
+            </Badge>
+          </DialogTitle>
           <DialogDescription>
             {investor.email} · {investor.phone || "No phone"}
           </DialogDescription>
@@ -82,33 +62,22 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
           {/* Summary cards */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Approved Principal</p>
+              <p className="text-xs text-muted-foreground">Total Investment</p>
               <p className="text-lg font-bold text-foreground">{fmt(approvedPrincipal)}</p>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Current Balance</p>
-              <p className="text-lg font-bold text-foreground">{fmt(currentBalance)}</p>
+              <p className="text-xs text-muted-foreground">Total Withdrawn</p>
+              <p className="text-lg font-bold text-destructive">{fmt(approvedWithdrawals)}</p>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Status</p>
-              <p className="text-lg font-bold text-foreground capitalize">{investor.status}</p>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3 text-center">
-              <p className="text-xs text-muted-foreground">Profit Received</p>
+              <p className="text-xs text-muted-foreground">Total Profit Received</p>
               <p className="text-lg font-bold text-profit">{fmt(totalProfitReceived)}</p>
             </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-center">
+              <p className="text-xs text-muted-foreground">Current Investment</p>
+              <p className="text-lg font-bold text-foreground">{fmt(currentBalance)}</p>
+            </div>
           </div>
-
-          {/* Withdraw button */}
-          {investor.status === "approved" && currentBalance > 0 && (
-            <Button
-              variant="outline"
-              className="w-full border-destructive/30 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setWithdrawOpen(true)}
-            >
-              <LogOut className="h-4 w-4 mr-2" /> Withdraw / Move Out Investment
-            </Button>
-          )}
 
           {/* Investment History */}
           <div>
@@ -205,64 +174,5 @@ export function InvestorDetailDialog({ investor, allInvestors, profit, onClose, 
         </div>
       </DialogContent>
     </Dialog>
-
-    {/* Withdraw Dialog */}
-    <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Withdraw Investment</DialogTitle>
-          <DialogDescription>
-            Current balance: <span className="font-semibold text-foreground">{fmt(currentBalance)}</span>. Enter the amount to withdraw (full or partial).
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-4 py-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="withdraw-amount">Withdrawal Amount</Label>
-            <Input
-              id="withdraw-amount"
-              type="number"
-              placeholder={`Max ${currentBalance.toLocaleString()}`}
-              value={withdrawAmount}
-              onChange={(e) => setWithdrawAmount(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={() => setWithdrawAmount(String(currentBalance))}
-            >
-              Full Amount
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={() => setWithdrawAmount(String(Math.round(currentBalance / 2)))}
-            >
-              50%
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              className="text-xs"
-              onClick={() => setWithdrawAmount(String(Math.round(currentBalance / 4)))}
-            >
-              25%
-            </Button>
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogClose>
-          <Button variant="destructive" onClick={handleWithdrawSubmit}>
-            Submit Withdrawal
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-    </>
   );
 }
