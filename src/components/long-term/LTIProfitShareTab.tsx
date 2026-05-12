@@ -292,7 +292,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
               </DialogHeader>
 
               <div className="border border-border rounded-lg mt-2">
-                <table className="w-full text-xs">
+                <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
                       <th className="text-left px-3 py-2 font-medium text-muted-foreground">Event</th>
