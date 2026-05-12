@@ -403,27 +403,35 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
               {/* Payout destination */}
               <div className="space-y-2">
                 <Label>Payout Destination</Label>
-                <RadioGroup value={destination} onValueChange={setDestination} className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                  <label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer transition-colors ${destination === "wallet" ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}>
-                    <RadioGroupItem value="wallet" />
-                    <Wallet className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">Wallet</span>
-                  </label>
-                  {accounts.bank && (
-                    <label className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer transition-colors ${destination === `bank-${accounts.bank.id}` ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}>
-                      <RadioGroupItem value={`bank-${accounts.bank.id}`} />
-                      <Landmark className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">Bank Account</span>
-                    </label>
-                  )}
-                  {accounts.mobiles.map((m) => (
-                    <label key={m.id} className={`flex items-center gap-2 border rounded-lg p-3 cursor-pointer transition-colors ${destination === `mobile-${m.id}` ? "border-primary bg-primary/5" : "border-border hover:bg-muted/30"}`}>
-                      <RadioGroupItem value={`mobile-${m.id}`} />
-                      <Smartphone className="h-4 w-4 text-primary" />
-                      <span className="text-sm font-medium">{m.provider}</span>
-                    </label>
-                  ))}
-                </RadioGroup>
+                <Select value={destination} onValueChange={setDestination}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select destination" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="wallet">
+                      <div className="flex items-center gap-2">
+                        <Wallet className="h-4 w-4 text-primary" />
+                        <span>Wallet</span>
+                      </div>
+                    </SelectItem>
+                    {accounts.bank && (
+                      <SelectItem value={`bank-${accounts.bank.id}`}>
+                        <div className="flex items-center gap-2">
+                          <Landmark className="h-4 w-4 text-primary" />
+                          <span>{accounts.bank.bankName} · ••••{accounts.bank.accountNumber.slice(-4)}</span>
+                        </div>
+                      </SelectItem>
+                    )}
+                    {accounts.mobiles.map((m) => (
+                      <SelectItem key={m.id} value={`mobile-${m.id}`}>
+                        <div className="flex items-center gap-2">
+                          <Smartphone className="h-4 w-4 text-primary" />
+                          <span>{m.provider} · {m.accountNumber}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
 
                 {/* Selected account details */}
                 {destination === "wallet" && (
