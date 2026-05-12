@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye, User, DollarSign, Hash, CreditCard, FileText } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye, User, DollarSign, Hash, CreditCard, FileText, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ const typeLabels: Record<string, string> = {
 interface Props {
   investors: Investor[];
   onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
-  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => void;
+  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string }; fundingSource?: "direct" | "wallet" }) => void;
   selectedYear: number;
 }
 
@@ -58,6 +58,7 @@ const emptyTxForm = {
   type: "deposit" as "deposit" | "withdrawal",
   amount: "",
   date: new Date().toISOString().split("T")[0],
+  fundingSource: "direct" as "direct" | "wallet",
   transferMedium: "cash" as TransferMedium,
   description: "",
 };
@@ -94,9 +95,10 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
       return;
     }
     onAddTransaction?.(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.date, {
-      transferMedium: txForm.transferMedium,
+      fundingSource: txForm.fundingSource,
+      transferMedium: txForm.fundingSource === "direct" ? txForm.transferMedium : undefined,
       description: txForm.description || undefined,
-      attachment: txAttachment || undefined,
+      attachment: txForm.fundingSource === "direct" ? (txAttachment || undefined) : undefined,
     });
     const inv = investors.find((i) => i.id === Number(txForm.investorId));
     toast.success(`${txForm.type === "deposit" ? "Deposit" : "Withdrawal"} of ${fmt(Number(txForm.amount))} submitted for ${inv?.name || "investor"}.`);
@@ -374,7 +376,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                   {/* Financial Details */}
                   <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financial Details</p>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="bg-card border border-border rounded-lg p-3 text-center">
                         <DollarSign className={`h-5 w-5 mx-auto mb-1 ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`} />
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</p>
@@ -388,10 +390,17 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                         <p className="text-lg font-bold text-foreground mt-0.5">{typeLabels[viewTx.type] || viewTx.type}</p>
                       </div>
                       <div className="bg-card border border-border rounded-lg p-3 text-center">
-                        <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
-                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                        <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Funding Source</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.fundingSource === "wallet" ? "Wallet" : "Direct"}</p>
                       </div>
+                      {viewTx.fundingSource !== "wallet" && (
+                        <div className="bg-card border border-border rounded-lg p-3 text-center">
+                          <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
+                          <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -500,6 +509,18 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                 <Input type="date" value={txForm.date} onChange={(e) => setTxForm((f) => ({ ...f, date: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
+                <Label>Funding Source *</Label>
+                <Select value={txForm.fundingSource} onValueChange={(v) => setTxForm((f) => ({ ...f, fundingSource: v as "direct" | "wallet" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="direct">Direct Investment</SelectItem>
+                    <SelectItem value="wallet">From Wallet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {txForm.fundingSource === "direct" && (
+              <div className="space-y-1.5">
                 <Label>Transfer Medium *</Label>
                 <Select value={txForm.transferMedium} onValueChange={(v) => setTxForm((f) => ({ ...f, transferMedium: v as TransferMedium }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -510,28 +531,30 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            )}
             <div className="space-y-1.5">
               <Label>Description</Label>
               <Input placeholder="e.g. Additional capital deposit" value={txForm.description} onChange={(e) => setTxForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Attachment (optional)</Label>
-              <input type="file" ref={txAttachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleTxAttachment} />
-              {txAttachment ? (
-                <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
-                  <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-foreground truncate flex-1">{txAttachment.name}</span>
-                  <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTxAttachment(null)}>
-                    <X className="h-3.5 w-3.5" />
+            {txForm.fundingSource === "direct" && (
+              <div className="space-y-1.5">
+                <Label>Attachment (optional)</Label>
+                <input type="file" ref={txAttachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleTxAttachment} />
+                {txAttachment ? (
+                  <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
+                    <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground truncate flex-1">{txAttachment.name}</span>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTxAttachment(null)}>
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => txAttachmentRef.current?.click()}>
+                    <Paperclip className="h-4 w-4" /> Upload receipt or bank slip
                   </Button>
-                </div>
-              ) : (
-                <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => txAttachmentRef.current?.click()}>
-                  <Paperclip className="h-4 w-4" /> Upload receipt or bank slip
-                </Button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
