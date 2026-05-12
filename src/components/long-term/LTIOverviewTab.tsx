@@ -102,7 +102,7 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                 <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Phone</th>
                 <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Total Principal</th>
                 <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">No of Shares</th>
-                <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Projected Share</th>
+                <th className="text-left px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Joining Date</th>
                 <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">View</th>
               </tr>
             </thead>
@@ -115,7 +115,7 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                   <td className="px-4 xl:px-6 py-3 xl:py-4 text-foreground">{inv.phone}</td>
                   <td className="px-4 xl:px-6 py-3 xl:py-4 text-right text-foreground">{fmt(inv.invested)}</td>
                   <td className="px-4 xl:px-6 py-3 xl:py-4 text-center text-foreground">{inv.shares || 0}</td>
-                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-semibold text-profit">{fmt(Math.round(inv.share))}</td>
+                  <td className="px-4 xl:px-6 py-3 xl:py-4 text-foreground">{inv.investmentDate}</td>
                   <td className="px-4 xl:px-6 py-3 xl:py-4 text-center space-x-1">
                     <Button variant="ghost" size="sm" onClick={() => setDetailInvestor(inv)}>
                       <Eye className="h-4 w-4" />
@@ -130,7 +130,7 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                 <td />
                 <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-semibold text-foreground">{fmt(totalInvested)}</td>
                 <td className="px-4 xl:px-6 py-3 xl:py-4 text-center font-semibold text-foreground">{totalShares}</td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-bold text-profit">{fmt(profit)}</td>
+                <td />
                 <td />
               </tr>
             </tfoot>
