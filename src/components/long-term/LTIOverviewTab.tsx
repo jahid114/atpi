@@ -124,16 +124,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr className="border-t border-border bg-muted/30">
-                <td className="px-4 xl:px-6 py-3 xl:py-4 font-semibold text-foreground">Total</td>
-                <td />
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-right font-semibold text-foreground">{fmt(totalInvested)}</td>
-                <td className="px-4 xl:px-6 py-3 xl:py-4 text-center font-semibold text-foreground">{totalShares}</td>
-                <td />
-                <td />
-              </tr>
-            </tfoot>
           </table>
         </div>
 
