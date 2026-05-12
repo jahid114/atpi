@@ -19,6 +19,7 @@ export interface InvestmentEntry {
   transferMedium?: TransferMedium;
   description?: string;
   attachment?: { name: string; url: string };
+  fundingSource?: "direct" | "wallet";
 }
 
 export interface Investor {
