@@ -502,6 +502,18 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                 <Input type="date" value={txForm.date} onChange={(e) => setTxForm((f) => ({ ...f, date: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
+                <Label>Funding Source *</Label>
+                <Select value={txForm.fundingSource} onValueChange={(v) => setTxForm((f) => ({ ...f, fundingSource: v as "direct" | "wallet" }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="direct">Direct Investment</SelectItem>
+                    <SelectItem value="wallet">From Wallet</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            {txForm.fundingSource === "direct" && (
+              <div className="space-y-1.5">
                 <Label>Transfer Medium *</Label>
                 <Select value={txForm.transferMedium} onValueChange={(v) => setTxForm((f) => ({ ...f, transferMedium: v as TransferMedium }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -512,28 +524,30 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                   </SelectContent>
                 </Select>
               </div>
-            </div>
+            )}
             <div className="space-y-1.5">
               <Label>Description</Label>
               <Input placeholder="e.g. Additional capital deposit" value={txForm.description} onChange={(e) => setTxForm((f) => ({ ...f, description: e.target.value }))} />
             </div>
-            <div className="space-y-1.5">
-              <Label>Attachment (optional)</Label>
-              <input type="file" ref={txAttachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleTxAttachment} />
-              {txAttachment ? (
-                <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
-                  <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm text-foreground truncate flex-1">{txAttachment.name}</span>
-                  <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTxAttachment(null)}>
-                    <X className="h-3.5 w-3.5" />
+            {txForm.fundingSource === "direct" && (
+              <div className="space-y-1.5">
+                <Label>Attachment (optional)</Label>
+                <input type="file" ref={txAttachmentRef} className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleTxAttachment} />
+                {txAttachment ? (
+                  <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-lg px-3 py-2">
+                    <Paperclip className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm text-foreground truncate flex-1">{txAttachment.name}</span>
+                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setTxAttachment(null)}>
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => txAttachmentRef.current?.click()}>
+                    <Paperclip className="h-4 w-4" /> Upload receipt or bank slip
                   </Button>
-                </div>
-              ) : (
-                <Button type="button" variant="outline" className="w-full justify-start gap-2 text-muted-foreground" onClick={() => txAttachmentRef.current?.click()}>
-                  <Paperclip className="h-4 w-4" /> Upload receipt or bank slip
-                </Button>
-              )}
-            </div>
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
