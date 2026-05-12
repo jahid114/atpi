@@ -415,17 +415,21 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                           <p className="text-sm font-medium text-foreground">{viewTx.description || "No description provided"}</p>
                         </div>
                       </div>
-                      {viewTx.attachment && (
+                      {viewTx.fundingSource !== "wallet" && (
                         <div className="flex items-start gap-2.5">
                           <Paperclip className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Attachment</p>
-                            <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
-                              <Paperclip className="h-4 w-4 text-primary shrink-0" />
-                              <a href={viewTx.attachment.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
-                                {viewTx.attachment.name}
-                              </a>
-                            </div>
+                            {viewTx.attachment ? (
+                              <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+                                <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                                <a href={viewTx.attachment.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                                  {viewTx.attachment.name}
+                                </a>
+                              </div>
+                            ) : (
+                              <p className="text-sm text-muted-foreground italic">No attachment provided</p>
+                            )}
                           </div>
                         </div>
                       )}
