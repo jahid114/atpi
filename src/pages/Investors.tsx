@@ -16,12 +16,9 @@ export default function Investors() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
-          <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine · Year {selectedYear}</p>
-        </div>
-        <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
+      <div>
+        <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
+        <p className="text-sm text-muted-foreground mt-1">Pro-rata distribution engine</p>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
@@ -49,7 +46,10 @@ export default function Investors() {
         <TabsContent value="transactions">
           <LTITransactionsTab investors={investors} onUpdateInvestment={handleUpdateInvestment} onAddTransaction={handleAddTransaction} selectedYear={selectedYear} />
         </TabsContent>
-        <TabsContent value="profit-share">
+        <TabsContent value="profit-share" className="space-y-4">
+          <div className="flex justify-end">
+            <YearSelector selectedYear={selectedYear} onYearChange={setSelectedYear} />
+          </div>
           <LTIProfitShareTab investors={investors} profit={profit} selectedYear={selectedYear} />
         </TabsContent>
       </Tabs>
