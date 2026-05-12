@@ -1,21 +1,13 @@
-import { useMemo, useState, useRef } from "react";
-import { Eye, Send, Search, Landmark, Paperclip, Upload } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Eye, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle, XCircle, Clock } from "lucide-react";
-import { toast } from "sonner";
 import { InvestorDetailDialog } from "@/components/InvestorDetailDialog";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import type { Investor, InvestorStatus, InvestmentStatus } from "@/types/investor";
-import { calcDaysActive, calculateInvestorShare, fmt, YEAR_TOTAL_DAYS, yearDaysElapsed } from "@/lib/investor-utils";
+import { calculateInvestorShare, fmt } from "@/lib/investor-utils";
 import { useFinancial } from "@/contexts/FinancialContext";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose,
-} from "@/components/ui/dialog";
 
 interface Props {
   investors: Investor[];
@@ -30,10 +22,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
   const { grossProfit, totalExpenses } = useFinancial();
   const [search, setSearch] = useState("");
   const [detailInvestor, setDetailInvestor] = useState<Investor | null>(null);
-  const [releaseInvestor, setReleaseInvestor] = useState<Investor | null>(null);
-  const [releaseAttachment, setReleaseAttachment] = useState<string>("");
-  const [releaseNote, setReleaseNote] = useState("");
-  const releaseFileRef = useRef<HTMLInputElement>(null);
 
   const approved = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
   const totalInvested = approved.reduce((s, i) => s + i.invested, 0);
@@ -53,19 +41,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
   const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } = usePagination(rows);
 
   const currentDetailInvestor = detailInvestor ? investors.find((i) => i.id === detailInvestor.id) || null : null;
-
-  const handleReleaseAttachment = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setReleaseAttachment(file.name);
-  };
-
-  const handleReleaseConfirm = () => {
-    if (!releaseInvestor) return;
-    onRelease(releaseInvestor.id);
-    setReleaseInvestor(null);
-    setReleaseAttachment("");
-    setReleaseNote("");
-  };
 
   return (
     <div className="space-y-6 xl:space-y-8">
@@ -88,16 +63,13 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
           <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
         </div>
         <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Year Progress</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{yearDaysElapsed} / {YEAR_TOTAL_DAYS}</p>
-          <div className="mt-2 h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="h-full bg-primary rounded-full transition-all" style={{ width: `${Math.min(100, (yearDaysElapsed / YEAR_TOTAL_DAYS) * 100)}%` }} />
-          </div>
+          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Investmentable Amount</p>
+          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(investmentableAmount)}</p>
         </div>
       </div>
 
       {/* Profit Breakdown */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 xl:gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 xl:gap-5">
         <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
           <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Profit from Client</p>
           <p className="text-xl xl:text-2xl font-bold text-profit mt-1">{fmt(grossProfit)}</p>
@@ -109,10 +81,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
         <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
           <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Net Profit</p>
           <p className={`text-xl xl:text-2xl font-bold mt-1 ${profit >= 0 ? "text-profit" : "text-destructive"}`}>{fmt(profit)}</p>
-        </div>
-        <div className="bg-card border border-border rounded-lg p-4 xl:p-5 kpi-shadow">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">Investmentable Amount</p>
-          <p className="text-xl xl:text-2xl font-bold text-foreground mt-1">{fmt(investmentableAmount)}</p>
         </div>
       </div>
 
@@ -151,9 +119,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                     <Button variant="ghost" size="sm" onClick={() => setDetailInvestor(inv)}>
                       <Eye className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-profit hover:text-profit" title="Release profit" onClick={() => setReleaseInvestor(inv)}>
-                      <Send className="h-4 w-4" />
-                    </Button>
                   </td>
                 </tr>
               ))}
@@ -181,96 +146,6 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
         onClose={() => setDetailInvestor(null)}
         onWithdraw={onWithdraw}
       />
-
-      {/* Release Profit Dialog */}
-      <Dialog open={!!releaseInvestor} onOpenChange={(o) => { if (!o) { setReleaseInvestor(null); setReleaseAttachment(""); setReleaseNote(""); } }}>
-        <DialogContent className="sm:max-w-lg">
-          {releaseInvestor && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <Send className="h-5 w-5 text-profit" /> Release Profit
-                </DialogTitle>
-                <DialogDescription>
-                  Release profit share to {releaseInvestor.name}. Attach payment proof before confirming.
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-4 py-2">
-                {/* Bank Details */}
-                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Bank Details</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <Landmark className="h-4 w-4 text-muted-foreground shrink-0" />
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Account Holder</p>
-                        <p className="text-sm font-medium text-foreground">{releaseInvestor.name}</p>
-                      </div>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Bank Name</p>
-                      <p className="text-sm font-medium text-foreground">National Bank</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Account Number</p>
-                      <p className="text-sm font-medium text-foreground font-mono">••••••{String(releaseInvestor.id).slice(-4).padStart(4, '0')}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Routing Number</p>
-                      <p className="text-sm font-medium text-foreground font-mono">••••1234</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Amount */}
-                <div className="bg-card border border-border rounded-lg p-4 text-center">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Profit Amount</p>
-                  <p className="text-2xl font-bold text-profit mt-1">{fmt(Math.round(calculateInvestorShare(releaseInvestor, profit, investors)))}</p>
-                </div>
-
-                {/* Attachment */}
-                <div className="space-y-1.5">
-                  <Label>Payment Proof / Attachment</Label>
-                  <div
-                    onClick={() => releaseFileRef.current?.click()}
-                    className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
-                  >
-                    {releaseAttachment ? (
-                      <div className="flex items-center justify-center gap-2 text-foreground">
-                        <Paperclip className="h-4 w-4" />
-                        <span className="text-sm font-medium">{releaseAttachment}</span>
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center gap-1.5 text-muted-foreground">
-                        <Upload className="h-6 w-6" />
-                        <p className="text-sm">Click to upload payment proof</p>
-                        <p className="text-xs">PDF, Image, or Document</p>
-                      </div>
-                    )}
-                  </div>
-                  <input ref={releaseFileRef} type="file" className="hidden" onChange={handleReleaseAttachment} />
-                </div>
-
-                {/* Note */}
-                <div className="space-y-1.5">
-                  <Label>Note (optional)</Label>
-                  <Textarea placeholder="Add a note about this payment..." value={releaseNote} onChange={(e) => setReleaseNote(e.target.value)} />
-                </div>
-              </div>
-
-              <DialogFooter>
-                <DialogClose asChild>
-                  <Button variant="outline">Cancel</Button>
-                </DialogClose>
-                <Button className="bg-profit text-white hover:bg-profit/90" onClick={handleReleaseConfirm}>
-                  <Send className="h-4 w-4 mr-1.5" /> Confirm & Send
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

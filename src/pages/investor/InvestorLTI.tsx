@@ -14,7 +14,7 @@ import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import {
   BarChart3, ShoppingCart, ArrowLeftRight, DollarSign, TrendingUp,
-  CheckCircle, Clock, XCircle, ArrowDownCircle, UserPlus, Layers
+  CheckCircle, Clock, XCircle, ArrowDownCircle, UserPlus, Layers, Wallet
 } from "lucide-react";
 import type { Investor, InvestmentEntry, InvestmentStatus, NomineeInfo } from "@/types/investor";
 import { calculateInvestorShare, fmt } from "@/lib/investor-utils";
@@ -43,7 +43,7 @@ const txTypeLabels: Record<string, string> = {
 };
 
 export default function InvestorLTI() {
-  const { investors, profit, handleSelfRegister, handleBuyShares, handleWithdraw: ctxWithdraw } = useLTI();
+  const { investors, profit, handleSelfRegister, handleBuyShares } = useLTI();
 
   // Find investor from shared context by email
   const investor = useMemo(
@@ -53,7 +53,6 @@ export default function InvestorLTI() {
 
   const [regDialogOpen, setRegDialogOpen] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
-  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
   // Registration form
   const [regShares, setRegShares] = useState("");
@@ -67,9 +66,6 @@ export default function InvestorLTI() {
 
   // Buy shares
   const [buyShares, setBuyShares] = useState("");
-
-  // Withdraw
-  const [withdrawAmount, setWithdrawAmount] = useState("");
 
   // Transaction filter
   const [txFilter, setTxFilter] = useState<"all" | InvestmentStatus>("all");
@@ -88,6 +84,22 @@ export default function InvestorLTI() {
       .filter((h) => h.type === "payout" && h.status === "approved")
       .reduce((s, h) => s + h.amount, 0);
   }, [investor]);
+
+  const totalWithdrawn = useMemo(() => {
+    if (!investor) return 0;
+    return investor.history
+      .filter((h) => h.type === "withdrawal" && h.status === "approved")
+      .reduce((s, h) => s + h.amount, 0);
+  }, [investor]);
+
+  const totalDeposited = useMemo(() => {
+    if (!investor) return 0;
+    return investor.history
+      .filter((h) => h.type === "deposit" && h.status === "approved")
+      .reduce((s, h) => s + h.amount, 0);
+  }, [investor]);
+
+  const currentInvestment = totalDeposited - totalWithdrawn;
 
   const transactions = useMemo(() => {
     if (!investor) return [];
@@ -134,18 +146,6 @@ export default function InvestorLTI() {
     setBuyDialogOpen(false);
     setBuyShares("");
     toast.success(`Request to buy ${shares} share(s) submitted. Awaiting approval.`);
-  };
-
-  const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount);
-    if (!amount || amount <= 0) { toast.error("Enter a valid amount."); return; }
-    if (!investor) return;
-    if (amount > investor.invested) { toast.error("Amount exceeds your invested principal."); return; }
-
-    ctxWithdraw(investor.id, amount);
-    setWithdrawDialogOpen(false);
-    setWithdrawAmount("");
-    toast.success("Withdrawal request submitted. Funds will be returned to your wallet upon approval.");
   };
 
   const getStatusIcon = (status: InvestmentStatus) => {
@@ -242,15 +242,17 @@ export default function InvestorLTI() {
     <div className="space-y-6 xl:space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl xl:text-3xl font-bold text-foreground">Long-Term Investment</h1>
+            <Badge variant="default" className="gap-1 bg-profit text-white border-profit">
+              <CheckCircle className="h-3 w-3" /> Approved
+            </Badge>
+          </div>
           <p className="text-sm text-muted-foreground mt-1">Your investment portfolio · Pro-rata profit sharing</p>
         </div>
         <div className="flex gap-3">
           <Button onClick={() => setBuyDialogOpen(true)} className="gap-2">
             <ShoppingCart className="h-4 w-4" /> Buy More Shares
-          </Button>
-          <Button variant="outline" onClick={() => setWithdrawDialogOpen(true)} className="gap-2">
-            <ArrowDownCircle className="h-4 w-4" /> Withdraw to Wallet
           </Button>
         </div>
       </div>
@@ -272,10 +274,10 @@ export default function InvestorLTI() {
         <TabsContent value="overview">
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <KpiCard title="My Shares" value={String(investor?.shares || 0)} icon={<Layers className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-blue))]" />
-              <KpiCard title="Total Invested" value={fmt(investor?.invested || 0)} icon={<TrendingUp className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-emerald))]" />
-              <KpiCard title="Projected Profit" value={fmt(profitShare)} icon={<DollarSign className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-amber))]" />
-              <KpiCard title="Total Payouts" value={fmt(totalPayouts)} icon={<CheckCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-slate))]" />
+              <KpiCard title="Total Investment" value={fmt(totalDeposited)} icon={<TrendingUp className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-emerald))]" />
+              <KpiCard title="Total Withdrawn" value={fmt(totalWithdrawn)} icon={<ArrowDownCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-amber))]" />
+              <KpiCard title="Total Profit Received" value={fmt(totalPayouts)} icon={<DollarSign className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-blue))]" />
+              <KpiCard title="Current Investment" value={fmt(currentInvestment)} icon={<Wallet className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-slate))]" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -466,26 +468,6 @@ export default function InvestorLTI() {
         </DialogContent>
       </Dialog>
 
-      {/* Withdraw Dialog */}
-      <Dialog open={withdrawDialogOpen} onOpenChange={setWithdrawDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader><DialogTitle>Withdraw to Wallet</DialogTitle></DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Current principal: <span className="font-semibold text-foreground">{fmt(investor?.invested || 0)}</span>
-            </p>
-            <div className="space-y-2">
-              <Label>Amount to Withdraw</Label>
-              <Input type="number" placeholder="Enter amount" value={withdrawAmount} onChange={(e) => setWithdrawAmount(e.target.value)} />
-            </div>
-            <p className="text-xs text-muted-foreground">Withdrawn amount will be returned to your wallet upon admin approval.</p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setWithdrawDialogOpen(false)}>Cancel</Button>
-            <Button onClick={handleWithdraw}>Submit Withdrawal</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

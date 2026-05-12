@@ -499,40 +499,29 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                   )}
                 </div>
 
-                {/* Existing History */}
-                {reviewInvestor.history.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Previous History</p>
-                    <div className="border border-border rounded-lg overflow-hidden">
-                      <table className="w-full text-sm">
-                        <thead>
-                          <tr className="bg-muted/50 border-b border-border">
-                            <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Date</th>
-                            <th className="text-left px-3 py-2 font-medium text-muted-foreground text-xs">Type</th>
-                            <th className="text-right px-3 py-2 font-medium text-muted-foreground text-xs">Amount</th>
-                            <th className="text-center px-3 py-2 font-medium text-muted-foreground text-xs">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {reviewInvestor.history.map((h) => (
-                            <tr key={h.id} className="border-b border-border last:border-0">
-                              <td className="px-3 py-2 text-xs text-muted-foreground">{h.date}</td>
-                              <td className="px-3 py-2 text-xs text-foreground capitalize">{h.type}</td>
-                              <td className={`px-3 py-2 text-right text-xs font-medium ${h.type === "withdrawal" ? "text-destructive" : "text-profit"}`}>
-                                {h.type === "withdrawal" ? "-" : "+"}{fmt(h.amount)}
-                              </td>
-                              <td className="px-3 py-2 text-center">
-                                <Badge variant={h.status === "approved" ? "default" : h.status === "rejected" ? "destructive" : "secondary"} className="text-[10px]">
-                                  {h.status}
-                                </Badge>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                )}
+                {/* Attachments */}
+                <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Attachments</p>
+                  {(() => {
+                    const atts = reviewInvestor.history.filter((h) => h.attachment);
+                    if (atts.length === 0) {
+                      return <p className="text-sm text-muted-foreground">No attachments uploaded.</p>;
+                    }
+                    return (
+                      <div className="space-y-2">
+                        {atts.map((h) => (
+                          <div key={h.id} className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-2">
+                            <Paperclip className="h-4 w-4 text-primary shrink-0" />
+                            <a href={h.attachment!.url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate flex-1">
+                              {h.attachment!.name}
+                            </a>
+                            <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{h.type} · {h.date}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
 
                 {/* Status */}
                 <div className="flex items-center gap-2 px-1">

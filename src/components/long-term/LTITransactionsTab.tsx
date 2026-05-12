@@ -19,6 +19,8 @@ import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
 import { fmt } from "@/lib/investor-utils";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface FlatTransaction extends InvestmentEntry {
   investorName: string;
@@ -71,6 +73,9 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
   const [txAttachment, setTxAttachment] = useState<{ name: string; url: string } | null>(null);
   const txAttachmentRef = useRef<HTMLInputElement>(null);
   const [viewTx, setViewTx] = useState<FlatTransaction | null>(null);
+  const [stmtDialogOpen, setStmtDialogOpen] = useState(false);
+  const [stmtFrom, setStmtFrom] = useState<Date | undefined>();
+  const [stmtTo, setStmtTo] = useState<Date | undefined>();
 
   const approvedInvestors = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
 
@@ -136,19 +141,55 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
     setDateTo(undefined);
   }, []);
 
-  const downloadStatement = () => {
-    const headers = ["Date", "Investor", "Type", "Amount", "Status"];
-    const csvRows = [headers.join(",")];
-    filtered.forEach((t) => {
-      csvRows.push([t.date, t.investorName, typeLabels[t.type] || t.type, t.amount, t.status].join(","));
+  const generateStatementPdf = () => {
+    if (!stmtFrom || !stmtTo) {
+      toast.error("Please select both From and To dates.");
+      return;
+    }
+    if (stmtFrom > stmtTo) {
+      toast.error("From date must be before To date.");
+      return;
+    }
+    const rows = allTransactions.filter((t) => {
+      const d = new Date(t.date);
+      return d >= stmtFrom && d <= stmtTo;
     });
-    const blob = new Blob([csvRows.join("\n")], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `transactions-${selectedYear}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+
+    const doc = new jsPDF();
+    const pw = doc.internal.pageSize.getWidth();
+    doc.setFillColor(15, 23, 42);
+    doc.rect(0, 0, pw, 40, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("LTI TRANSACTION STATEMENT", 14, 18);
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Period: ${format(stmtFrom, "MMM d, yyyy")} — ${format(stmtTo, "MMM d, yyyy")}`, 14, 28);
+
+    autoTable(doc, {
+      startY: 50,
+      head: [["Date", "Investor", "Type", "Amount", "Status"]],
+      body: rows.length === 0
+        ? [["—", "No transactions in selected range", "—", "—", "—"]]
+        : rows.map((t) => [
+            t.date,
+            t.investorName,
+            typeLabels[t.type] || t.type,
+            (t.type === "withdrawal" ? "-" : "+") + fmt(t.amount),
+            t.status,
+          ]),
+      theme: "grid",
+      headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: "bold" },
+      bodyStyles: { fontSize: 9 },
+      columnStyles: { 3: { halign: "right" } },
+      margin: { left: 14, right: 14 },
+    });
+
+    doc.save(`LTI_Statement_${format(stmtFrom, "yyyyMMdd")}_${format(stmtTo, "yyyyMMdd")}.pdf`);
+    setStmtDialogOpen(false);
+    setStmtFrom(undefined);
+    setStmtTo(undefined);
   };
 
   return (
@@ -208,7 +249,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
           <Button size="sm" className="h-10 px-3 text-xs" onClick={() => setTxDialogOpen(true)}>
             <Plus className="h-4 w-4 mr-1" /> Add Transaction
           </Button>
-          <Button variant="outline" size="sm" className="h-10 px-3 text-xs" onClick={downloadStatement}>
+          <Button variant="outline" size="sm" className="h-10 px-3 text-xs" onClick={() => setStmtDialogOpen(true)}>
             <Download className="h-4 w-4 mr-1" /> Download Statement
           </Button>
           <p className="text-xs text-muted-foreground">{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</p>
@@ -495,6 +536,52 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
           <DialogFooter>
             <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
             <Button onClick={handleSubmitTransaction}>Submit Transaction</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Download Statement Dialog */}
+      <Dialog open={stmtDialogOpen} onOpenChange={(open) => { if (!open) { setStmtFrom(undefined); setStmtTo(undefined); } setStmtDialogOpen(open); }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Download Statement</DialogTitle>
+            <DialogDescription>Select a date range to generate a PDF statement.</DialogDescription>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3 py-2">
+            <div className="space-y-1.5">
+              <Label>From *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !stmtFrom && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {stmtFrom ? format(stmtFrom, "MMM d, yyyy") : "Pick date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={stmtFrom} onSelect={setStmtFrom} className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="space-y-1.5">
+              <Label>To *</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !stmtTo && "text-muted-foreground")}>
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {stmtTo ? format(stmtTo, "MMM d, yyyy") : "Pick date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar mode="single" selected={stmtTo} onSelect={setStmtTo} className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild><Button variant="outline">Cancel</Button></DialogClose>
+            <Button onClick={generateStatementPdf} className="gap-1.5">
+              <Download className="h-4 w-4" /> Download PDF
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
