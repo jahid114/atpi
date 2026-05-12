@@ -477,7 +477,8 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                 })()}
               </div>
 
-              {/* Attachment */}
+              {/* Attachment — only for bank / mobile banking payouts */}
+              {destination !== "wallet" && (
               <div className="space-y-1.5">
                 <Label>Payment Proof / Attachment <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <div
@@ -499,6 +500,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                 </div>
                 <input ref={fileRef} type="file" className="hidden" onChange={handleAttachment} />
               </div>
+              )}
 
               {/* Note */}
               <div className="space-y-1.5">
