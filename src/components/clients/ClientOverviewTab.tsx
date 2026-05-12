@@ -64,38 +64,38 @@ export function ClientOverviewTab({ selectedYear }: Props) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <DollarSign className="h-4 w-4" /> Total Invested
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalInvested)}</p>
           <p className="text-xs text-muted-foreground mt-1">capital deployed in {selectedYear}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <TrendingUp className="h-4 w-4" /> Profit Received
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-profit mt-1">{fmt(totalProfitReceived)}</p>
+          <p className="text-2xl font-bold text-profit mt-1">{fmt(totalProfitReceived)}</p>
           <p className="text-xs text-muted-foreground mt-1">total returns in {selectedYear}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <ArrowDownLeft className="h-4 w-4" /> Principal Returned
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalPrincipalReturned)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalPrincipalReturned)}</p>
           <p className="text-xs text-muted-foreground mt-1">capital returned in {selectedYear}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <Users className="h-4 w-4" /> Clients
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{clients.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{clients.length}</p>
           <p className="text-xs text-muted-foreground mt-1">{activeClients} active</p>
         </div>
       </div>
 
       {byClient.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-sm font-semibold text-foreground mb-4">Capital by Client ({selectedYear})</p>
           <div className="space-y-3">
             {byClient.map((c) => {
@@ -119,7 +119,7 @@ export function ClientOverviewTab({ selectedYear }: Props) {
       )}
 
       {byMonth.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-sm font-semibold text-foreground mb-3">Monthly Transaction Volume ({selectedYear})</p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={byMonth}>

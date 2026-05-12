@@ -46,39 +46,39 @@ export function ExpenseOverviewTab({ categories, selectedYear }: Props) {
     <div className="space-y-6">
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 xl:gap-6">
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <DollarSign className="h-4 w-4" /> Total Expenses
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(totalExpenses)}</p>
           <p className="text-xs text-muted-foreground mt-1">{yearExpenses.length} entries in {selectedYear}</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <Flame className="h-4 w-4" /> Burn Rate
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-destructive mt-1">{fmt(burnRate)}/mo</p>
+          <p className="text-2xl font-bold text-destructive mt-1">{fmt(burnRate)}/mo</p>
           <p className="text-xs text-muted-foreground mt-1">annualized</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <TrendingDown className="h-4 w-4" /> Avg. Expense
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{fmt(avgExpense)}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{fmt(avgExpense)}</p>
           <p className="text-xs text-muted-foreground mt-1">per entry</p>
         </div>
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
             <PieChart className="h-4 w-4" /> Categories
           </div>
-          <p className="text-2xl xl:text-3xl font-bold text-foreground mt-1">{categories.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{categories.length}</p>
           <p className="text-xs text-muted-foreground mt-1">{byCategory.length} active</p>
         </div>
       </div>
 
       {/* Highest expense */}
       {highestExpense && (
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-sm font-semibold text-foreground mb-3">Largest Single Expense</p>
           <div className="flex items-center justify-between">
             <div>
@@ -91,7 +91,7 @@ export function ExpenseOverviewTab({ categories, selectedYear }: Props) {
       )}
 
       {/* Category breakdown */}
-      <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+      <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
         <p className="text-sm font-semibold text-foreground mb-4">Spending by Category</p>
         <div className="space-y-3">
           {byCategory.map(([cat, amount]) => {
@@ -116,7 +116,7 @@ export function ExpenseOverviewTab({ categories, selectedYear }: Props) {
 
       {/* Monthly breakdown */}
       {byMonth.length > 0 && (
-        <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+        <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
           <p className="text-sm font-semibold text-foreground mb-3">Monthly Breakdown</p>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={byMonth.map(([month, amount]) => ({ month, amount }))}>

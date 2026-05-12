@@ -211,7 +211,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   return (
     <div className="space-y-6">
       {/* Distribution Summary */}
-      <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
+      <div className="bg-card border border-border rounded-lg p-5 kpi-shadow">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-foreground">Distribution Summary · {selectedYear}</h2>
         </div>
