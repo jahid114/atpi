@@ -103,7 +103,7 @@ export function LTIOverviewTab({ investors, profit, onRelease, onUpdateInvestmen
                 <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Total Principal</th>
                 <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">No of Shares</th>
                 <th className="text-right px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Projected Share</th>
-                <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">Actions</th>
+                <th className="text-center px-4 xl:px-6 py-3 xl:py-4 font-medium text-muted-foreground">View</th>
               </tr>
             </thead>
             <tbody>
