@@ -294,24 +294,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-3 gap-3 py-2">
-                <div className="bg-muted/40 rounded-md p-3">
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Profit Pool</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(profit)}</p>
-                </div>
-                <div className="bg-muted/40 rounded-md p-3">
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Pool Weight</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(totalPoolWeight)}</p>
-                  <p className="text-[10px] text-muted-foreground">$·days</p>
-                </div>
-                <div className="bg-muted/40 rounded-md p-3">
-                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Investor Weight</p>
-                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(totalSegWeight)}</p>
-                  <p className="text-[10px] text-muted-foreground">$·days</p>
-                </div>
-              </div>
-
-              <div className="border border-border rounded-lg overflow-x-auto">
+              <div className="border border-border rounded-lg overflow-x-auto mt-2">
                 <table className="w-full text-xs min-w-[640px]">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
@@ -319,13 +302,12 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                       <th className="text-left px-3 py-2 font-medium text-muted-foreground">Period</th>
                       <th className="text-right px-3 py-2 font-medium text-muted-foreground">Days</th>
                       <th className="text-right px-3 py-2 font-medium text-muted-foreground">Balance</th>
-                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Weight</th>
                       <th className="text-right px-3 py-2 font-medium text-muted-foreground">Share</th>
                     </tr>
                   </thead>
                   <tbody>
                     {segmentBreakdown.length === 0 ? (
-                      <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">No active segments in {selectedYear}.</td></tr>
+                      <tr><td colSpan={5} className="px-3 py-4 text-center text-muted-foreground">No active segments in {selectedYear}.</td></tr>
                     ) : segmentBreakdown.map((s, i) => (
                       <tr key={i} className="border-b border-border last:border-0">
                         <td className="px-3 py-2">
@@ -340,24 +322,18 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                         <td className="px-3 py-2 text-muted-foreground">{s.startDate} → {s.endDate}</td>
                         <td className="px-3 py-2 text-right text-foreground">{s.days}</td>
                         <td className="px-3 py-2 text-right text-foreground">{fmt(s.balance)}</td>
-                        <td className="px-3 py-2 text-right text-foreground">{fmt(s.weight)}</td>
                         <td className="px-3 py-2 text-right font-medium text-profit">{fmt(s.share)}</td>
                       </tr>
                     ))}
                   </tbody>
                   <tfoot>
                     <tr className="bg-muted/40 font-medium">
-                      <td colSpan={4} className="px-3 py-2 text-right text-muted-foreground">Total</td>
-                      <td className="px-3 py-2 text-right text-foreground">{fmt(totalSegWeight)}</td>
+                      <td colSpan={4} className="px-3 py-2 text-right text-muted-foreground">Total Share</td>
                       <td className="px-3 py-2 text-right text-profit">{fmt(totalSegShare)}</td>
                     </tr>
                   </tfoot>
                 </table>
               </div>
-
-              <p className="text-[11px] text-muted-foreground">
-                Formula per segment: <span className="font-mono">balance × days ÷ pool weight × profit pool</span>.
-              </p>
 
               <DialogFooter>
                 <Button variant="outline" onClick={() => setConfirmInvestorId(null)}>Cancel</Button>
