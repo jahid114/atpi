@@ -7,8 +7,8 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import type { Investor, InvestmentEntry, InvestmentStatus } from "@/types/investor";
-import { calcDaysActive, calculateProRata, fmt, YEAR_TOTAL_DAYS, TODAY } from "@/lib/investor-utils";
+import type { Investor, InvestmentStatus } from "@/types/investor";
+import { calcDaysActive, calculateProRata, fmt, YEAR_TOTAL_DAYS } from "@/lib/investor-utils";
 
 interface InvestorDetailDialogProps {
   investor: Investor | null;
