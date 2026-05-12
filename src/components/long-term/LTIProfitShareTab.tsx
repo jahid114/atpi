@@ -2,13 +2,27 @@ import { useState, useMemo, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FileText, Download, Filter, Search, CheckCircle2, Clock, Send } from "lucide-react";
+import { Download, Filter, Search, CheckCircle2, Clock, Send, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import { toast } from "sonner";
 import type { Investor } from "@/types/investor";
-import { calculateInvestorShare, calcTimeWeightedBalance, fmt, TODAY } from "@/lib/investor-utils";
+import {
+  calculateInvestorShare,
+  calcTimeWeightedBalance,
+  calcWeightSegments,
+  fmt,
+  TODAY,
+} from "@/lib/investor-utils";
 import { generateLTIInvoice } from "@/lib/lti-pdf";
 import { useLTI } from "@/contexts/LTIContext";
 
@@ -22,6 +36,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   const { handleRelease } = useLTI();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [confirmInvestorId, setConfirmInvestorId] = useState<number | null>(null);
 
   const approved = useMemo(() => investors.filter((i) => i.status === "approved"), [investors]);
 
@@ -70,7 +85,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
   const { paginatedItems, currentPage, totalPages, totalItems, goToPage, hasNextPage, hasPrevPage } =
     usePagination(rows);
 
-  const handleDistributeOne = useCallback((row: typeof rows[number]) => {
+  const performDistribute = useCallback((row: typeof rows[number]) => {
     if (row.distributed) return;
     if (row.projectedShare <= 0) {
       toast.error("No profit to distribute for this investor.");
@@ -94,14 +109,6 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
     toast.success(`Distributed ${fmt(row.projectedShare)} to ${row.investor.name}.`);
   }, [handleRelease, selectedYear, profit]);
 
-  const handleDistributeAll = useCallback(() => {
-    if (pendingRows.length === 0) {
-      toast.error("No pending investors to distribute.");
-      return;
-    }
-    pendingRows.forEach((r) => handleDistributeOne(r));
-  }, [pendingRows, handleDistributeOne]);
-
   const handleReDownload = useCallback((row: typeof rows[number]) => {
     const payout = getYearPayout(row.investor);
     if (!payout) return;
@@ -114,15 +121,34 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
     });
   }, [getYearPayout, selectedYear, profit]);
 
+  const confirmRow = useMemo(
+    () => rows.find((r) => r.investor.id === confirmInvestorId) ?? null,
+    [rows, confirmInvestorId]
+  );
+
+  const totalPoolWeight = useMemo(
+    () => approved.reduce((s, inv) => s + calcTimeWeightedBalance(inv), 0),
+    [approved]
+  );
+
+  const segmentBreakdown = useMemo(() => {
+    if (!confirmRow) return [];
+    const segs = calcWeightSegments(confirmRow.investor);
+    return segs.map((s) => ({
+      ...s,
+      share: totalPoolWeight > 0 ? (s.weight / totalPoolWeight) * profit : 0,
+    }));
+  }, [confirmRow, totalPoolWeight, profit]);
+
+  const totalSegWeight = segmentBreakdown.reduce((s, x) => s + x.weight, 0);
+  const totalSegShare = segmentBreakdown.reduce((s, x) => s + x.share, 0);
+
   return (
     <div className="space-y-6">
       {/* Distribution Summary */}
       <div className="bg-card border border-border rounded-lg p-5 xl:p-6 kpi-shadow">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-sm font-semibold text-foreground">Distribution Summary · {selectedYear}</h2>
-          <Button size="sm" onClick={handleDistributeAll} disabled={pendingRows.length === 0} className="gap-1.5">
-            <Send className="h-3.5 w-3.5" /> Distribute All Pending
-          </Button>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div>
@@ -233,7 +259,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                       <Button
                         size="sm"
                         className="h-7 px-2 text-xs gap-1"
-                        onClick={() => handleDistributeOne(r)}
+                        onClick={() => setConfirmInvestorId(r.investor.id)}
                         disabled={r.projectedShare <= 0}
                       >
                         <Send className="h-3.5 w-3.5" /> Distribute
@@ -255,6 +281,101 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
         hasNextPage={hasNextPage}
         hasPrevPage={hasPrevPage}
       />
+
+      {/* Distribution Confirmation Dialog with segment breakdown */}
+      <Dialog open={!!confirmRow} onOpenChange={(o) => !o && setConfirmInvestorId(null)}>
+        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+          {confirmRow && (
+            <>
+              <DialogHeader>
+                <DialogTitle>Distribute Profit · {confirmRow.investor.name}</DialogTitle>
+                <DialogDescription>
+                  Segment-wise time-weighted breakdown for {selectedYear}. Each segment runs from one balance change to the next.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="grid grid-cols-3 gap-3 py-2">
+                <div className="bg-muted/40 rounded-md p-3">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Profit Pool</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(profit)}</p>
+                </div>
+                <div className="bg-muted/40 rounded-md p-3">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Pool Weight</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(totalPoolWeight)}</p>
+                  <p className="text-[10px] text-muted-foreground">$·days</p>
+                </div>
+                <div className="bg-muted/40 rounded-md p-3">
+                  <p className="text-[11px] uppercase tracking-wider text-muted-foreground">Investor Weight</p>
+                  <p className="text-sm font-semibold text-foreground mt-0.5">{fmt(totalSegWeight)}</p>
+                  <p className="text-[10px] text-muted-foreground">$·days</p>
+                </div>
+              </div>
+
+              <div className="border border-border rounded-lg overflow-x-auto">
+                <table className="w-full text-xs min-w-[640px]">
+                  <thead>
+                    <tr className="border-b border-border bg-muted/50">
+                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Event</th>
+                      <th className="text-left px-3 py-2 font-medium text-muted-foreground">Period</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Days</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Balance</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Weight</th>
+                      <th className="text-right px-3 py-2 font-medium text-muted-foreground">Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {segmentBreakdown.length === 0 ? (
+                      <tr><td colSpan={6} className="px-3 py-4 text-center text-muted-foreground">No active segments in {selectedYear}.</td></tr>
+                    ) : segmentBreakdown.map((s, i) => (
+                      <tr key={i} className="border-b border-border last:border-0">
+                        <td className="px-3 py-2">
+                          <div className="flex items-center gap-1.5">
+                            {s.eventType === "deposit"
+                              ? <ArrowDownCircle className="h-3.5 w-3.5 text-profit" />
+                              : <ArrowUpCircle className="h-3.5 w-3.5 text-destructive" />}
+                            <span className="text-foreground">{s.eventLabel}</span>
+                            <span className="text-muted-foreground">{fmt(s.eventAmount)}</span>
+                          </div>
+                        </td>
+                        <td className="px-3 py-2 text-muted-foreground">{s.startDate} → {s.endDate}</td>
+                        <td className="px-3 py-2 text-right text-foreground">{s.days}</td>
+                        <td className="px-3 py-2 text-right text-foreground">{fmt(s.balance)}</td>
+                        <td className="px-3 py-2 text-right text-foreground">{fmt(s.weight)}</td>
+                        <td className="px-3 py-2 text-right font-medium text-profit">{fmt(s.share)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-muted/40 font-medium">
+                      <td colSpan={4} className="px-3 py-2 text-right text-muted-foreground">Total</td>
+                      <td className="px-3 py-2 text-right text-foreground">{fmt(totalSegWeight)}</td>
+                      <td className="px-3 py-2 text-right text-profit">{fmt(totalSegShare)}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground">
+                Formula per segment: <span className="font-mono">balance × days ÷ pool weight × profit pool</span>.
+              </p>
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setConfirmInvestorId(null)}>Cancel</Button>
+                <Button
+                  className="gap-1.5"
+                  onClick={() => {
+                    performDistribute(confirmRow);
+                    setConfirmInvestorId(null);
+                  }}
+                  disabled={confirmRow.projectedShare <= 0}
+                >
+                  <Send className="h-3.5 w-3.5" /> Confirm Distribution · {fmt(confirmRow.projectedShare)}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
