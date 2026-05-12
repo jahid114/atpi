@@ -282,7 +282,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
           <tbody>
             {paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
+                <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
                   No investors found.
                 </td>
               </tr>
