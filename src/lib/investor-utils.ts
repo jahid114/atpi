@@ -11,6 +11,56 @@ export const calcDaysActive = (dateStr: string): number => {
   return Math.max(0, Math.ceil((TODAY.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
 };
 
+export interface WeightSegment {
+  startDate: string;
+  endDate: string;
+  days: number;
+  balance: number;
+  weight: number;
+  eventLabel: string;
+  eventAmount: number;
+  eventType: "deposit" | "withdrawal";
+}
+
+/**
+ * Build per-segment weight breakdown for an investor (between consecutive
+ * approved deposit/withdrawal events, clipped to YEAR_START..TODAY).
+ */
+export const calcWeightSegments = (investor: Investor): WeightSegment[] => {
+  const events = investor.history
+    .filter((h) => (h.type === "deposit" || h.type === "withdrawal") && h.status === "approved")
+    .map((h) => ({
+      date: new Date(h.date),
+      delta: h.type === "deposit" ? h.amount : -h.amount,
+      type: h.type as "deposit" | "withdrawal",
+      amount: h.amount,
+    }))
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+  const segments: WeightSegment[] = [];
+  let balance = 0;
+
+  for (let i = 0; i < events.length; i++) {
+    balance += events[i].delta;
+    const segStart = events[i].date > YEAR_START ? events[i].date : YEAR_START;
+    const segEndRaw = i < events.length - 1 ? events[i + 1].date : TODAY;
+    const segEnd = segEndRaw > YEAR_START ? segEndRaw : YEAR_START;
+    const days = Math.max(0, Math.ceil((segEnd.getTime() - segStart.getTime()) / (1000 * 60 * 60 * 24)));
+    if (days <= 0) continue;
+    segments.push({
+      startDate: segStart.toISOString().split("T")[0],
+      endDate: segEnd.toISOString().split("T")[0],
+      days,
+      balance,
+      weight: balance * days,
+      eventLabel: events[i].type === "deposit" ? "Deposit" : "Withdrawal",
+      eventAmount: events[i].amount,
+      eventType: events[i].type,
+    });
+  }
+  return segments;
+};
+
 /**
  * Calculate time-weighted balance for an investor,
  * accounting for deposits and withdrawals at different dates.
