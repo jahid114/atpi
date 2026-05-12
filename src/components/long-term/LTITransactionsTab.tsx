@@ -1,6 +1,6 @@
 import { useMemo, useState, useCallback, useRef } from "react";
 import { format } from "date-fns";
-import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye, User, DollarSign, Hash, CreditCard, FileText } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, CalendarIcon, FilterX, Download, Plus, Paperclip, X, Eye, User, DollarSign, Hash, CreditCard, FileText, Wallet } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,7 +42,7 @@ const typeLabels: Record<string, string> = {
 interface Props {
   investors: Investor[];
   onUpdateInvestment?: (investorId: number, entryId: number, status: InvestmentStatus) => void;
-  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => void;
+  onAddTransaction?: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string }; fundingSource?: "direct" | "wallet" }) => void;
   selectedYear: number;
 }
 
@@ -58,6 +58,7 @@ const emptyTxForm = {
   type: "deposit" as "deposit" | "withdrawal",
   amount: "",
   date: new Date().toISOString().split("T")[0],
+  fundingSource: "direct" as "direct" | "wallet",
   transferMedium: "cash" as TransferMedium,
   description: "",
 };
@@ -94,9 +95,10 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
       return;
     }
     onAddTransaction?.(Number(txForm.investorId), Number(txForm.amount), txForm.type, txForm.date, {
-      transferMedium: txForm.transferMedium,
+      fundingSource: txForm.fundingSource,
+      transferMedium: txForm.fundingSource === "direct" ? txForm.transferMedium : undefined,
       description: txForm.description || undefined,
-      attachment: txAttachment || undefined,
+      attachment: txForm.fundingSource === "direct" ? (txAttachment || undefined) : undefined,
     });
     const inv = investors.find((i) => i.id === Number(txForm.investorId));
     toast.success(`${txForm.type === "deposit" ? "Deposit" : "Withdrawal"} of ${fmt(Number(txForm.amount))} submitted for ${inv?.name || "investor"}.`);
