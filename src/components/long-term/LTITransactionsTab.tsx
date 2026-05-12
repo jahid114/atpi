@@ -376,7 +376,7 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                   {/* Financial Details */}
                   <div className="bg-muted/50 rounded-lg p-4 space-y-3">
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Financial Details</p>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                       <div className="bg-card border border-border rounded-lg p-3 text-center">
                         <DollarSign className={`h-5 w-5 mx-auto mb-1 ${viewTx.type === "withdrawal" ? "text-destructive" : "text-profit"}`} />
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Amount</p>
@@ -390,10 +390,17 @@ export function LTITransactionsTab({ investors, onUpdateInvestment, onAddTransac
                         <p className="text-lg font-bold text-foreground mt-0.5">{typeLabels[viewTx.type] || viewTx.type}</p>
                       </div>
                       <div className="bg-card border border-border rounded-lg p-3 text-center">
-                        <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
-                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                        <Wallet className="h-5 w-5 text-primary mx-auto mb-1" />
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Funding Source</p>
+                        <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.fundingSource === "wallet" ? "Wallet" : "Direct"}</p>
                       </div>
+                      {viewTx.fundingSource !== "wallet" && (
+                        <div className="bg-card border border-border rounded-lg p-3 text-center">
+                          <CreditCard className="h-5 w-5 text-primary mx-auto mb-1" />
+                          <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Transfer Medium</p>
+                          <p className="text-lg font-bold text-foreground mt-0.5">{viewTx.transferMedium ? transferMediumLabels[viewTx.transferMedium] : "N/A"}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
