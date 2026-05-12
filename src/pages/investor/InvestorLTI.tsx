@@ -14,7 +14,7 @@ import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
 import {
   BarChart3, ShoppingCart, ArrowLeftRight, DollarSign, TrendingUp,
-  CheckCircle, Clock, XCircle, ArrowDownCircle, UserPlus, Layers
+  CheckCircle, Clock, XCircle, ArrowDownCircle, UserPlus, Layers, Wallet
 } from "lucide-react";
 import type { Investor, InvestmentEntry, InvestmentStatus, NomineeInfo } from "@/types/investor";
 import { calculateInvestorShare, fmt } from "@/lib/investor-utils";
@@ -43,7 +43,7 @@ const txTypeLabels: Record<string, string> = {
 };
 
 export default function InvestorLTI() {
-  const { investors, profit, handleSelfRegister, handleBuyShares, handleWithdraw: ctxWithdraw } = useLTI();
+  const { investors, profit, handleSelfRegister, handleBuyShares } = useLTI();
 
   // Find investor from shared context by email
   const investor = useMemo(
@@ -53,7 +53,6 @@ export default function InvestorLTI() {
 
   const [regDialogOpen, setRegDialogOpen] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
-  const [withdrawDialogOpen, setWithdrawDialogOpen] = useState(false);
 
   // Registration form
   const [regShares, setRegShares] = useState("");
@@ -67,9 +66,6 @@ export default function InvestorLTI() {
 
   // Buy shares
   const [buyShares, setBuyShares] = useState("");
-
-  // Withdraw
-  const [withdrawAmount, setWithdrawAmount] = useState("");
 
   // Transaction filter
   const [txFilter, setTxFilter] = useState<"all" | InvestmentStatus>("all");
@@ -88,6 +84,22 @@ export default function InvestorLTI() {
       .filter((h) => h.type === "payout" && h.status === "approved")
       .reduce((s, h) => s + h.amount, 0);
   }, [investor]);
+
+  const totalWithdrawn = useMemo(() => {
+    if (!investor) return 0;
+    return investor.history
+      .filter((h) => h.type === "withdrawal" && h.status === "approved")
+      .reduce((s, h) => s + h.amount, 0);
+  }, [investor]);
+
+  const totalDeposited = useMemo(() => {
+    if (!investor) return 0;
+    return investor.history
+      .filter((h) => h.type === "deposit" && h.status === "approved")
+      .reduce((s, h) => s + h.amount, 0);
+  }, [investor]);
+
+  const currentInvestment = totalDeposited - totalWithdrawn;
 
   const transactions = useMemo(() => {
     if (!investor) return [];
@@ -134,18 +146,6 @@ export default function InvestorLTI() {
     setBuyDialogOpen(false);
     setBuyShares("");
     toast.success(`Request to buy ${shares} share(s) submitted. Awaiting approval.`);
-  };
-
-  const handleWithdraw = () => {
-    const amount = parseFloat(withdrawAmount);
-    if (!amount || amount <= 0) { toast.error("Enter a valid amount."); return; }
-    if (!investor) return;
-    if (amount > investor.invested) { toast.error("Amount exceeds your invested principal."); return; }
-
-    ctxWithdraw(investor.id, amount);
-    setWithdrawDialogOpen(false);
-    setWithdrawAmount("");
-    toast.success("Withdrawal request submitted. Funds will be returned to your wallet upon approval.");
   };
 
   const getStatusIcon = (status: InvestmentStatus) => {
