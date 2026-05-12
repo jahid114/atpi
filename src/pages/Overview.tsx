@@ -121,8 +121,8 @@ export default function Overview() {
             <ArrowUpRight size={20} className="text-primary" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Capital at Work</p>
-            <p className="text-lg font-bold text-foreground">{fmt(analytics.capitalAtWork)}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Capital at Work</p>
+            <p className="text-2xl font-bold text-foreground">{fmt(analytics.capitalAtWork)}</p>
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow flex items-center gap-4">
@@ -130,8 +130,8 @@ export default function Overview() {
             <ArrowDownRight size={20} className="text-profit" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Principal Returned</p>
-            <p className="text-lg font-bold text-foreground">{fmt(analytics.totalReturned)}</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Principal Returned</p>
+            <p className="text-2xl font-bold text-foreground">{fmt(analytics.totalReturned)}</p>
           </div>
         </div>
         <div className="bg-card border border-border rounded-lg p-5 kpi-shadow flex items-center gap-4">
@@ -139,8 +139,8 @@ export default function Overview() {
             <Percent size={20} className="text-warning" />
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">Return on Investment</p>
-            <p className="text-lg font-bold text-foreground">{analytics.roi}%</p>
+            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Return on Investment</p>
+            <p className="text-2xl font-bold text-foreground">{analytics.roi}%</p>
           </div>
         </div>
       </div>
