@@ -31,7 +31,7 @@ interface LTIContextType {
   handleRelease: (id: number) => void;
   handleUpdateInvestment: (investorId: number, entryId: number, status: InvestmentStatus) => void;
   handleWithdraw: (investorId: number, amount: number) => void;
-  handleAddTransaction: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => void;
+  handleAddTransaction: (investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string }; fundingSource?: "direct" | "wallet" }) => void;
   /** For investor-side: register self */
   handleSelfRegister: (investor: Investor) => void;
   /** For investor-side: buy more shares */
@@ -178,7 +178,7 @@ export function LTIProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const handleAddTransaction = useCallback((investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string } }) => {
+  const handleAddTransaction = useCallback((investorId: number, amount: number, type: "deposit" | "withdrawal", date: string, extra?: { transferMedium?: string; description?: string; attachment?: { name: string; url: string }; fundingSource?: "direct" | "wallet" }) => {
     const entry = {
       id: Date.now(),
       date,
@@ -188,6 +188,7 @@ export function LTIProvider({ children }: { children: ReactNode }) {
       transferMedium: extra?.transferMedium as any,
       description: extra?.description,
       attachment: extra?.attachment,
+      fundingSource: extra?.fundingSource,
     };
     setInvestors((prev) =>
       prev.map((i) => (i.id === investorId ? { ...i, history: [...i.history, entry] } : i))
