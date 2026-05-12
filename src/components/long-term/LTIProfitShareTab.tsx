@@ -207,6 +207,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
             <tr className="border-b border-border bg-muted/50">
               <th className="text-left px-3 py-2 font-medium text-muted-foreground w-10">#</th>
               <th className="text-left px-3 py-2 font-medium text-muted-foreground">Investor</th>
+              <th className="text-left px-3 py-2 font-medium text-muted-foreground">Phone</th>
               <th className="text-right px-3 py-2 font-medium text-muted-foreground">Principal</th>
               <th className="text-right px-3 py-2 font-medium text-muted-foreground">Projected Share</th>
               <th className="text-center px-3 py-2 font-medium text-muted-foreground">Status</th>
@@ -217,7 +218,7 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
           <tbody>
             {paginatedItems.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                <td colSpan={8} className="px-3 py-6 text-center text-muted-foreground">
                   No investors found.
                 </td>
               </tr>
@@ -227,8 +228,9 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
                   <td className="px-3 py-2 text-muted-foreground text-xs">{(currentPage - 1) * 5 + idx + 1}</td>
                   <td className="px-3 py-2">
                     <p className="font-medium text-foreground">{r.investor.name}</p>
-                    <p className="text-xs text-muted-foreground">{r.investor.phone}</p>
+                    <p className="text-xs text-muted-foreground">{r.investor.email}</p>
                   </td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{r.investor.phone}</td>
                   <td className="px-3 py-2 text-right text-foreground">{fmt(r.principal)}</td>
                   <td className="px-3 py-2 text-right font-medium text-profit">
                     {fmt(r.distributed ? r.distributedAmount : r.projectedShare)}
