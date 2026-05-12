@@ -284,18 +284,15 @@ export function LTIProfitShareTab({ investors, profit, selectedYear }: Props) {
 
       {/* Distribution Confirmation Dialog with segment breakdown */}
       <Dialog open={!!confirmRow} onOpenChange={(o) => !o && setConfirmInvestorId(null)}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl w-fit max-w-[95vw]">
           {confirmRow && (
             <>
               <DialogHeader>
                 <DialogTitle>Distribute Profit · {confirmRow.investor.name}</DialogTitle>
-                <DialogDescription>
-                  Segment-wise time-weighted breakdown for {selectedYear}. Each segment runs from one balance change to the next.
-                </DialogDescription>
               </DialogHeader>
 
-              <div className="border border-border rounded-lg overflow-x-auto mt-2">
-                <table className="w-full text-xs min-w-[640px]">
+              <div className="border border-border rounded-lg mt-2">
+                <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b border-border bg-muted/50">
                       <th className="text-left px-3 py-2 font-medium text-muted-foreground">Event</th>
