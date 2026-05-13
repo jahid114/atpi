@@ -38,6 +38,7 @@ interface RegisterData {
   fundingSource: "direct" | "wallet";
   transferMedium?: TransferMedium;
   attachment?: { name: string; url: string };
+  description?: string;
 }
 
 interface Props {
