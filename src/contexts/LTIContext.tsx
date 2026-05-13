@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { useNotifications } from "@/contexts/NotificationContext";
 import { useWallet } from "@/contexts/WalletContext";
 import { useFinancial } from "@/contexts/FinancialContext";
-import type { Investor, InvestorStatus, InvestmentStatus, NomineeInfo } from "@/types/investor";
+import type { Investor, InvestorStatus, InvestmentStatus, NomineeInfo, TransferMedium } from "@/types/investor";
 import { calculateInvestorShare, fmt, initialInvestors, TODAY } from "@/lib/investor-utils";
 
 interface RegisterData {
@@ -18,6 +18,8 @@ interface RegisterData {
   jerseySize: string;
   nominee: NomineeInfo;
   fundingSource: "direct" | "wallet";
+  transferMedium?: TransferMedium;
+  attachment?: { name: string; url: string };
 }
 
 interface LTIContextType {
@@ -84,7 +86,15 @@ export function LTIProvider({ children }: { children: ReactNode }) {
       jerseySize: data.jerseySize,
       nominee: data.nominee,
       fundingSource: data.fundingSource,
-      history: [{ id: entryId + 1, date: data.investmentDate, amount: data.invested, type: "deposit", status: "pending" }],
+      history: [{
+        id: entryId + 1,
+        date: data.investmentDate,
+        amount: data.invested,
+        type: "deposit",
+        status: "pending",
+        ...(data.fundingSource === "direct" ? { transferMedium: data.transferMedium, attachment: data.attachment } : {}),
+        fundingSource: data.fundingSource,
+      }],
     };
     setInvestors((prev) => [...prev, newInvestor]);
     addNotification({
