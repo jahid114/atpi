@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +51,7 @@ const emptyForm = {
   name: "", email: "", phone: "", invested: "", investmentDate: "",
   shares: "", bloodGroup: "", nidNumber: "", jerseySize: "",
   nomineeName: "", nomineeRelationship: "", nomineePhone: "", nomineeNid: "",
+  description: "",
 };
 
 export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: Props) {
@@ -136,6 +138,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
       fundingSource,
       transferMedium: fundingSource === "direct" ? transferMedium : undefined,
       attachment: fundingSource === "direct" ? attachment ?? undefined : undefined,
+      description: form.description || undefined,
     });
     setForm(emptyForm);
     setFundingSource("direct");
@@ -369,6 +372,10 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                     )}
                   </div>
                 )}
+                <div className="col-span-2 space-y-1.5">
+                  <Label htmlFor="reg-description">Description</Label>
+                  <Textarea id="reg-description" placeholder="Optional notes about this investment…" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} rows={3} />
+                </div>
               </div>
             </div>
 
