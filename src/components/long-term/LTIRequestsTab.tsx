@@ -17,7 +17,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import type { Investor, InvestorStatus, NomineeInfo } from "@/types/investor";
+import type { Investor, InvestorStatus, NomineeInfo, TransferMedium } from "@/types/investor";
 import { fmt } from "@/lib/investor-utils";
 import { useWallet } from "@/contexts/WalletContext";
 import { fmtWallet } from "@/types/wallet";
@@ -35,6 +35,8 @@ interface RegisterData {
   jerseySize: string;
   nominee: NomineeInfo;
   fundingSource: "direct" | "wallet";
+  transferMedium?: TransferMedium;
+  attachment?: { name: string; url: string };
 }
 
 interface Props {
@@ -55,6 +57,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
   const [registerOpen, setRegisterOpen] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [fundingSource, setFundingSource] = useState<"direct" | "wallet">("direct");
+  const [transferMedium, setTransferMedium] = useState<TransferMedium>("cash");
   const [reviewInvestor, setReviewInvestor] = useState<Investor | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [attachment, setAttachment] = useState<{ name: string; url: string } | null>(null);
@@ -131,9 +134,12 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
         nidNumber: form.nomineeNid,
       },
       fundingSource,
+      transferMedium: fundingSource === "direct" ? transferMedium : undefined,
+      attachment: fundingSource === "direct" ? attachment ?? undefined : undefined,
     });
     setForm(emptyForm);
     setFundingSource("direct");
+    setTransferMedium("cash");
     setSelectedUserId("");
     setAttachment(null);
     setRegisterOpen(false);
@@ -227,7 +233,7 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
       )}
 
       {/* Register Dialog */}
-      <Dialog open={registerOpen} onOpenChange={(open) => { if (!open) { setForm(emptyForm); setSelectedUserId(""); setFundingSource("direct"); setAttachment(null); } setRegisterOpen(open); }}>
+      <Dialog open={registerOpen} onOpenChange={(open) => { if (!open) { setForm(emptyForm); setSelectedUserId(""); setFundingSource("direct"); setTransferMedium("cash"); setAttachment(null); } setRegisterOpen(open); }}>
         <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Register New Investor</DialogTitle>
@@ -331,6 +337,19 @@ export function LTIRequestsTab({ investors, onApprove, onReject, onRegister }: P
                     <p className="text-xs text-destructive">Amount exceeds wallet balance of {fmtWallet(walletBalance)}</p>
                   )}
                 </div>
+                {fundingSource === "direct" && (
+                  <div className="space-y-1.5">
+                    <Label>Transfer Medium</Label>
+                    <Select value={transferMedium} onValueChange={(v) => setTransferMedium(v as TransferMedium)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cash">Cash</SelectItem>
+                        <SelectItem value="check">Check</SelectItem>
+                        <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
                 {fundingSource === "direct" && (
                   <div className="col-span-2 space-y-1.5">
                     <Label>Payment Attachment</Label>
