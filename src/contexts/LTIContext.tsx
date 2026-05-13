@@ -20,6 +20,7 @@ interface RegisterData {
   fundingSource: "direct" | "wallet";
   transferMedium?: TransferMedium;
   attachment?: { name: string; url: string };
+  description?: string;
 }
 
 interface LTIContextType {
@@ -93,6 +94,7 @@ export function LTIProvider({ children }: { children: ReactNode }) {
         type: "deposit",
         status: "pending",
         ...(data.fundingSource === "direct" ? { transferMedium: data.transferMedium, attachment: data.attachment } : {}),
+        description: data.description,
         fundingSource: data.fundingSource,
       }],
     };
