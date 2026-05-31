@@ -276,29 +276,6 @@ const InvestorProfile = () => {
               </div>
             </div>
 
-            <Separator />
-
-            {/* Investment Breakdown */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Investment Summary</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="bg-muted/30">
-                  <CardContent className="pt-4 pb-4 space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium">Long-Term Investment</p>
-                    <p className="text-sm text-foreground">Shares: <span className="font-semibold">{investmentSummary.ltiShares}</span></p>
-                    <p className="text-sm text-foreground">Invested: <span className="font-semibold">{fmt(investmentSummary.ltiInvested)}</span></p>
-                    <p className="text-sm text-emerald-600">Profit: {fmt(investmentSummary.ltiProfit)}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-muted/30">
-                  <CardContent className="pt-4 pb-4 space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium">Short-Term Investment</p>
-                    <p className="text-sm text-foreground">Invested: <span className="font-semibold">{fmt(investmentSummary.stiInvested)}</span></p>
-                    <p className="text-sm text-emerald-600">Profit: {fmt(investmentSummary.stiProfit)}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
