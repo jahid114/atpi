@@ -184,7 +184,7 @@ export default function InvestorDashboard() {
           <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/30 blur-3xl" />
           <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
         </div>
-        <CardContent className="relative py-6 px-6 sm:py-8 sm:px-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <CardContent className="relative py-6 px-6 sm:py-8 sm:px-8">
           <div>
             <p className="text-xs uppercase tracking-wider text-primary-foreground/70 font-medium">
               {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
@@ -193,10 +193,6 @@ export default function InvestorDashboard() {
             <p className="text-sm text-primary-foreground/80 mt-2 max-w-xl">
               Here's a snapshot of your wallet, investments, and returns. Keep growing your portfolio.
             </p>
-          </div>
-          <div className="hidden sm:flex flex-col items-end gap-1 rounded-xl bg-white/10 backdrop-blur-sm px-5 py-4 border border-white/20">
-            <span className="text-[11px] uppercase tracking-wider text-primary-foreground/70">Wallet Balance</span>
-            <span className="text-xl font-bold">{fmtWallet(mockWallet.balance)}</span>
           </div>
         </CardContent>
       </Card>
