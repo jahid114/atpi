@@ -24,6 +24,7 @@ import InvestorWallet from "./pages/investor/InvestorWallet";
 import InvestorLTI from "./pages/investor/InvestorLTI";
 import InvestorSTI from "./pages/investor/InvestorSTI";
 import InvestorProfile from "./pages/investor/InvestorProfile";
+import InvestorDashboard from "./pages/investor/InvestorDashboard";
 
 const queryClient = new QueryClient();
 
@@ -34,7 +35,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   if (!isLoggedIn) return <Navigate to="/login" replace />;
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to={userRole === "investor" ? "/investor/wallet" : "/"} replace />;
+    return <Navigate to={userRole === "investor" ? "/investor/dashboard" : "/"} replace />;
   }
 
   return <>{children}</>;
@@ -60,11 +61,12 @@ const App = () => (
                     <ProtectedRoute requiredRole="investor">
                       <InvestorDashboardLayout>
                         <Routes>
+                          <Route path="/dashboard" element={<InvestorDashboard />} />
                           <Route path="/wallet" element={<InvestorWallet />} />
                           <Route path="/lti" element={<InvestorLTI />} />
                           <Route path="/sti" element={<InvestorSTI />} />
                           <Route path="/profile" element={<InvestorProfile />} />
-                          <Route path="*" element={<Navigate to="/investor/wallet" replace />} />
+                          <Route path="*" element={<Navigate to="/investor/dashboard" replace />} />
                         </Routes>
                       </InvestorDashboardLayout>
                     </ProtectedRoute>

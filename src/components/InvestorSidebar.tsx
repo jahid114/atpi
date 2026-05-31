@@ -8,12 +8,14 @@ import {
   Menu,
   LogOut,
   User,
+  LayoutDashboard,
 } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const investorNavItems = [
+  { title: "Dashboard", path: "/investor/dashboard", icon: LayoutDashboard },
   { title: "My Wallet", path: "/investor/wallet", icon: Wallet },
   { title: "Long-Term Investment", path: "/investor/lti", icon: TrendingUp },
   { title: "Short-Term Investment", path: "/investor/sti", icon: BarChart3 },
