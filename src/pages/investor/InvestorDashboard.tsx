@@ -40,7 +40,7 @@ const mockSTI = [
 type UnifiedTx = {
   id: string;
   date: string;
-  source: "Wallet" | "LTI" | "STI";
+  source: "Wallet" | "Direct";
   type: string;
   description: string;
   amount: number;
@@ -56,8 +56,7 @@ const statusConfig: Record<string, { label: string; variant: "default" | "second
 
 const sourceColor: Record<string, string> = {
   Wallet: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  LTI: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  STI: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+  Direct: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
 };
 
 const walletTypeLabel: Record<string, string> = {
@@ -80,7 +79,7 @@ export default function InvestorDashboard() {
   const { investors } = useLTI();
   const ltiInvestor = useMemo(() => investors.find((i) => i.email === CURRENT_USER.email) || null, [investors]);
 
-  const [sourceFilter, setSourceFilter] = useState<"all" | "Wallet" | "LTI" | "STI">("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "Wallet" | "Direct">("all");
   const [statusFilter, setStatusFilter] = useState<"all" | "approved" | "pending" | "rejected">("all");
 
   // LTI aggregates
@@ -125,11 +124,12 @@ export default function InvestorDashboard() {
       ltiInvestor.history.forEach((h) => {
         const dir: UnifiedTx["direction"] = h.type === "payout" ? "in" : h.type === "withdrawal" ? "out" : "neutral";
         const typeLabel = h.type === "deposit" ? "Deposit" : h.type === "withdrawal" ? "Withdrawal" : "Profit Payout";
+        const src: UnifiedTx["source"] = h.fundingSource === "wallet" ? "Wallet" : "Direct";
         all.push({
           id: `lti-${h.id}`,
           date: h.date,
-          source: "LTI",
-          type: typeLabel,
+          source: src,
+          type: `LTI ${typeLabel}`,
           description: h.description || `Long-term ${typeLabel.toLowerCase()}`,
           amount: h.amount,
           direction: dir,
@@ -139,11 +139,12 @@ export default function InvestorDashboard() {
     }
 
     mockSTI.forEach((s) => {
+      const src: UnifiedTx["source"] = (s as any).fundingSource === "wallet" ? "Wallet" : "Direct";
       all.push({
         id: `sti-${s.id}`,
         date: s.date,
-        source: "STI",
-        type: "Investment",
+        source: src,
+        type: "STI Investment",
         description: s.projectName,
         amount: s.amount,
         direction: "out",
@@ -153,8 +154,8 @@ export default function InvestorDashboard() {
         all.push({
           id: `sti-payout-${s.id}`,
           date: s.date,
-          source: "STI",
-          type: "Profit Payout",
+          source: src,
+          type: "STI Profit Payout",
           description: `${s.projectName} · distributed return`,
           amount: Math.round(s.amount * s.expectedReturn / 100),
           direction: "in",
@@ -237,8 +238,7 @@ export default function InvestorDashboard() {
               <SelectContent>
                 <SelectItem value="all">All Sources</SelectItem>
                 <SelectItem value="Wallet">Wallet</SelectItem>
-                <SelectItem value="LTI">LTI</SelectItem>
-                <SelectItem value="STI">STI</SelectItem>
+                <SelectItem value="Direct">Direct</SelectItem>
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
