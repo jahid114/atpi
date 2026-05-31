@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { KpiCard } from "@/components/KpiCard";
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -16,7 +15,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import {
   User, Mail, Phone, MapPin, Camera, Save, KeyRound, Eye, EyeOff,
-  Wallet, TrendingUp, BarChart3, DollarSign, Heart, Shield,
+  Heart, Shield,
 } from "lucide-react";
 import { AccountCards } from "@/components/AccountCards";
 import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
@@ -82,18 +81,6 @@ const InvestorProfile = () => {
   // Add Mobile Dialog
   const [addMobileOpen, setAddMobileOpen] = useState(false);
   const [mobileForm, setMobileForm] = useState({ provider: "bKash" as MobileBankingAccount["provider"], accountNumber: "", accountName: "" });
-
-  // Mock investment summary
-  const investmentSummary = {
-    walletBalance: 45000,
-    ltiShares: 5,
-    ltiInvested: 50000,
-    ltiProfit: 3200,
-    stiInvested: 25000,
-    stiProfit: 1800,
-    totalInvested: 75000,
-    totalProfit: 5000,
-  };
 
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -166,14 +153,12 @@ const InvestorProfile = () => {
     toast({ title: "Mobile banking account added" });
   };
 
-  const fmt = (n: number) => "৳" + n.toLocaleString();
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">My Profile</h1>
-          <p className="text-sm text-muted-foreground">Manage your account and view investment summary</p>
+          <p className="text-sm text-muted-foreground">Manage your account details</p>
         </div>
         {!isEditing ? (
           <div className="flex gap-2">
@@ -190,14 +175,6 @@ const InvestorProfile = () => {
             <Button size="sm" onClick={handleSave}><Save className="h-4 w-4 mr-1" /> Save</Button>
           </div>
         )}
-      </div>
-
-      {/* Investment Summary KPIs */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <KpiCard title="Wallet Balance" value={fmt(investmentSummary.walletBalance)} icon={<Wallet className="h-5 w-5" />} accentColor="text-blue-500" />
-        <KpiCard title="Total Invested" value={fmt(investmentSummary.totalInvested)} icon={<DollarSign className="h-5 w-5" />} accentColor="text-primary" />
-        <KpiCard title="LTI Shares" value={String(investmentSummary.ltiShares)} icon={<TrendingUp className="h-5 w-5" />} accentColor="text-emerald-500" />
-        <KpiCard title="Total Profit" value={fmt(investmentSummary.totalProfit)} icon={<BarChart3 className="h-5 w-5" />} accentColor="text-amber-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -297,29 +274,6 @@ const InvestorProfile = () => {
               </div>
             </div>
 
-            <Separator />
-
-            {/* Investment Breakdown */}
-            <div>
-              <h4 className="text-sm font-semibold text-foreground mb-3">Investment Summary</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Card className="bg-muted/30">
-                  <CardContent className="pt-4 pb-4 space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium">Long-Term Investment</p>
-                    <p className="text-sm text-foreground">Shares: <span className="font-semibold">{investmentSummary.ltiShares}</span></p>
-                    <p className="text-sm text-foreground">Invested: <span className="font-semibold">{fmt(investmentSummary.ltiInvested)}</span></p>
-                    <p className="text-sm text-emerald-600">Profit: {fmt(investmentSummary.ltiProfit)}</p>
-                  </CardContent>
-                </Card>
-                <Card className="bg-muted/30">
-                  <CardContent className="pt-4 pb-4 space-y-1">
-                    <p className="text-xs text-muted-foreground font-medium">Short-Term Investment</p>
-                    <p className="text-sm text-foreground">Invested: <span className="font-semibold">{fmt(investmentSummary.stiInvested)}</span></p>
-                    <p className="text-sm text-emerald-600">Profit: {fmt(investmentSummary.stiProfit)}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
