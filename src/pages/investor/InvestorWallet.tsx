@@ -10,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TablePagination } from "@/components/TablePagination";
 import { usePagination } from "@/hooks/use-pagination";
-import { ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Clock, CheckCircle, XCircle, Wallet, CreditCard } from "lucide-react";
 import type { WalletTransaction, WalletTransactionStatus, TransferMedium } from "@/types/wallet";
 import { walletTxTypeConfig, walletTxStatusConfig, transferMediumConfig, fmtWallet } from "@/types/wallet";
 import { AccountCards } from "@/components/AccountCards";
 import type { BankAccount, MobileBankingAccount } from "@/types/accounts";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { KpiCard } from "@/components/KpiCard";
 
 const myWallet = {
   id: 1,
@@ -59,6 +61,15 @@ export default function InvestorWallet() {
   }, [wallet.transactions, statusFilter]);
 
   const pagination = usePagination(filteredTransactions, { pageSize: 8 });
+
+  const totalTopUps = useMemo(
+    () => wallet.transactions.filter((t) => t.type === "top_up" && t.status === "approved").reduce((s, t) => s + t.amount, 0),
+    [wallet.transactions]
+  );
+  const totalWithdrawn = useMemo(
+    () => wallet.transactions.filter((t) => t.type === "withdraw" && t.status === "approved").reduce((s, t) => s + t.amount, 0),
+    [wallet.transactions]
+  );
 
   const handleSubmitTransaction = () => {
     const amount = parseFloat(txAmount);
@@ -116,22 +127,30 @@ export default function InvestorWallet() {
           <Button variant="outline" onClick={() => { setTxType("withdraw"); setTxDialogOpen(true); }} className="gap-2">
             <ArrowDownCircle className="h-4 w-4" /> Withdraw
           </Button>
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" className="gap-2">
+                <CreditCard className="h-4 w-4" /> Linked Accounts
+              </Button>
+            </SheetTrigger>
+            <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Linked Accounts</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6">
+                <AccountCards bankAccount={mockBankAccount} mobileAccounts={mockMobileAccounts} readOnly />
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
 
-      {/* Linked Payment Accounts */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Linked Accounts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AccountCards
-            bankAccount={mockBankAccount}
-            mobileAccounts={mockMobileAccounts}
-            readOnly
-          />
-        </CardContent>
-      </Card>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <KpiCard title="Wallet Balance" value={fmtWallet(wallet.balance)} icon={<Wallet className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-blue))]" />
+        <KpiCard title="Total Top-Up" value={fmtWallet(totalTopUps)} icon={<ArrowUpCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-emerald))]" />
+        <KpiCard title="Total Withdrawn" value={fmtWallet(totalWithdrawn)} icon={<ArrowDownCircle className="h-5 w-5 text-white" />} accentColor="bg-[hsl(var(--kpi-amber))]" />
+      </div>
 
       {/* Transaction History */}
       <Card>
