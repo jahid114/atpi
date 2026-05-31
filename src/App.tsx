@@ -35,7 +35,7 @@ const ProtectedRoute = ({ children, requiredRole }: { children: React.ReactNode;
   if (!isLoggedIn) return <Navigate to="/login" replace />;
 
   if (requiredRole && userRole !== requiredRole) {
-    return <Navigate to={userRole === "investor" ? "/investor/wallet" : "/"} replace />;
+    return <Navigate to={userRole === "investor" ? "/investor/dashboard" : "/"} replace />;
   }
 
   return <>{children}</>;
