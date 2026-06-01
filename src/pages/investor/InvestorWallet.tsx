@@ -60,7 +60,7 @@ export default function InvestorWallet() {
     return txs;
   }, [wallet.transactions, statusFilter]);
 
-  const pagination = usePagination(filteredTransactions, { pageSize: 8 });
+  const pagination = usePagination(filteredTransactions, { pageSize: 5 });
 
   const totalTopUps = useMemo(
     () => wallet.transactions.filter((t) => t.type === "top_up" && t.status === "approved").reduce((s, t) => s + t.amount, 0),

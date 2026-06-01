@@ -175,7 +175,7 @@ export default function InvestorDashboard() {
     });
   }, [unifiedTx, sourceFilter, statusFilter]);
 
-  const pagination = usePagination(filteredTx, { pageSize: 8 });
+  const pagination = usePagination(filteredTx, { pageSize: 5 });
 
   return (
     <div className="space-y-6 xl:space-y-8">
