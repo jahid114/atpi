@@ -179,14 +179,14 @@ export default function InvestorDashboard() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <Card className="relative overflow-hidden border-0 shadow-sm" style={{ backgroundColor: "hsl(var(--sidebar-bg))", color: "hsl(var(--sidebar-fg))" }}>
-        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-10 blur-3xl" style={{ backgroundColor: "hsl(var(--primary))" }} />
+      <Card className="relative overflow-hidden border border-sidebar-border bg-primary-foreground text-foreground shadow-sm">
+        <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full opacity-20 blur-3xl bg-primary" />
         <CardContent className="relative py-5 px-6 sm:py-6 sm:px-8">
-          <p className="text-xs uppercase tracking-wider font-medium" style={{ color: "hsl(var(--sidebar-muted))" }}>
+          <p className="text-xs uppercase tracking-wider font-medium text-muted-foreground">
             {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
           </p>
           <h1 className="text-xl xl:text-2xl font-bold mt-1">Welcome back, {CURRENT_USER.name.split(" ")[0]} 👋</h1>
-          <p className="text-sm mt-1.5 max-w-xl opacity-80">
+          <p className="text-sm mt-1.5 max-w-xl text-muted-foreground">
             Here's a snapshot of your wallet, investments, and returns. Keep growing your portfolio.
           </p>
         </CardContent>
