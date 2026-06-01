@@ -179,21 +179,16 @@ export default function InvestorDashboard() {
 
   return (
     <div className="space-y-6 xl:space-y-8">
-      <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground shadow-lg">
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-          <div className="absolute -top-16 -right-16 h-56 w-56 rounded-full bg-white/30 blur-3xl" />
-          <div className="absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-white/20 blur-3xl" />
-        </div>
-        <CardContent className="relative py-6 px-6 sm:py-8 sm:px-8">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-primary-foreground/70 font-medium">
-              {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
-            </p>
-            <h1 className="text-2xl xl:text-3xl font-bold mt-1">Welcome back, {CURRENT_USER.name.split(" ")[0]} 👋</h1>
-            <p className="text-sm text-primary-foreground/80 mt-2 max-w-xl">
-              Here's a snapshot of your wallet, investments, and returns. Keep growing your portfolio.
-            </p>
-          </div>
+      <Card className="relative overflow-hidden border bg-card shadow-sm">
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
+        <CardContent className="py-5 px-6 sm:py-6 sm:px-8">
+          <p className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+            {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric", year: "numeric" })}
+          </p>
+          <h1 className="text-xl xl:text-2xl font-bold mt-1 text-foreground">Welcome back, {CURRENT_USER.name.split(" ")[0]} 👋</h1>
+          <p className="text-sm text-muted-foreground mt-1.5 max-w-xl">
+            Here's a snapshot of your wallet, investments, and returns. Keep growing your portfolio.
+          </p>
         </CardContent>
       </Card>
 
