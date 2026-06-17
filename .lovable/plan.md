@@ -1,264 +1,161 @@
-# LTI Profit Distribution Modal — API Contracts
+# Investor Dashboard — API Spec
 
-Two endpoints back the Distribute Profit modal on the Profit Share tab. Example uses `year = 2026`, `lti-investor-id = 7` (Noah Bennett), `TODAY = 2026-02-14`.
+Spec for the data behind `/investor/dashboard` (`src/pages/investor/InvestorDashboard.tsx`). One read endpoint returns everything the page renders today: welcome header, 4 KPI cards, LTI + STI summary cards, and the unified transaction history with filters and pagination.
+
+Example uses `userId = u_42` (Alice Johnson) viewing on `TODAY = 2026-06-17`.
 
 ---
 
-## 1. `GET /lti-profit/{year}/distribute/{lti-investor-id}`
+## 1. `GET /investor/dashboard`
 
-Returns everything needed to render the modal: investor header, the per-segment weight/share breakdown, the live profit pool denominator, available payout destinations, and a `canDistribute` guard.
+Identifies the caller from the session. No path params.
+
+### Query params
+
+| param | type | default | notes |
+|---|---|---|---|
+| `source` | `all \| Wallet \| Direct` | `all` | filters the transaction list |
+| `status` | `all \| approved \| pending \| rejected` | `all` | filters the transaction list |
+| `page` | int | 1 | 1-based |
+| `pageSize` | int | 5 | matches project pagination default |
 
 ### Response 200
 
 ```json
 {
-  "year": 2026,
-  "cycle": {
-    "id": "2026",
-    "startDate": "2026-01-01",
-    "endDate": "2026-12-31",
-    "asOfDate": "2026-02-14",
-    "status": "open"
-  },
-  "investor": {
-    "id": 7,
-    "name": "Noah Bennett",
-    "email": "noah.bennett@example.com",
-    "phone": "+8801710000007",
-    "status": "approved"
-  },
-  "profitPool": 1250000,
-  "totalCycleWeight": 412600000,
-  "investorWeight": 84810000,
-  "sharePct": 0.2056,
-  "projectedShare": 257000,
-  "principal": 370000,
-
-  "segments": [
-    {
-      "index": 1,
-      "eventType": "deposit",
-      "eventLabel": "Deposit",
-      "eventAmount": 200000,
-      "eventDate": "2026-01-05",
-      "startDate": "2026-01-05",
-      "endDate": "2026-03-12",
-      "days": 66,
-      "balance": 200000,
-      "weight": 13200000,
-      "share": 40000
-    },
-    {
-      "index": 2,
-      "eventType": "deposit",
-      "eventLabel": "Deposit",
-      "eventAmount": 150000,
-      "eventDate": "2026-03-12",
-      "startDate": "2026-03-12",
-      "endDate": "2026-05-20",
-      "days": 69,
-      "balance": 350000,
-      "weight": 24150000,
-      "share": 73175
-    },
-    {
-      "index": 3,
-      "eventType": "withdrawal",
-      "eventLabel": "Withdrawal",
-      "eventAmount": 80000,
-      "eventDate": "2026-05-20",
-      "startDate": "2026-05-20",
-      "endDate": "2026-08-01",
-      "days": 73,
-      "balance": 270000,
-      "weight": 19710000,
-      "share": 59725
-    },
-    {
-      "index": 4,
-      "eventType": "deposit",
-      "eventLabel": "Deposit",
-      "eventAmount": 100000,
-      "eventDate": "2026-08-01",
-      "startDate": "2026-08-01",
-      "endDate": "2026-10-15",
-      "days": 75,
-      "balance": 370000,
-      "weight": 27750000,
-      "share": 84100
-    }
-  ],
-  "totals": {
-    "weight": 84810000,
-    "share": 257000
+  "user": {
+    "id": "u_42",
+    "name": "Alice Johnson",
+    "firstName": "Alice",
+    "email": "alice@example.com",
+    "phone": "+8801711111111",
+    "today": "2026-06-17"
   },
 
-  "destinations": {
-    "wallet": {
-      "id": "wallet",
-      "kind": "wallet",
-      "label": "Wallet",
-      "description": "Credit to Noah Bennett's wallet balance"
-    },
-    "bank": {
-      "id": "bank-7",
-      "kind": "bank",
-      "accountId": 7,
-      "bankName": "BRAC Bank",
-      "accountName": "Noah Bennett",
-      "accountNumber": "1086415000000",
-      "branchName": "Main Branch",
-      "routingNumber": "900000217"
-    },
-    "mobiles": [
+  "kpis": {
+    "walletBalance":   { "amount": 25000, "currency": "BDT" },
+    "totalInvested":   { "amount": 150000, "currency": "USD" },
+    "totalWithdrawn":  { "amount": 12000, "currency": "USD" },
+    "totalProfit":     { "amount": 18500, "currency": "USD" }
+  },
+
+  "lti": {
+    "registered": true,
+    "status": "approved",
+    "shares": 3,
+    "currentInvestment": 70000,
+    "withdrawn": 12000,
+    "profitReceived": 11000,
+    "link": { "route": "/investor/lti" }
+  },
+
+  "sti": {
+    "projectCount": 2,
+    "totalInvested": 80000,
+    "expectedReturns": 14400,
+    "distributedProfit": 7500,
+    "link": { "route": "/investor/sti" }
+  },
+
+  "transactions": {
+    "items": [
       {
-        "id": "mobile-71",
-        "kind": "mobile",
-        "accountId": 71,
-        "provider": "Nagad",
-        "accountName": "Noah Bennett",
-        "accountNumber": "01764211000"
+        "id": "wallet-101",
+        "date": "2026-01-10",
+        "source": "Wallet",
+        "type": "Top Up",
+        "typeCode": "wallet.top_up",
+        "description": "Initial wallet funding",
+        "amount": 75000,
+        "currency": "BDT",
+        "direction": "in",
+        "status": "approved",
+        "subject": { "kind": "wallet_tx", "id": "wtx_101" },
+        "link": { "route": "/investor/wallet", "params": { "txId": "wtx_101" }, "highlightId": "wtx_101" }
+      },
+      {
+        "id": "lti-7",
+        "date": "2026-01-15",
+        "source": "Wallet",
+        "type": "LTI Deposit",
+        "typeCode": "lti.deposit",
+        "description": "Long-term deposit from wallet",
+        "amount": 30000,
+        "currency": "USD",
+        "direction": "neutral",
+        "status": "approved",
+        "subject": { "kind": "lti_entry", "id": "entry_7" },
+        "link": { "route": "/investor/lti", "tab": "transactions", "highlightId": "entry_7" }
+      },
+      {
+        "id": "sti-payout-2",
+        "date": "2025-09-10",
+        "source": "Direct",
+        "type": "STI Profit Payout",
+        "typeCode": "sti.payout",
+        "description": "Solar Farm Phase 1 · distributed return",
+        "amount": 7500,
+        "currency": "USD",
+        "direction": "in",
+        "status": "approved",
+        "subject": { "kind": "sti_entry", "id": "sti_entry_2" },
+        "link": { "route": "/investor/sti", "params": { "projectId": "proj_solar_1" }, "highlightId": "sti_entry_2" }
       }
-    ]
+    ],
+    "page": 1,
+    "pageSize": 5,
+    "totalItems": 14,
+    "totalPages": 3,
+    "appliedFilters": { "source": "all", "status": "all" }
   },
 
-  "canDistribute": true,
-  "alreadyDistributed": false,
-  "guard": {
-    "reason": null,
-    "minAmount": 1
+  "filterOptions": {
+    "sources": ["all", "Wallet", "Direct"],
+    "statuses": ["all", "approved", "pending", "rejected"]
   }
 }
 ```
 
 ### Field notes
 
-- `sharePct` is a decimal fraction (0.2056 = 20.56%). UI multiplies by 100.
-- `segments[].share` is derived; the source of truth is `weight / totalCycleWeight * profitPool`. Sent pre-computed so the modal does not need to recompute.
-- `endDate` of the last open segment equals `min(today, cycle.endDate)`.
-- `alreadyDistributed = true` ⇒ `canDistribute = false`, `guard.reason = "already_distributed"`, and a `distribution` block is added mirroring section 2's success body.
-- `guard.reason` enum: `null | "already_distributed" | "no_profit" | "cycle_closed" | "not_approved"`.
+- `user.today` is server time (the welcome header uses it instead of `new Date()`).
+- KPI amounts are pre-aggregated server-side; the UI never re-derives:
+  - `totalInvested = ltiCurrent + stiInvested`
+  - `totalWithdrawn = ltiWithdrawn + walletWithdrawn`
+  - `totalProfit   = ltiPayouts + stiProfit`
+- `kpis.walletBalance.currency = "BDT"` (taka, per project memory); investment KPIs are `USD`.
+- `lti.registered=false` ⇒ all other `lti` numeric fields are `0` and the card renders the "Not registered…" empty state. Same shape, no `null` branches in the UI.
+- `transactions.items[]` is the merged Wallet + LTI + STI feed already produced in `unifiedTx`, sorted desc by `date`, paginated server-side, and filter-applied per query params. `direction` drives the +/- sign and color (`in` → profit, `out` → destructive, `neutral` → foreground).
+- `subject` is the stable domain reference for the row. `link` is the routing contract used when the user clicks the row (matches the notification `target` shape so the same helper builds the URL).
+- `typeCode` is the stable machine value; `type` is the human label rendered today (`"Top Up"`, `"LTI Deposit"`, `"STI Investment"`, `"STI Profit Payout"`, etc.). The UI uses `type` as-is and groups/sorts by `typeCode` when needed.
+- `filterOptions` is returned so the two `<Select>`s render straight from the payload.
 
 ### Errors
 
-- `404` — investor not found, or not approved.
-- `409` `{ "error": "cycle_closed" }` — cycle is `distributed`.
+| Status | `error` | cause |
+|---|---|---|
+| 401 | `unauthenticated` | no session |
+| 403 | `forbidden` | session is not an investor account |
+| 422 | `invalid_filter` | unknown `source` / `status` value |
+
+Shared shape `{ "error": "<code>", "message": "..." }`.
 
 ---
 
-## 2. `POST /lti-profit/{year}/distribute/{lti-investor-id}`
+## 2. Cross-API consistency
 
-Commits the distribution: writes a `payout` InvestmentEntry, snapshots a `ProfitDistribution` row, optionally credits the wallet, and returns the invoice handle.
-
-### Request body
-
-```json
-{
-  "destination": {
-    "kind": "bank",
-    "accountId": 7
-  },
-  "amount": 257000,
-  "attachment": {
-    "name": "noah-payout-2026.pdf",
-    "url": "https://uploads.atpi.app/lti/2026/7/noah-payout-2026.pdf"
-  },
-  "note": "Q1 2026 profit release",
-  "idempotencyKey": "lti-2026-7-2026-02-14"
-}
-```
-
-Body rules:
-
-- `destination.kind`: `"wallet" | "bank" | "mobile"`.
-  - `wallet` ⇒ omit `accountId`.
-  - `bank` / `mobile` ⇒ `accountId` required (must match an id returned by the GET).
-- `amount` is **optional**. If omitted, server uses the current `projectedShare`. If supplied, it must equal that value within ±1 (rounding) — otherwise `422 amount_mismatch`. Sending it lets the client confirm what the user saw.
-- `attachment` allowed only when `destination.kind !== "wallet"`.
-- `note` ≤ 500 chars.
-- `idempotencyKey` recommended; replays return the original `201` body.
-
-### Response 201
-
-```json
-{
-  "distribution": {
-    "id": "dist_2026_7_01",
-    "cycleId": "2026",
-    "investorId": 7,
-    "weight": 84810000,
-    "totalWeight": 412600000,
-    "sharePct": 0.2056,
-    "amount": 257000,
-    "releasedAt": "2026-02-14T10:32:11Z",
-    "destination": {
-      "kind": "bank",
-      "accountId": 7,
-      "label": "BRAC Bank · ••••0000"
-    },
-    "note": "Q1 2026 profit release",
-    "attachment": {
-      "name": "noah-payout-2026.pdf",
-      "url": "https://uploads.atpi.app/lti/2026/7/noah-payout-2026.pdf"
-    }
-  },
-  "entry": {
-    "id": 901,
-    "investorId": 7,
-    "type": "payout",
-    "status": "approved",
-    "amount": 257000,
-    "date": "2026-02-14"
-  },
-  "wallet": null,
-  "invoice": {
-    "url": "https://api.atpi.app/lti-profit/2026/distribute/7/invoice.pdf",
-    "filename": "LTI-Invoice-NoahBennett-2026.pdf"
-  },
-  "summaryDelta": {
-    "pendingAmount": -257000,
-    "distributedAmount": 257000,
-    "pendingCount": -1,
-    "distributedCount": 1
-  }
-}
-```
-
-When `destination.kind === "wallet"`, `wallet` is populated instead of `null`:
-
-```json
-"wallet": {
-  "investorId": 7,
-  "transactionId": "wtx_4412",
-  "creditedAmount": 257000,
-  "newBalance": 312500,
-  "reason": "LTI profit payout · 2026"
-}
-```
-
-### Error responses
-
-| Status | `error` code            | Cause                                                            |
-| ------ | ----------------------- | ---------------------------------------------------------------- |
-| 400    | `invalid_destination`   | Unknown `accountId` for this investor / kind mismatch            |
-| 404    | `investor_not_found`    |                                                                  |
-| 409    | `already_distributed`   | Investor already has an approved payout for this cycle           |
-| 409    | `cycle_closed`          | `cycle.status === "distributed"`                                 |
-| 422    | `amount_mismatch`       | `amount` differs from server-computed `projectedShare` by > 1    |
-| 422    | `no_profit`             | `projectedShare <= 0`                                            |
-| 422    | `attachment_not_allowed`| Attachment sent with `destination.kind === "wallet"`             |
-
-All errors share the shape:
-
-```json
-{ "error": "amount_mismatch", "message": "Amount 260000 differs from projected 257000.", "expected": 257000 }
-```
+- `lti.shares`, `lti.currentInvestment`, `lti.withdrawn`, `lti.profitReceived` match the values returned by the LTI investor endpoint for this user (and the totals in `.lovable/plan.md`'s distribute payload).
+- `transactions.items[].subject.id` matches the ids returned by the matching domain APIs:
+  - `wallet_tx` → `wtx_*` from the Wallet API
+  - `lti_entry` → LTI `InvestmentEntry.id`
+  - `sti_entry` → STI ledger entry id
+- `link.params` keys (`txId`, `projectId`, `investorId`, `year`, `tab`, `highlight`) match the URL params the destination pages read (same contract as the Notification `target`).
 
 ---
 
-## Cross-API consistency
+## 3. Caching & freshness
 
-- `segments`, `investorWeight`, `totalCycleWeight`, `sharePct`, `projectedShare` in GET match the snapshot persisted in POST's `distribution` block (weight/totalWeight/sharePct/amount). The POST freezes those values per the entity design in `.lovable/plan.md`.
-- `destinations` ids returned by GET are the exact strings the POST expects in `destination.accountId`.
+- Cacheable per session for ~30s with `Cache-Control: private, max-age=30`.
+- Invalidate when any of the following events fire for this user: wallet tx create/approve/reject, LTI entry change, LTI profit distribution, STI invest/distribute. The same events drive notifications, so a single server hook can bust both caches.
 
 Documentation only — no code changes in this plan.
